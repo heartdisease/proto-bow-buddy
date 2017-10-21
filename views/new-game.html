@@ -33,6 +33,34 @@
 		</nav>
 		<div class="container" id="main">
 			<h1>New Game</h1>
+			
+			<div class="panel panel-default">
+				<div class="panel-heading">Choose players:</div>
+				<div class="panel-body">
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+							Dropdown <span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" aria-labelledby="dropdownMenuDivider">
+							<li>Player 1</li>
+							<li>Player 2</li>
+							<li>Player 3</li>
+							<li>Player 4</li>
+							<li role="separator" class="divider"></li>
+							<li>
+								<div class="input-group">
+									<input type="text" placeholder="Add new player" class="form-control" aria-label="Add new player">
+									<span class="input-group-addon">
+										<a class="btn btn-success" href="station-set-score.html?player=player2" role="button">
+											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+										</a>
+									</span>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
 
 			<div class="btn-group btn-group-justified" role="group">
 				<a class="btn btn-success btn-lg" href="station-select-player.html" role="button"><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span> Start Game</a>
