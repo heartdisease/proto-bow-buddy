@@ -23,6 +23,25 @@
 				top: 2px;
 				left: -4px;
 			}
+			
+			.config-panel-heading {
+				display: flex;
+				align-items: center;
+			}
+			
+			.config-panel-heading > .header {
+				margin-right: 12px;
+				font-weight: bold;
+			}
+			
+			.player-dropdown, .course-dropdown {
+				min-width: 220px;
+			}
+			
+			.player-dropdown > .dropdown-menu > li:last-child,
+			.course-dropdown > .dropdown-menu > li:last-child {
+				padding: 3px 20px;
+			}
 		</style>
 		<link rel="stylesheet" href="../css/bootstrap-theme.min.css">
 		<script src="../js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
@@ -35,23 +54,26 @@
 			<h1>New Game</h1>
 			
 			<div class="panel panel-default">
-				<div class="panel-heading">Choose players:</div>
-				<div class="panel-body">
-					<div class="dropdown">
-						<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-							Dropdown <span class="caret"></span>
+				<div class="panel-heading config-panel-heading">
+					<div class="header">Choose players:</div>
+					<div class="btn-group player-dropdown">
+						<button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
+							Choose player...
 						</button>
-						<ul class="dropdown-menu" aria-labelledby="dropdownMenuDivider">
-							<li>Player 1</li>
-							<li>Player 2</li>
-							<li>Player 3</li>
-							<li>Player 4</li>
+						<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu">
+							<li><a href="#">Player 1</a></li>
+							<li><a href="#">Player 2</a></li>
+							<li><a href="#">Player 3</a></li>
+							<li><a href="#">Player 4</a></li>
 							<li role="separator" class="divider"></li>
 							<li>
 								<div class="input-group">
-									<input type="text" placeholder="Add new player" class="form-control" aria-label="Add new player">
-									<span class="input-group-addon">
-										<a class="btn btn-success" href="station-set-score.html?player=player2" role="button">
+									<input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
+									<span class="input-group-btn">
+										<a class="btn btn-success" href="#" role="button" id="add-player-btn">
 											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 										</a>
 									</span>
@@ -59,6 +81,71 @@
 							</li>
 						</ul>
 					</div>
+				</div>
+				<div class="panel-body">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Player</th>
+								<th>Email</th>
+								<th>Rang</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr id="dummy-player-entry">
+								<td>-</td>
+								<td>-</td>
+								<td>-</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<div class="panel panel-default">
+				<div class="panel-heading config-panel-heading">
+					<div class="header">Choose course:</div>
+					<div class="btn-group course-dropdown">
+						<button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
+							Choose course...
+						</button>
+						<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu">
+							<li><a href="#">Course 1</a></li>
+							<li><a href="#">Course 2</a></li>
+							<li role="separator" class="divider"></li>
+							<li>
+								<div class="input-group">
+									<input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
+									<span class="input-group-btn">
+										<a class="btn btn-success" href="#" role="button" id="add-course-btn">
+											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+										</a>
+									</span>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div class="panel-body">
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>Course</th>
+								<th>Place</th>
+								<th>Stations</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr id="dummy-player-entry">
+								<td>-</td>
+								<td>-</td>
+								<td>-</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 
@@ -70,5 +157,41 @@
 		<script src="../js/vendor/jquery-1.11.2.min.js"></script>
 		<script src="../js/vendor/bootstrap.min.js"></script>
 		<script src="../js/main.js"></script>
+		<script>
+			$(function(){
+				let lockPlayerDropdown = false;
+				let lockCourseDropdown = false;
+				
+				$("#new-player-name")
+					.on("focus", function(e) {
+						lockPlayerDropdown = true;
+					})
+					.on("blur", function(e) {
+						lockPlayerDropdown = false;
+					});
+					
+				$("#new-course-name")
+					.on("focus", function(e) {
+						lockCourseDropdown = true;
+					})
+					.on("blur", function(e) {
+						lockCourseDropdown = false;
+					});
+			
+				$('.player-dropdown').on('hide.bs.dropdown', function (e) {
+					console.info("hide player dropdown");
+					if (lockPlayerDropdown) {
+						e.preventDefault();
+					}
+				});
+				
+				$('.course-dropdown').on('hide.bs.dropdown', function (e) {
+					console.info("hide course dropdown");
+					if (lockCourseDropdown) {
+						e.preventDefault();
+					}
+				});
+			});
+		</script>
 	</body>
 </html>
