@@ -164,6 +164,12 @@
 				let lockPlayerDropdown = false;
 				let lockCourseDropdown = false;
 				
+				const urlParams = BowBuddy.getUrlParams();
+				
+				console.log(urlParams);
+				
+				$("nav.navbar").on("click", BowBuddy.switchToFullscreen);
+				
 				$("#new-player-name")
 					.on("focus", function(e) {
 						lockPlayerDropdown = true;

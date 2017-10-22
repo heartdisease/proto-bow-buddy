@@ -178,6 +178,12 @@
 						window.location.href = "station-select-player.html?player=player1&" + scoreParams;
 					}, 1200);
 				}
+				
+				const urlParams = BowBuddy.getUrlParams();
+				
+				console.log(urlParams);
+				
+				$("nav.navbar").on("click", BowBuddy.switchToFullscreen);
 		
 				$(".hit")
 					.draggable({ connectWith: ".turn" })
