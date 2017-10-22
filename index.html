@@ -59,5 +59,22 @@
 		<script src="js/vendor/jquery-1.11.2.min.js"></script>
 		<script src="js/vendor/bootstrap.min.js"></script>
 		<script src="js/main.js"></script>
+		<script>
+			$(function(){
+				let clickCounter = 0;
+			
+				$(".app-logo").on("click", (e) => {
+					if ((++clickCounter%2 === 0) & !document.fullscreenElement) {
+						console.log("Init fullscreen...");
+						
+						if (document.documentElement.requestFullscreen) {
+							document.documentElement.requestFullscreen();
+						} else if (document.documentElement.webkitRequestFullscreen) {
+							document.documentElement.webkitRequestFullscreen();
+						}
+					}
+				})
+			});
+		</script>
 	</body>
 </html>

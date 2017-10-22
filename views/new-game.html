@@ -53,7 +53,7 @@
 		<div class="container" id="main">
 			<h1>New Game</h1>
 			
-			<div class="panel panel-default">
+			<div class="panel panel-default" style="margin-top: 20px;">
 				<div class="panel-heading config-panel-heading">
 					<div class="header">Choose players:</div>
 					<div class="btn-group player-dropdown">
@@ -91,7 +91,7 @@
 								<th>Rang</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="player-entries">
 							<tr id="dummy-player-entry">
 								<td>-</td>
 								<td>-</td>
@@ -138,8 +138,8 @@
 								<th>Stations</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr id="dummy-player-entry">
+						<tbody id="course-entries">
+							<tr id="dummy-course-entry">
 								<td>-</td>
 								<td>-</td>
 								<td>-</td>
@@ -159,6 +159,8 @@
 		<script src="../js/main.js"></script>
 		<script>
 			$(function(){
+				// TODO keep "Start Game" button disabled until all required input was given by the user
+			
 				let lockPlayerDropdown = false;
 				let lockCourseDropdown = false;
 				
@@ -169,7 +171,6 @@
 					.on("blur", function(e) {
 						lockPlayerDropdown = false;
 					});
-					
 				$("#new-course-name")
 					.on("focus", function(e) {
 						lockCourseDropdown = true;
@@ -177,18 +178,33 @@
 					.on("blur", function(e) {
 						lockCourseDropdown = false;
 					});
+				
+				$("#add-player-btn").on("click", (e) => {
+					$("#dummy-player-entry").remove();
+					$("#player-entries").append(
+						$("<tr/>").html("<td>" + $("#new-player-name").val() + "</td><td>-</td><td>-</td>"));
+				});	
+				$("#add-course-btn").on("click", (e) => {
+					// TODO limit to one course!
+					$("#dummy-course-entry").remove();
+					$("#course-entries").append(
+						$("<tr/>").html("<td>" + $("#new-course-name").val() + "</td><td>-</td><td>-</td>"));
+				});
 			
-				$('.player-dropdown').on('hide.bs.dropdown', function (e) {
+				$(".player-dropdown").on("hide.bs.dropdown", function (e) {
 					console.info("hide player dropdown");
 					if (lockPlayerDropdown) {
 						e.preventDefault();
+					} else {
+						$("#new-player-name").val("");
 					}
 				});
-				
-				$('.course-dropdown').on('hide.bs.dropdown', function (e) {
+				$(".course-dropdown").on("hide.bs.dropdown", function (e) {
 					console.info("hide course dropdown");
 					if (lockCourseDropdown) {
 						e.preventDefault();
+					} else {
+						$("#new-course-name").val("");
 					}
 				});
 			});

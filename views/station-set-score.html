@@ -55,6 +55,24 @@
 				color: #fff;
 				font-weight: bold;
 			}
+			
+			#scoreModal.in {
+				display: flex !important;
+				align-items: center;
+			}
+			
+			#scoreModal > .modal-dialog {
+				width: 100% !important;
+			}
+			
+			#scoreDisplay > a.btn {
+				margin-left: auto;
+				margin-right: auto;
+			}
+			
+			#scoreDisplay > a.btn:last-child {
+				margin-bottom: 0;
+			}
 		</style>
 		<link rel="stylesheet" href="../css/bootstrap-theme.min.css">
 		<script src="../js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
@@ -103,8 +121,14 @@
 						<button type="button" class="close" data-dismiss="modal">&times;</button>
 						<h4 class="modal-title">Player 1 scored:</h4>
 					</div>
-					<div class="modal-body" id="scoreDisplay">
-						<!-- DISPLAY SCORE HERE -->
+					<div class="modal-body">
+						<div class="row score-button-group">
+							<div class="col-xs-12">
+								<div class="btn-group btn-group-justified" role="group" aria-label="score" id="scoreDisplay">
+									<!-- DISPLAY SCORE HERE -->
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -133,12 +157,26 @@
 				}
 			
 				function logScore(dragInitiator, hit, turn) {
-					$("#scoreDisplay").html(getTurnButton(turn) + " - " + getHitButton(hit));
+					let scoreParams;
+					let miss;
+					
+					if (hit !== undefined && turn !== undefined) {
+						scoreParams = "hit=" + hit + "&turn=" + turn;
+						miss = false;
+					} else {
+						scoreParams = "hit=miss";
+						miss = true;
+					}
+				
+					$("#scoreDisplay").html(
+						miss
+							? '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>'
+							: getTurnButton(turn) + getHitButton(hit));
+					
 					$("#scoreModal").modal({ keyboard: false });
 					window.setTimeout(function(){
-						$("#scoreModal").modal("hide");
-						window.location.href = "station-select-player.html?player=player1&hit=" + hit + "&turn=" + turn;
-					}, 1750);
+						window.location.href = "station-select-player.html?player=player1&" + scoreParams;
+					}, 1200);
 				}
 		
 				$(".hit")
@@ -154,6 +192,8 @@
 					.on("droppable:drop", function(e, ui) {
 						logScore("turn", ui.item[0].getAttribute("data-dnd"), e.target.getAttribute("data-dnd"));
 					});
+					
+				$(".miss-btn").on("click", (e) => logScore())
 			});
 		</script>
 	</body>
