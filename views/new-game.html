@@ -64,10 +64,6 @@
 							<span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu">
-							<li><a href="#">Player 1</a></li>
-							<li><a href="#">Player 2</a></li>
-							<li><a href="#">Player 3</a></li>
-							<li><a href="#">Player 4</a></li>
 							<li role="separator" class="divider"></li>
 							<li>
 								<div class="input-group">
@@ -113,8 +109,6 @@
 							<span class="caret"></span>
 						</button>
 						<ul class="dropdown-menu">
-							<li><a href="#">Course 1</a></li>
-							<li><a href="#">Course 2</a></li>
 							<li role="separator" class="divider"></li>
 							<li>
 								<div class="input-group">
@@ -160,6 +154,18 @@
 		<script>
 			$(function(){
 				// TODO keep "Start Game" button disabled until all required input was given by the user
+				
+				function addPlayerToTable(player) {
+					$("#dummy-player-entry").remove();
+					$("#player-entries").append(
+						$("<tr/>").append($("<td/>").text(player.name), $("<td/>").text(player.email), $("<td/>").text("-")));
+				}
+				
+				function addCourseToTable(course) {
+					$("#dummy-course-entry").remove();
+					$("#course-entries").append(
+						$("<tr/>").append($("<td/>").text(course.name), $("<td/>").text(course.place), $("<td/>").text(course.stations)));
+				}
 			
 				let lockPlayerDropdown = false;
 				let lockCourseDropdown = false;
@@ -167,8 +173,46 @@
 				const urlParams = BowBuddy.getUrlParams();
 				
 				console.log(urlParams);
+				BowBuddy.storage.getPlayers().then((players) => console.log(players));
+				BowBuddy.storage.getCourses().then((courses) => console.log(courses));
+				BowBuddy.storage.getGames().then((games) => console.log(games));
 				
-				$("nav.navbar").on("click", BowBuddy.switchToFullscreen);
+				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
+				
+				// init player list
+				BowBuddy.storage.getPlayers().then((players) => {
+					const $playerMenu = $(".player-dropdown > .dropdown-menu");
+				
+					players.reverse().forEach((player) => {
+						const $playerEntry = $("<li/>").append(
+							$("<a/>")
+								.on("click", (e) => {
+									$playerEntry.remove();
+									addPlayerToTable(player);
+								})
+								.text(player.name));
+						
+						$playerMenu.prepend($playerEntry);
+					});
+				});
+				
+				// init course list
+				BowBuddy.storage.getCourses().then((courses) => {
+					const $courseMenu = $(".course-dropdown > .dropdown-menu");
+				
+					courses.reverse().forEach((course) => {
+						const $courseEntry = $("<li/>").append(
+							$("<a/>")
+								.on("click", (e) => {
+									$courseEntry.remove();
+									addCourseToTable(course);
+								})
+								.text(course.name));
+						
+						$courseMenu.prepend($courseEntry);
+					});
+				});
+				
 				
 				$("#new-player-name")
 					.on("focus", function(e) {
@@ -186,15 +230,18 @@
 					});
 				
 				$("#add-player-btn").on("click", (e) => {
-					$("#dummy-player-entry").remove();
-					$("#player-entries").append(
-						$("<tr/>").html("<td>" + $("#new-player-name").val() + "</td><td>-</td><td>-</td>"));
+					const playerName = $("#new-player-name").val();
+					
+					$(".player-dropdown").addClass("disabled");
+					BowBuddy.storage.addPlayer(playerName, "")
+						.then((player) => addPlayerToTable(player));
 				});	
 				$("#add-course-btn").on("click", (e) => {
-					// TODO limit to one course!
-					$("#dummy-course-entry").remove();
-					$("#course-entries").append(
-						$("<tr/>").html("<td>" + $("#new-course-name").val() + "</td><td>-</td><td>-</td>"));
+					const courseName = $("#new-course-name").val();
+					
+					$(".course-dropdown").addClass("disabled");
+					BowBuddy.storage.addCourse(courseName, "", "", 0)
+						.then((course) => addCourseToTable(course));
 				});
 			
 				$(".player-dropdown").on("hide.bs.dropdown", function (e) {
