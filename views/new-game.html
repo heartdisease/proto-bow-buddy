@@ -58,7 +58,7 @@
 					<div class="header">Choose players:</div>
 					<div class="btn-group player-dropdown">
 						<button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
-							Choose player...
+							Add player...
 						</button>
 						<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							<span class="caret"></span>
@@ -69,7 +69,7 @@
 								<div class="input-group">
 									<input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
 									<span class="input-group-btn">
-										<a class="btn btn-success" href="#" role="button" id="add-player-btn">
+										<a class="btn btn-success" href="#" role="button" id="add-player-btn" disabled>
 											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 										</a>
 									</span>
@@ -103,7 +103,7 @@
 					<div class="header">Choose course:</div>
 					<div class="btn-group course-dropdown">
 						<button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
-							Choose course...
+							Set course...
 						</button>
 						<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							<span class="caret"></span>
@@ -114,7 +114,7 @@
 								<div class="input-group">
 									<input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
 									<span class="input-group-btn">
-										<a class="btn btn-success" href="#" role="button" id="add-course-btn">
+										<a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled>
 											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 										</a>
 									</span>
@@ -133,7 +133,7 @@
 							</tr>
 						</thead>
 						<tbody id="course-entries">
-							<tr id="dummy-course-entry">
+							<tr>
 								<td>-</td>
 								<td>-</td>
 								<td>-</td>
@@ -144,7 +144,9 @@
 			</div>
 
 			<div class="btn-group btn-group-justified" role="group">
-				<a class="btn btn-success btn-lg" href="station-select-player.html" role="button"><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span> Start Game</a>
+				<a class="btn btn-success btn-lg" href="#" id="start-game-btn" role="button" disabled>
+					<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span> Start Game
+				</a>
 			</div>
 		</div>
 		
@@ -153,80 +155,126 @@
 		<script src="../js/main.js"></script>
 		<script>
 			$(function(){
-				// TODO keep "Start Game" button disabled until all required input was given by the user
+				let playerConfigured = false;
+				let courseConfigured = false;
+				let configuredPlayers = [];
 				
 				function addPlayerToTable(player) {
 					$("#dummy-player-entry").remove();
-					$("#player-entries").append(
-						$("<tr/>").append($("<td/>").text(player.name), $("<td/>").text(player.email), $("<td/>").text("-")));
+					$("#player-entries")
+						.append($("<tr/>")
+							.attr("data-pid", player.pid)
+							.append($("<td/>").text(player.name), $("<td/>").text(player.email || "-"), $("<td/>").text("-")));
+					
+					configuredPlayers.push(player);
+					initPlayerSelectionMenu(configuredPlayers);
+					playerConfigured = true;
+					if (playerConfigured && courseConfigured) {
+						$("#start-game-btn").removeAttr("disabled");
+					}
 				}
 				
 				function addCourseToTable(course) {
-					$("#dummy-course-entry").remove();
-					$("#course-entries").append(
-						$("<tr/>").append($("<td/>").text(course.name), $("<td/>").text(course.place), $("<td/>").text(course.stations)));
+					console.log("addCourseToTable");
+					console.log(course);
+				
+					$("#course-entries")
+						.empty()
+						.append($("<tr/>")
+							.attr("data-cid", course.cid)
+							.append($("<td/>").text(course.name), $("<td/>").text(course.place || "-"), $("<td/>").text(course.stations)));
+							
+					initCourseSelectionMenu(course);
+					courseConfigured = true;
+					if (playerConfigured && courseConfigured) {
+						$("#start-game-btn").removeAttr("disabled");
+					}
 				}
 			
 				let lockPlayerDropdown = false;
 				let lockCourseDropdown = false;
 				
 				const urlParams = BowBuddy.getUrlParams();
-				
 				console.log(urlParams);
-				BowBuddy.storage.getPlayers().then((players) => console.log(players));
-				BowBuddy.storage.getCourses().then((courses) => console.log(courses));
-				BowBuddy.storage.getGames().then((games) => console.log(games));
 				
 				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
 				
-				// init player list
-				BowBuddy.storage.getPlayers().then((players) => {
-					const $playerMenu = $(".player-dropdown > .dropdown-menu");
+				function initPlayerSelectionMenu(excludedPlayers) {
+					BowBuddy.storage.getPlayers().then((players) => {
+						const $playerMenu = $(".player-dropdown > .dropdown-menu");
 				
-					players.reverse().forEach((player) => {
-						const $playerEntry = $("<li/>").append(
-							$("<a/>")
-								.on("click", (e) => {
-									$playerEntry.remove();
-									addPlayerToTable(player);
-								})
-								.text(player.name));
+						$playerMenu.find("li[data-pid]").remove();
+						players.reverse().forEach((player) => {
+							if (excludedPlayers !== undefined && excludedPlayers.some((excludedPlayer) => excludedPlayer.pid === player.pid)) {
+								return;
+							}
+							
+							const $playerEntry = $("<li/>")
+								.attr("data-pid", player.pid)
+								.append(
+									$("<a/>")
+										.on("click", (e) => {
+											$playerEntry.remove();
+											addPlayerToTable(player);
+										})
+										.text(player.name));
 						
-						$playerMenu.prepend($playerEntry);
+							$playerMenu.prepend($playerEntry);
+						});
 					});
-				});
+				}
 				
-				// init course list
-				BowBuddy.storage.getCourses().then((courses) => {
-					const $courseMenu = $(".course-dropdown > .dropdown-menu");
+				function initCourseSelectionMenu(excludedCourse) {
+					BowBuddy.storage.getCourses().then((courses) => {
+						const $courseMenu = $(".course-dropdown > .dropdown-menu");
 				
-					courses.reverse().forEach((course) => {
-						const $courseEntry = $("<li/>").append(
-							$("<a/>")
-								.on("click", (e) => {
-									$courseEntry.remove();
-									addCourseToTable(course);
-								})
-								.text(course.name));
+						$courseMenu.find("li[data-cid]").remove();
+						courses.reverse().forEach((course) => {
+							if (excludedCourse !== undefined && excludedCourse.cid === course.cid) {
+								return;
+							}
 						
-						$courseMenu.prepend($courseEntry);
+							const $courseEntry = $("<li/>")
+								.attr("data-cid", course.cid)
+								.append(
+									$("<a/>")
+										.on("click", (e) => {
+											$courseEntry.remove();
+											addCourseToTable(course);
+										})
+										.text(course.name));
+						
+							$courseMenu.prepend($courseEntry);
+						});
 					});
-				});
+				}
 				
+				initPlayerSelectionMenu();
+				initCourseSelectionMenu();
 				
 				$("#new-player-name")
-					.on("focus", function(e) {
-						lockPlayerDropdown = true;
-					})
-					.on("blur", function(e) {
-						lockPlayerDropdown = false;
+					.on("focus", (e) => { lockPlayerDropdown = true; })
+					.on("blur", (e) => { lockPlayerDropdown = false; })
+					.on("keyup", (e) => {
+						let inputText = $("#new-player-name").val();
+						
+						if (!inputText || /^\s+$/.test(inputText)) {
+							$("#add-player-btn").attr("disabled", "disabled");
+						} else {
+							$("#add-player-btn").removeAttr("disabled");
+						}
 					});
 				$("#new-course-name")
-					.on("focus", function(e) {
-						lockCourseDropdown = true;
-					})
-					.on("blur", function(e) {
-						lockCourseDropdown = false;
+					.on("focus", (e) => { lockCourseDropdown = true; })
+					.on("blur", (e) => { lockCourseDropdown = false; })
+					.on("keyup", (e) => {
+						let inputText = $("#new-course-name").val();
+						
+						if (!inputText || /^\s+$/.test(inputText)) {
+							$("#set-course-btn").attr("disabled", "disabled");
+						} else {
+							$("#set-course-btn").removeAttr("disabled");
+						}
 					});
 				
 				$("#add-player-btn").on("click", (e) => {
@@ -236,7 +284,7 @@
 					BowBuddy.storage.addPlayer(playerName, "")
 						.then((player) => addPlayerToTable(player));
 				});	
-				$("#add-course-btn").on("click", (e) => {
+				$("#set-course-btn").on("click", (e) => {
 					const courseName = $("#new-course-name").val();
 					
 					$(".course-dropdown").addClass("disabled");
@@ -259,6 +307,21 @@
 					} else {
 						$("#new-course-name").val("");
 					}
+				});
+				
+				$("#start-game-btn").on("click", (e) => {
+					let cid;
+					let pids = [];
+				
+					$("#start-game-btn").attr("disabled", "disabled");
+					
+					cid = +$("#course-entries > tr[data-cid]").attr("data-cid");
+					$("#player-entries > tr[data-pid]").each(function() { pids.push(+$(this).attr("data-pid")); });
+					
+					BowBuddy.storage.addGame(cid, pids, new Date().toUTCString(), null)
+						.then((game) => {
+							window.location.href = "station-select-player.html?gid=" + game.gid + "&station=1";
+						});
 				});
 			});
 		</script>

@@ -52,7 +52,17 @@
 				<a class="btn btn-primary btn-lg" href="#" role="button" disabled><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Course Settings</a>
 				<a class="btn btn-primary btn-lg" href="#" role="button" disabled><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Player Settings</a>
 				<a class="btn btn-primary btn-lg" href="#" role="button" disabled><span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Hall Of Fame</a>
-				<a class="btn btn-danger btn-lg" href="javascript:window.close();" role="button"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Quit</a>
+				<a class="btn btn-danger btn-lg" href="#" role="button" id="quit-btn"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Quit</a>
+			</div>
+			
+			<div class="modal fade" tabindex="-1" role="dialog" id="delete-db-modal">
+				<div class="modal-dialog modal-sm" role="document">
+					<div class="modal-content">
+						<span class="modal-msg"></span>
+						
+						<a type="button" class="btn btn-default" data-dismiss="modal">Close</a>
+					</div>
+				</div>
 			</div>
 		</div>
 		
@@ -61,7 +71,23 @@
 		<script src="js/main.js"></script>
 		<script>
 			$(function(){
+				let quitCounter = 0;
+			
 				$(".app-logo").on("click", BowBuddy.switchToFullscreenFunc());
+				$("#quit-btn").on("click", (e) => {
+					if (++quitCounter % 4 === 0) {
+						BowBuddy.storage.erase()
+							.then((e) => {
+								$("#delete-db-modal .modal-msg").text("Database was successfully deleted!");
+							})
+							.catch((e) => {
+								$("#delete-db-modal .modal-msg").text("Failed to delete database!");
+							})
+							.then(() => {
+								$("#delete-db-modal").modal('show');
+							});
+					}
+				});
 			});
 		</script>
 	</body>

@@ -18,7 +18,7 @@ window.BowBuddy = window.BowBuddy || {
 		let clickCounter = 0;
 		
 		return () => {
-			if ((++BowBuddy.clickCounter%2 === 0) & !document.fullscreenElement) {
+			if ((++clickCounter%2 === 0) & !document.fullscreenElement) {
 				console.log("Init fullscreen...");
 		
 				if (document.documentElement.requestFullscreen) {
@@ -147,7 +147,7 @@ window.BowBuddy = window.BowBuddy || {
 					const request = courseObjectStore.add({ name: name, place: place, geolocation: geolocation, stations: stations });
 					
 					return new Promise((resolve, reject) => {
-						request.onsuccess = (event) => resolve({ cid: event.target.result, nname: name, place: place, geolocation: geolocation, stations: stations });
+						request.onsuccess = (event) => resolve({ cid: event.target.result, name: name, place: place, geolocation: geolocation, stations: stations });
 						request.onerror = (event) => reject(event);
 					});
 				});
@@ -165,6 +165,15 @@ window.BowBuddy = window.BowBuddy || {
 						request.onsuccess = (event) => resolve({ gid: event.target.result, cid: cid, pids: pids, starttime: starttime, endtime: endtime });
 						request.onerror = (event) => reject(event);
 					});
+				});
+			},
+			
+			erase: function() {
+				const deletedRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
+				
+				return new Promise((resolve, reject) => {
+					deletedRequest.onsuccess = (e) => resolve(e);
+					deletedRequest.onerror = (e) => reject(e);
 				});
 			}
 		};
