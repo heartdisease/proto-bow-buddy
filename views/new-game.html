@@ -35,7 +35,19 @@
 			}
 			
 			.player-dropdown, .course-dropdown {
-				min-width: 220px;
+				min-width: 228px;
+			}
+			
+			.player-dropdown .form-control, .course-dropdown .form-control {
+				padding: 3px; 6px;
+			}
+			
+			#new-course-name {
+				max-width: 110px;
+			}
+			
+			#new-course-no-of-stations {
+				max-width: 36px;
 			}
 			
 			.player-dropdown > .dropdown-menu > li:last-child,
@@ -113,6 +125,7 @@
 							<li>
 								<div class="input-group">
 									<input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
+									<input type="text" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
 									<span class="input-group-btn">
 										<a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled>
 											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
@@ -242,11 +255,22 @@
 											$courseEntry.remove();
 											addCourseToTable(course);
 										})
-										.text(course.name));
+										.text(course.name + " (" + course.stations + ")"));
 						
 							$courseMenu.prepend($courseEntry);
 						});
 					});
+				}
+				
+				function verifyCourseInput() {
+					const courseName = $("#new-course-name").val();
+					const noOfStations = $("#new-course-no-of-stations").val();
+					
+					if (!courseName || /^\s+$/.test(courseName) || !noOfStations || !/^[1-9][0-9]*$/.test(noOfStations)) {
+						$("#set-course-btn").attr("disabled", "disabled");
+					} else {
+						$("#set-course-btn").removeAttr("disabled");
+					}
 				}
 				
 				initPlayerSelectionMenu();
@@ -265,17 +289,13 @@
 						}
 					});
 				$("#new-course-name")
-					.on("focus", (e) => { lockCourseDropdown = true; })
-					.on("blur", (e) => { lockCourseDropdown = false; })
-					.on("keyup", (e) => {
-						let inputText = $("#new-course-name").val();
-						
-						if (!inputText || /^\s+$/.test(inputText)) {
-							$("#set-course-btn").attr("disabled", "disabled");
-						} else {
-							$("#set-course-btn").removeAttr("disabled");
-						}
-					});
+					.on("focus", (e) => lockCourseDropdown = true)
+					.on("blur", (e) => lockCourseDropdown = false)
+					.on("keyup", (e) => verifyCourseInput());
+				$("#new-course-no-of-stations")
+					.on("focus", (e) => lockCourseDropdown = true)
+					.on("blur", (e) => lockCourseDropdown = false)
+					.on("keyup", (e) => verifyCourseInput());
 				
 				$("#add-player-btn").on("click", (e) => {
 					const playerName = $("#new-player-name").val();
@@ -286,9 +306,10 @@
 				});	
 				$("#set-course-btn").on("click", (e) => {
 					const courseName = $("#new-course-name").val();
+					const noOfStations = $("#new-course-no-of-stations").val();
 					
 					$(".course-dropdown").addClass("disabled");
-					BowBuddy.storage.addCourse(courseName, "", "", 0)
+					BowBuddy.storage.addCourse(courseName, "", "", noOfStations)
 						.then((course) => addCourseToTable(course));
 				});
 			
