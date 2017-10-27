@@ -79,11 +79,11 @@
 	</head>
 	<body>
 		<nav class="navbar">
-			<a class="btn" href="station-select-player.html" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
+			<a class="btn" href="#" id="back-btn" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
 		</nav>
 		<div class="container-fluid" id="main">
 			<div class="row">
-				<div class="col-md-12"><h1>Station 1 - Player 1: <wbr>Set score</wbr></h1></div>
+				<div class="col-md-12"><h1>Station <span id="station-no">?</span> - <span class="player-name">...</span>: Set score</h1></div>
 			</div>
 			
 			<div class="row">
@@ -119,7 +119,7 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal">&times;</button>
-						<h4 class="modal-title">Player 1 scored:</h4>
+						<h4 class="modal-title"><span class="player-name">...</span> scored:</h4>
 					</div>
 					<div class="modal-body">
 						<div class="row score-button-group">
@@ -140,6 +140,15 @@
 		<script src="../js/main.js"></script>
 		<script>
 			$(function(){
+				const navigateBackDelay = 1100;
+				const urlParams = BowBuddy.getUrlParams();
+				
+				console.log(urlParams); // TODO remove
+				
+				function navigateBack() {
+					window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + urlParams.station;
+				}
+			
 				function getHitButton(hit) {
 					switch (hit) {
 						case "body-hit": return '<a class="btn btn-info btn-lg hit" href="#" role="button">Body</a>';
@@ -157,34 +166,34 @@
 				}
 			
 				function logScore(dragInitiator, hit, turn) {
-					let scoreParams;
-					let miss;
+					const before = Date.now();
+					const miss = hit === undefined || turn === undefined;
+					const score = miss ? "miss" : turn + ":" + hit;
 					
-					if (hit !== undefined && turn !== undefined) {
-						scoreParams = "hit=" + hit + "&turn=" + turn;
-						miss = false;
-					} else {
-						scoreParams = "hit=miss";
-						miss = true;
-					}
-				
 					$("#scoreDisplay").html(
 						miss
 							? '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>'
 							: getTurnButton(turn) + getHitButton(hit));
-					
 					$("#scoreModal").modal({ keyboard: false });
-					window.setTimeout(function(){
-						window.location.href = "station-select-player.html?player=player1&" + scoreParams;
-					}, 1200);
+					
+					BowBuddy.storage.setScore(urlParams.gid, urlParams.pid, urlParams.station, score)
+						.then((score) => {
+							const timeDiff = Date.now() - before;
+							
+							if (timeDiff >= navigateBackDelay) {
+								navigateBack();
+							} else {
+								window.setTimeout(navigateBack, navigateBackDelay - timeDiff);
+							}
+						});
 				}
 				
-				const urlParams = BowBuddy.getUrlParams();
-				
-				console.log(urlParams);
-				
 				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
-		
+				$("#back-btn").on("click", navigateBack);
+				
+				$("#station-no").text(urlParams.station);
+				BowBuddy.storage.getPlayer(urlParams.pid).then((player) => $("span.player-name").text(player.name));
+				
 				$(".hit")
 					.draggable({ connectWith: ".turn" })
 					.droppable({ accept: ".turn", activeClass: "active", hoverClass: "dropZone" })

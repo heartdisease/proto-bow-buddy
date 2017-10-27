@@ -69,10 +69,11 @@ window.BowBuddy = window.BowBuddy || {
 					gameStore.createIndex("endtime", "date", { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
 					
 					const scoreStore = db.createObjectStore("scores", { keyPath: ["gid", "pid", "station"] });
+					scoreStore.createIndex("sid", "sid", { unique: true, multiEntry: true }); // TODO not sure if multiEntry works like it's a compound ID...
 					scoreStore.createIndex("gid", "gid", { unique: false });
 					scoreStore.createIndex("pid", "pid", { unique: false });
 					scoreStore.createIndex("station", "station", { unique: false });
-					scoreStore.createIndex("score", "score", { unique: false }); // string format: "first-turn:body"
+					scoreStore.createIndex("score", "score", { unique: false }); // string format: "first-turn:body-hit" OR "miss"
 				};
 				dbRequest.onerror = (event) => {
 					window.alert("This app does not work without IndexedDB enabled!");
@@ -136,7 +137,7 @@ window.BowBuddy = window.BowBuddy || {
 		}
 		
 		function fetchAll(objectStore, keyRange, filter) {
-			if (keyRange && filter) {
+			if (filter) {
 				return new Promise((resolve, reject) => {
 					let filteredDataObjects = [];
 
@@ -175,10 +176,11 @@ window.BowBuddy = window.BowBuddy || {
 		
 		function fetchById(objectStore, indexName, id) {
 			return new Promise((resolve, reject) => {
-				console.log("Fetch index " + indexName + " with id " + id);
 				const index = objectStore.index(indexName);
 				
-				index.get(id).onsuccess = (event) => resolve(event.target.result);
+				index.get(id).onsuccess = (event) => {
+					resolve(event.target.result);
+				}
 			});
 		}
 		
@@ -188,23 +190,55 @@ window.BowBuddy = window.BowBuddy || {
 				return db().players(true).then((playerObjectStore) => fetchAll(playerObjectStore));
 			},
 			
-			getPlayersForGame: function(gid) {
+			getPlayer: function(pid) {
+				return db().players(true).then((playerObjectStore) => fetchById(playerObjectStore, "pid", pid));
+			},
+			
+			getPlayersWithScore: function(gid, station) {
 				return db().playersForGame(true)
-					.then((objectStores) => {
-						console.log(objectStores.games);
-						return fetchById(objectStores.games, "gid", gid)
-							.then((game) => {
-								return fetchAll(
-									objectStores.players,
-									IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
-									(player) => game.pids.indexOf(player.pid) !== -1);
-							});
+					.then((objectStores) => fetchById(objectStores.games, "gid", gid)
+						.then((game) =>
+							fetchAll(
+								objectStores.players,
+								IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
+								(player) => game.pids.indexOf(player.pid) !== -1)
+						)
+					)
+					.then((players) => {
+						if (players.length === 0) {
+							return [];
+						} else {
+							return db().scores(true)
+								.then((scoreObjectStore) => {
+									let playersWithScore = [];
+								
+									return new Promise((resolve, reject) => {
+										players.forEach((player) => {
+											console.log("Fetch score for player " + player.name + "...");
+										
+											// TODO why does this API suck so hard????!!
+											fetchAll(
+												scoreObjectStore,
+												undefined,
+												(score) => score.gid === gid && score.pid === player.pid && score.station === station
+											).then((scores) => {
+												const score = scores[0];
+												
+												playersWithScore.push((score && score.score) ? Object.assign(player, { score: score.score }) : player);
+												
+												if (players.length === playersWithScore.length) {
+													resolve(playersWithScore);
+												}
+											});
+										});
+									});
+								});
+						}
 					});
 			},
 			
 			addPlayer: function(name, email) {
 				return db().players().then((playerObjectStore) => {
-					console.log("playerObjectStore.add");
 					const request = playerObjectStore.add({ name: name, email: email });
 					
 					return new Promise((resolve, reject) => {
@@ -267,9 +301,9 @@ window.BowBuddy = window.BowBuddy || {
 				});
 			},
 			
-			addScore: function(gid, pid, station, score) {
+			setScore: function(gid, pid, station, score) {
 				return db().scores().then((scoreObjectStore) => {
-					const request = scoreObjectStore.add({
+					const request = scoreObjectStore.put({
 						gid: gid,
 						pid: pid,
 						station: station,
@@ -284,14 +318,6 @@ window.BowBuddy = window.BowBuddy || {
 							score: score
 						});
 						request.onerror = (event) => reject(event);
-					});
-				});
-			},
-			
-			getScoreForPlayers: function(gid, pids, station) {
-				return db().scores(true).then((scoreObjectStore) => {
-					return new Promise((resolve, reject) => {
-						// TODO implement
 					});
 				});
 			},
