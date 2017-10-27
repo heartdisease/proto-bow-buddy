@@ -48,6 +48,8 @@
 				
 				console.log(urlParams);
 				
+				BowBuddy.storage.getPlayersForGame(urlParams.gid).then((players) => console.log(players));
+				
 				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
 			});
 		</script>

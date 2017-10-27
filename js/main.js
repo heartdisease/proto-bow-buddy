@@ -4,12 +4,17 @@ window.BowBuddy = window.BowBuddy || {
 		if (!window.location.search) {
 			return {}
 		}
+		const numRegExp = /^(0|-?[1-9][0-9]*)$/;
+		
 		return window.location.search
 			.substring(1)
 			.split("&")
 			.map((keyValueStr) => keyValueStr.split("="))
 			.reduce((urlParams, keyValuePair) => {
-				urlParams[keyValuePair[0]] = keyValuePair[1];
+				const key = keyValuePair[0];
+				const value = keyValuePair[1];
+				
+				urlParams[key] = numRegExp.test(value) ? +value : value;
 				return urlParams;
 			}, {});
 	},
@@ -45,18 +50,21 @@ window.BowBuddy = window.BowBuddy || {
 					const db = event.target.result;
 					
 					const playerStore = db.createObjectStore("players", { keyPath: "pid", autoIncrement: true });
+					playerStore.createIndex("pid", "pid", { unique: true });
 					playerStore.createIndex("name", "name", { unique: true });
 					playerStore.createIndex("email", "email", { unique: false });
 						
 					const courseStore = db.createObjectStore("courses", { keyPath: "cid", autoIncrement: true });
+					courseStore.createIndex("cid", "cid", { unique: true });
 					courseStore.createIndex("name", "name", { unique: false });
 					courseStore.createIndex("place", "place", { unique: false });
 					courseStore.createIndex("geolocation", "geolocation", { unique: false });
 					courseStore.createIndex("stations", "stations", { unique: false });
 					
 					const gameStore = db.createObjectStore("games", { keyPath: "gid", autoIncrement: true });
+					gameStore.createIndex("gid", "gid", { unique: true });
 					gameStore.createIndex("cid", "cid", { unique: false });
-					gameStore.createIndex("pids", "pids", { unique: false });
+					gameStore.createIndex("pids", "pids", { unique: false, multiEntry: true });
 					gameStore.createIndex("starttime", "date", { unique: false }); // UTC standard format
 					gameStore.createIndex("endtime", "date", { unique: false }); // UTC standard format
 				};
@@ -80,7 +88,17 @@ window.BowBuddy = window.BowBuddy || {
 				players: function(readonly) {
 					return dbPromise.then((db) => {
 						return new Promise((resolve, reject) => {
-							resolve(db.transaction(["players"], readonly ? "readonly" : "readwrite").objectStore("players"));
+							resolve(db.transaction("players", readonly ? "readonly" : "readwrite").objectStore("players"));
+						});
+					});
+				},
+				
+				playersForGame: function(readonly) {
+					return dbPromise.then((db) => {
+						return new Promise((resolve, reject) => {
+							const transaction = db.transaction(["players", "games"], readonly ? "readonly" : "readwrite");
+							
+							resolve({ players: transaction.objectStore("players"), games: transaction.objectStore("games") });
 						});
 					});
 				},
@@ -88,7 +106,7 @@ window.BowBuddy = window.BowBuddy || {
 				courses: function(readonly) {
 					return dbPromise.then((db) => {
 						return new Promise((resolve, reject) => {
-							resolve(db.transaction(["courses"], readonly ? "readonly" : "readwrite").objectStore("courses"));
+							resolve(db.transaction("courses", readonly ? "readonly" : "readwrite").objectStore("courses"));
 						});
 					});
 				},
@@ -96,14 +114,35 @@ window.BowBuddy = window.BowBuddy || {
 				games: function(readonly) {
 					return dbPromise.then((db) => {
 						return new Promise((resolve, reject) => {
-							resolve(db.transaction(["games"], readonly ? "readonly" : "readwrite").objectStore("games"));
+							resolve(db.transaction("games", readonly ? "readonly" : "readwrite").objectStore("games"));
 						});
 					});
 				}
 			};
 		}
 		
-		function fetchAll(objectStore) {
+		function fetchAll(objectStore, keyRange, filter) {
+			if (keyRange && filter) {
+				return new Promise((resolve, reject) => {
+					let filteredDataObjects = [];
+
+					objectStore.openCursor(keyRange).onsuccess = (event) => {
+						const cursor = event.target.result;
+				
+						if (cursor) {
+							const dataObject = cursor.value;
+							
+							if (filter(dataObject)) {
+								filteredDataObjects.push(dataObject);
+							}
+							cursor.continue();
+						} else {
+							resolve(filteredDataObjects);
+						}
+					};
+				});
+			}
+			
 			return new Promise((resolve, reject) => {
 				let dataObjects = [];
 
@@ -120,10 +159,33 @@ window.BowBuddy = window.BowBuddy || {
 			});
 		}
 		
+		function fetchById(objectStore, indexName, id) {
+			return new Promise((resolve, reject) => {
+				console.log("Fetch index " + indexName + " with id " + id);
+				const index = objectStore.index(indexName);
+				
+				index.get(id).onsuccess = (event) => resolve(event.target.result);
+			});
+		}
+		
 		return {
 			
 			getPlayers: function() {
 				return db().players(true).then((playerObjectStore) => fetchAll(playerObjectStore));
+			},
+			
+			getPlayersForGame: function(gid) {
+				return db().playersForGame(true)
+					.then((objectStores) => {
+						console.log(objectStores.games);
+						return fetchById(objectStores.games, "gid", gid)
+							.then((game) => {
+								return fetchAll(
+									objectStores.players,
+									IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
+									(player) => game.pids.indexOf(player.pid) !== -1);
+							});
+					});
 			},
 			
 			addPlayer: function(name, email) {

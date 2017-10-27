@@ -125,7 +125,7 @@
 							<li>
 								<div class="input-group">
 									<input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
-									<input type="text" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
+									<input type="number" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
 									<span class="input-group-btn">
 										<a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled>
 											<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
@@ -170,6 +170,8 @@
 			$(function(){
 				let playerConfigured = false;
 				let courseConfigured = false;
+				let existingPlayers = [];
+				let existingCourses = [];
 				let configuredPlayers = [];
 				
 				function addPlayerToTable(player) {
@@ -180,7 +182,7 @@
 							.append($("<td/>").text(player.name), $("<td/>").text(player.email || "-"), $("<td/>").text("-")));
 					
 					configuredPlayers.push(player);
-					initPlayerSelectionMenu(configuredPlayers);
+					updatePlayerSelectionMenu(configuredPlayers);
 					playerConfigured = true;
 					if (playerConfigured && courseConfigured) {
 						$("#start-game-btn").removeAttr("disabled");
@@ -197,7 +199,7 @@
 							.attr("data-cid", course.cid)
 							.append($("<td/>").text(course.name), $("<td/>").text(course.place || "-"), $("<td/>").text(course.stations)));
 							
-					initCourseSelectionMenu(course);
+					updateCourseSelectionMenu(course);
 					courseConfigured = true;
 					if (playerConfigured && courseConfigured) {
 						$("#start-game-btn").removeAttr("disabled");
@@ -212,10 +214,11 @@
 				
 				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
 				
-				function initPlayerSelectionMenu(excludedPlayers) {
+				function updatePlayerSelectionMenu(excludedPlayers) {
 					BowBuddy.storage.getPlayers().then((players) => {
 						const $playerMenu = $(".player-dropdown > .dropdown-menu");
 				
+						existingPlayers = players;
 						$playerMenu.find("li[data-pid]").remove();
 						players.reverse().forEach((player) => {
 							if (excludedPlayers !== undefined && excludedPlayers.some((excludedPlayer) => excludedPlayer.pid === player.pid)) {
@@ -237,10 +240,11 @@
 					});
 				}
 				
-				function initCourseSelectionMenu(excludedCourse) {
+				function updateCourseSelectionMenu(excludedCourse) {
 					BowBuddy.storage.getCourses().then((courses) => {
 						const $courseMenu = $(".course-dropdown > .dropdown-menu");
 				
+						existingCourses = courses;
 						$courseMenu.find("li[data-cid]").remove();
 						courses.reverse().forEach((course) => {
 							if (excludedCourse !== undefined && excludedCourse.cid === course.cid) {
@@ -262,32 +266,39 @@
 					});
 				}
 				
+				function verifyPlayerInput() {
+					const playerName = $("#new-player-name").val();
+					
+					if (!playerName || /^\s+/.test(playerName) || /\s+$/.test(playerName) ||
+						existingPlayers.some((player) => player.name === playerName))
+					{
+						$("#add-player-btn").attr("disabled", "disabled");
+					} else {
+						$("#add-player-btn").removeAttr("disabled");
+					}
+				}
+				
 				function verifyCourseInput() {
 					const courseName = $("#new-course-name").val();
 					const noOfStations = $("#new-course-no-of-stations").val();
 					
-					if (!courseName || /^\s+$/.test(courseName) || !noOfStations || !/^[1-9][0-9]*$/.test(noOfStations)) {
+					if (!courseName || /^\s+/.test(courseName) || /\s+$/.test(courseName) ||
+						!noOfStations || !/^[1-9][0-9]*$/.test(noOfStations) ||
+						existingCourses.some((course) => course.name === courseName))
+					{
 						$("#set-course-btn").attr("disabled", "disabled");
 					} else {
 						$("#set-course-btn").removeAttr("disabled");
 					}
 				}
 				
-				initPlayerSelectionMenu();
-				initCourseSelectionMenu();
+				updatePlayerSelectionMenu();
+				updateCourseSelectionMenu();
 				
 				$("#new-player-name")
-					.on("focus", (e) => { lockPlayerDropdown = true; })
-					.on("blur", (e) => { lockPlayerDropdown = false; })
-					.on("keyup", (e) => {
-						let inputText = $("#new-player-name").val();
-						
-						if (!inputText || /^\s+$/.test(inputText)) {
-							$("#add-player-btn").attr("disabled", "disabled");
-						} else {
-							$("#add-player-btn").removeAttr("disabled");
-						}
-					});
+					.on("focus", (e) => lockPlayerDropdown = true)
+					.on("blur", (e) => lockPlayerDropdown = false)
+					.on("keyup", (e) => verifyPlayerInput());
 				$("#new-course-name")
 					.on("focus", (e) => lockCourseDropdown = true)
 					.on("blur", (e) => lockCourseDropdown = false)
@@ -300,7 +311,7 @@
 				$("#add-player-btn").on("click", (e) => {
 					const playerName = $("#new-player-name").val();
 					
-					$(".player-dropdown").addClass("disabled");
+					$(".player-dropdown").addClass("disabled"); // TODO what is this doing?
 					BowBuddy.storage.addPlayer(playerName, "")
 						.then((player) => addPlayerToTable(player));
 				});	
@@ -308,7 +319,7 @@
 					const courseName = $("#new-course-name").val();
 					const noOfStations = $("#new-course-no-of-stations").val();
 					
-					$(".course-dropdown").addClass("disabled");
+					$(".course-dropdown").addClass("disabled"); // TODO what is this doing?
 					BowBuddy.storage.addCourse(courseName, "", "", noOfStations)
 						.then((course) => addCourseToTable(course));
 				});
@@ -319,6 +330,7 @@
 						e.preventDefault();
 					} else {
 						$("#new-player-name").val("");
+						$("#add-player-btn").attr("disabled", "disabled");
 					}
 				});
 				$(".course-dropdown").on("hide.bs.dropdown", function (e) {
@@ -327,6 +339,8 @@
 						e.preventDefault();
 					} else {
 						$("#new-course-name").val("");
+						$("#new-course-no-of-stations").val("");
+						$("#set-course-btn").attr("disabled", "disabled");
 					}
 				});
 				
