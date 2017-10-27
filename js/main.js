@@ -65,8 +65,14 @@ window.BowBuddy = window.BowBuddy || {
 					gameStore.createIndex("gid", "gid", { unique: true });
 					gameStore.createIndex("cid", "cid", { unique: false });
 					gameStore.createIndex("pids", "pids", { unique: false, multiEntry: true });
-					gameStore.createIndex("starttime", "date", { unique: false }); // UTC standard format
-					gameStore.createIndex("endtime", "date", { unique: false }); // UTC standard format
+					gameStore.createIndex("starttime", "date", { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+					gameStore.createIndex("endtime", "date", { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+					
+					const scoreStore = db.createObjectStore("scores", { keyPath: ["gid", "pid", "station"] });
+					scoreStore.createIndex("gid", "gid", { unique: false });
+					scoreStore.createIndex("pid", "pid", { unique: false });
+					scoreStore.createIndex("station", "station", { unique: false });
+					scoreStore.createIndex("score", "score", { unique: false }); // string format: "first-turn:body"
 				};
 				dbRequest.onerror = (event) => {
 					window.alert("This app does not work without IndexedDB enabled!");
@@ -115,6 +121,14 @@ window.BowBuddy = window.BowBuddy || {
 					return dbPromise.then((db) => {
 						return new Promise((resolve, reject) => {
 							resolve(db.transaction("games", readonly ? "readonly" : "readwrite").objectStore("games"));
+						});
+					});
+				},
+				
+				scores: function(readonly) {
+					return dbPromise.then((db) => {
+						return new Promise((resolve, reject) => {
+							resolve(db.transaction("scores", readonly ? "readonly" : "readwrite").objectStore("scores"));
 						});
 					});
 				}
@@ -205,14 +219,26 @@ window.BowBuddy = window.BowBuddy || {
 			},
 			
 			addCourse: function(name, place, geolocation, stations) {
-				return db().courses().then((courseObjectStore) => {
-					const request = courseObjectStore.add({ name: name, place: place, geolocation: geolocation, stations: stations });
+				return db().courses()
+					.then((courseObjectStore) => {
+						const request = courseObjectStore.add({
+							name: name,
+							place: place,
+							geolocation: geolocation,
+							stations: stations
+						});
 					
-					return new Promise((resolve, reject) => {
-						request.onsuccess = (event) => resolve({ cid: event.target.result, name: name, place: place, geolocation: geolocation, stations: stations });
-						request.onerror = (event) => reject(event);
+						return new Promise((resolve, reject) => {
+							request.onsuccess = (event) => resolve({
+								cid: event.target.result,
+								name: name,
+								place: place,
+								geolocation: geolocation,
+								stations: stations
+							});
+							request.onerror = (event) => reject(event);
+						});
 					});
-				});
 			},
 			
 			getGames: function() {
@@ -221,11 +247,51 @@ window.BowBuddy = window.BowBuddy || {
 			
 			addGame: function(cid, pids, starttime, endtime) {
 				return db().games().then((gameObjectStore) => {
-					const request = gameObjectStore.add({ cid: cid, pids: pids, starttime: starttime, endtime: endtime });
+					const request = gameObjectStore.add({
+						cid: cid,
+						pids: pids,
+						starttime: starttime || new Date().toISOString(),
+						endtime: endtime || null
+					});
 					
 					return new Promise((resolve, reject) => {
-						request.onsuccess = (event) => resolve({ gid: event.target.result, cid: cid, pids: pids, starttime: starttime, endtime: endtime });
+						request.onsuccess = (event) => resolve({
+							gid: event.target.result,
+							cid: cid,
+							pids: pids,
+							starttime: starttime,
+							endtime: endtime
+						});
 						request.onerror = (event) => reject(event);
+					});
+				});
+			},
+			
+			addScore: function(gid, pid, station, score) {
+				return db().scores().then((scoreObjectStore) => {
+					const request = scoreObjectStore.add({
+						gid: gid,
+						pid: pid,
+						station: station,
+						score: score
+					});
+					
+					return new Promise((resolve, reject) => {
+						request.onsuccess = (event) => resolve({
+							gid: gid,
+							pid: pid,
+							station: station,
+							score: score
+						});
+						request.onerror = (event) => reject(event);
+					});
+				});
+			},
+			
+			getScoreForPlayers: function(gid, pids, station) {
+				return db().scores(true).then((scoreObjectStore) => {
+					return new Promise((resolve, reject) => {
+						// TODO implement
 					});
 				});
 			},

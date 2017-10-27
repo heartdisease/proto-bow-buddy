@@ -353,7 +353,7 @@
 					cid = +$("#course-entries > tr[data-cid]").attr("data-cid");
 					$("#player-entries > tr[data-pid]").each(function() { pids.push(+$(this).attr("data-pid")); });
 					
-					BowBuddy.storage.addGame(cid, pids, new Date().toUTCString(), null)
+					BowBuddy.storage.addGame(cid, pids)
 						.then((game) => {
 							window.location.href = "station-select-player.html?gid=" + game.gid + "&station=1";
 						});

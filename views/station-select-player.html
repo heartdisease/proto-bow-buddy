@@ -29,13 +29,13 @@
 		<div class="container" id="main">
 			<h1>Station 1: Select player</h1>
 
-			<div class="btn-group-vertical btn-group-lg player-selection" role="group" aria-label="choose player">
-				<a class="btn btn-default" href="station-set-score.html?player=player1" role="button">
+			<div class="btn-group-vertical btn-group-lg player-selection" id="player-selection-list" role="group" aria-label="choose player">
+				<!--<a class="btn btn-default" href="station-set-score.html?player=player1" role="button">
 					Player 1 <span class="badge">1<sup>st</sup> - Center Kill&nbsp;&nbsp;&nbsp;(+20)</span>
 				</a>
 				<a class="btn btn-default" href="station-set-score.html?player=player2" role="button">Player 2</a>
 				<a class="btn btn-default" href="station-set-score.html?player=player3" role="button">Player 3</a>
-				<a class="btn btn-default" href="station-set-score.html?player=player4" role="button">Player 4</a>
+				<a class="btn btn-default" href="station-set-score.html?player=player4" role="button">Player 4</a>-->
 			</div>
 		</div>
 		
@@ -48,9 +48,23 @@
 				
 				console.log(urlParams);
 				
-				BowBuddy.storage.getPlayersForGame(urlParams.gid).then((players) => console.log(players));
-				
 				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
+				
+				BowBuddy.storage.getPlayersForGame(urlParams.gid)
+					.then((players) => {
+						console.log(players);
+						
+						const $playerSelectionList = $("#player-selection-list");
+						
+						players.forEach((player) => {
+							$playerSelectionList.append(
+								$("<a/>")
+									.addClass("btn btn-default")
+									.attr("href", "station-set-score.html?gid=" + urlParams.gid + "&pid=" + player.pid + "&station=" + urlParams.station)
+									.attr("role", "button")
+									.text(player.name));
+						});
+					});
 			});
 		</script>
 	</body>
