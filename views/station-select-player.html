@@ -94,7 +94,9 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 				
 				BowBuddy.storage.getCourseForGame(urlParams.gid)
 					.then((course) => {
-						if (urlParams.station >= course.stations) {
+						const stations = +course.stations; // TODO remove type coercion with new db!
+						
+						if (urlParams.station >= stations) {
 							$("#next-station-btn")
 								.html("<span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span> Finish course")
 								.on("click", (e) => window.location.href = "final-score.html?gid=" + urlParams.gid);
