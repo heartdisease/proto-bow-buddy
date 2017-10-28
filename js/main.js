@@ -50,6 +50,75 @@ window.BowBuddy = window.BowBuddy || {
 		};
 	},
 	
+	scoreToPoints: function(score) {
+		if (score === "miss") {
+			return 0;
+		}
+		
+		const scoreParts = score.split(":");
+		let penalty;
+		
+		switch (scoreParts[0]) {
+			case "first-turn":
+				penalty = 0;
+				break;
+			case "second-turn":
+				penalty = 1;
+				break;
+			case "third-turn":
+				penalty = 2;
+				break;
+			default:
+				throw new Error("Invalid score format '" + score + "'");
+		}
+		switch (scoreParts[1]) {
+			case "body-hit": return 16 - penalty * 6;
+			case "kill-hit": return 18 - penalty * 6;
+			case "center-kill-hit": return 20 - penalty * 6;
+			default:
+				throw new Error("Invalid score format '" + score + "'");
+		}
+	},
+	
+	scoreToDisplayName: function(score) {
+		if (score === "miss") {
+			return "Miss";
+		}
+	
+		const scoreParts = score.split(":");
+		let scoreLabel;
+		
+		switch (scoreParts[0]) {
+			case "first-turn":
+				scoreLabel = "1<sup>st</sup>";
+				break;
+			case "second-turn":
+				scoreLabel = "2<sup>nd</sup>";
+				break;
+			case "third-turn":
+				scoreLabel = "3<sup>rd</sup>";
+				break;
+			default:
+				throw new Error("Invalid score format '" + score + "'");
+		}
+		scoreLabel += " - ";
+		switch (scoreParts[1]) {
+			case "body-hit":
+				scoreLabel += "Body";
+				break;
+			case "kill-hit":
+				scoreLabel += "Kill";
+				break;
+			case "center-kill-hit":
+				scoreLabel += "Center Kill";
+				break;
+			default:
+				throw new Error("Invalid score format '" + score + "'");
+		}
+		
+		return scoreLabel;
+	},
+	
 	storage: (function(){
 		let dbPromise = null;
 	
@@ -84,7 +153,7 @@ window.BowBuddy = window.BowBuddy || {
 					gameStore.createIndex("endtime", "date", { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
 					
 					const scoreStore = db.createObjectStore("scores", { keyPath: ["gid", "pid", "station"] });
-					scoreStore.createIndex("sid", "sid", { unique: true, multiEntry: true }); // TODO not sure if multiEntry works like it's a compound ID...
+					scoreStore.createIndex("sid", ["gid", "pid", "station"], { unique: true }); // compound key path
 					scoreStore.createIndex("gid", "gid", { unique: false });
 					scoreStore.createIndex("pid", "pid", { unique: false });
 					scoreStore.createIndex("station", "station", { unique: false });
@@ -107,20 +176,26 @@ window.BowBuddy = window.BowBuddy || {
 			
 			return {
 			
+				// objectStores {Array|String}
+				// writeAccess {boolean}
+				transaction: function(objectStores, writeAccess) {
+					return dbPromise.then((db) => {
+						const transaction = db.transaction(objectStores, writeAccess ? "readwrite" : "readonly");
+						
+						return Array.isArray(objectStores)
+							? objectStores.reduce(
+								(map, objectStore) => {
+									map[objectStore] = transaction.objectStore(objectStore);
+									return map;
+								}, {})
+							: transaction.objectStore(objectStores);
+					});
+				},
+			
 				players: function(readonly) {
 					return dbPromise.then((db) => {
 						return new Promise((resolve, reject) => {
 							resolve(db.transaction("players", readonly ? "readonly" : "readwrite").objectStore("players"));
-						});
-					});
-				},
-				
-				playersForGame: function(readonly) {
-					return dbPromise.then((db) => {
-						return new Promise((resolve, reject) => {
-							const transaction = db.transaction(["players", "games"], readonly ? "readonly" : "readwrite");
-							
-							resolve({ players: transaction.objectStore("players"), games: transaction.objectStore("games") });
 						});
 					});
 				},
@@ -189,11 +264,12 @@ window.BowBuddy = window.BowBuddy || {
 			});
 		}
 		
-		function fetchById(objectStore, indexName, id) {
+		function fetchById(objectStore, indexName, keyPath) {
 			return new Promise((resolve, reject) => {
 				const index = objectStore.index(indexName);
+				const request = index.get(keyPath);
 				
-				index.get(id).onsuccess = (event) => {
+				request.onsuccess = (event) => {
 					resolve(event.target.result);
 				}
 			});
@@ -210,7 +286,7 @@ window.BowBuddy = window.BowBuddy || {
 			},
 			
 			getPlayersWithScore: function(gid, station) {
-				return db().playersForGame(true)
+				return db().transaction(["players", "games"])
 					.then((objectStores) => fetchById(objectStores.games, "gid", gid)
 						.then((game) =>
 							fetchAll(
@@ -229,22 +305,14 @@ window.BowBuddy = window.BowBuddy || {
 								
 									return new Promise((resolve, reject) => {
 										players.forEach((player) => {
-											console.log("Fetch score for player " + player.name + "...");
-										
-											// TODO why does this API suck so hard????!!
-											fetchAll(
-												scoreObjectStore,
-												undefined,
-												(score) => score.gid === gid && score.pid === player.pid && score.station === station
-											).then((scores) => {
-												const score = scores[0];
+											fetchById(scoreObjectStore, "sid", [gid, player.pid, station])
+												.then((score) => {
+													playersWithScore.push((score && score.score) ? Object.assign(player, { score: score.score }) : player);
 												
-												playersWithScore.push((score && score.score) ? Object.assign(player, { score: score.score }) : player);
-												
-												if (players.length === playersWithScore.length) {
-													resolve(playersWithScore);
-												}
-											});
+													if (players.length === playersWithScore.length) {
+														resolve(playersWithScore);
+													}
+												});
 										});
 									});
 								});
@@ -267,7 +335,15 @@ window.BowBuddy = window.BowBuddy || {
 				return db().courses(true).then((courseObjectStore) => fetchAll(courseObjectStore));
 			},
 			
+			getCourseForGame: function(gid) {
+				return db().transaction(["courses", "games"])
+					.then((objectStores) =>
+						fetchById(objectStores.games, "gid", gid)
+							.then((game) => fetchById(objectStores.courses, "cid", game.cid)));
+			},
+			
 			addCourse: function(name, place, geolocation, stations) {
+				stations = +stations; // coerce stations into being a number
 				return db().courses()
 					.then((courseObjectStore) => {
 						const request = courseObjectStore.add({
@@ -292,6 +368,10 @@ window.BowBuddy = window.BowBuddy || {
 			
 			getGames: function() {
 				return db().games(true).then((gameObjectStore) => fetchAll(gameObjectStore));
+			},
+			
+			getGame: function(gid) {
+				return db().games(true).then((gameObjectStore) => fetchById(gameObjectStore, "gid", gid));
 			},
 			
 			addGame: function(cid, pids, starttime, endtime) {
@@ -319,6 +399,7 @@ window.BowBuddy = window.BowBuddy || {
 			setScore: function(gid, pid, station, score) {
 				return db().scores().then((scoreObjectStore) => {
 					const request = scoreObjectStore.put({
+						//sid: [gid, pid, station],
 						gid: gid,
 						pid: pid,
 						station: station,
@@ -327,6 +408,7 @@ window.BowBuddy = window.BowBuddy || {
 					
 					return new Promise((resolve, reject) => {
 						request.onsuccess = (event) => resolve({
+							//sid: [gid, pid, station],
 							gid: gid,
 							pid: pid,
 							station: station,

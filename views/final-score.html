@@ -20,7 +20,7 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<title>BowBuddy 1.0 (Prototype) - New Game</title>
+		<title>BowBuddy 1.0 (Prototype) - Final score</title>
 		<meta name="description" content="An app for keeping track of your score" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="../css/bootstrap.min.css" />
@@ -35,8 +35,8 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 				margin-top: 22px;
 			}
 			
-			#player-selection-list {
-				margin-bottom: 12px;
+			#course-label {
+				font-style: italic;
 			}
 		</style>
 		<link rel="stylesheet" href="../css/bootstrap-theme.min.css">
@@ -47,15 +47,22 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 			<a class="btn" href="#" id="back-btn" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
 		</nav>
 		<div class="container" id="main">
-			<h1>Station <span id="station-no">?</span>: Select player</h1>
+			<h1>Course complete:<br/><span id="course-label"></span></h1>
 
-			<div class="btn-group-vertical btn-group-lg player-selection" id="player-selection-list" role="group" aria-label="choose player">
-				<!-- PLAYER BUTTONS ARE INSERTED HERE -->
-			</div>
+			<table class="table table-striped">
+				<thead>
+					<tr id="player-header-row">
+						<td>#</td>
+					</tr>
+				</thead>
+				<tbody id="player-score-entries">
+					<!-- SCORE ENTRIES -->
+				</tbody>
+			</table>
 			
 			<div class="btn-group btn-group-justified" role="group">
-				<a class="btn btn-success btn-lg" href="#" id="next-station-btn" role="button" disabled="disabled">
-					<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Next station
+				<a class="btn btn-success btn-lg" href="../index.html" role="button">
+					<span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span> Finish course
 				</a>
 			</div>
 		</div>
@@ -67,96 +74,67 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 			$(function(){
 				const urlParams = BowBuddy.getUrlParams();
 				
-				console.log(urlParams);
-				
 				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
-				$("#back-btn")
-					.on("click", (e) => {
-						const station = urlParams.station;
-						
-						if (station > 1) {
-							window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + (station - 1);
-						} else {
-							const result = window.confirm("Do you really want to go back to the game menu? All progess will be lost!");
-							
-							if (result) {
-								// TODO replace native dialog with bootstrap dialog and actually delete all scores for current game!
-								window.location.href = "new-game.html";
-							}
-						}
-					});
-				$("#next-station-btn")
-					.on("click", (e) => window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + (urlParams.station + 1));
-				$("#station-no").text(urlParams.station);
 				
-				BowBuddy.storage.getPlayersWithScore(urlParams.gid, urlParams.station)
-					.then((players) => {
-						const $playerSelectionList = $("#player-selection-list");
-						let playersWithScore = 0;
+				function generateScoreTable(playerNames, scores) {
+					console.log("generateScoreTable");
+				
+					const $playerHeaderRow = $("#player-header-row");
+					const $playerScoreEntries = $("#player-score-entries");
+					
+					playerNames.forEach((playerName) => $playerHeaderRow.append($("<th/>").text(playerName)));
+					scores.forEach((scoresForStation, index) => {
+						let $tr = $("<tr/>");
 						
-						players.forEach((player) => {
-							const $playerEntry = $("<a/>")
-									.addClass("btn btn-default")
-									.attr("href", "station-set-score.html?gid=" + urlParams.gid + "&pid=" + player.pid + "&station=" + urlParams.station)
-									.attr("role", "button")
-									.text(player.name + " "); // add space separator here for score badge
+						$tr.append($("<td/>").text(index + 1));
+						scoresForStation.forEach((score) => $tr.append($("<td/>").text(BowBuddy.scoreToPoints(score))));
+						$playerScoreEntries.append($tr);
+					});
+					
+					let $sumRow = $("<tr/>").addClass("info").css("font-weight", "bold");
+					$sumRow.append($("<td/>").html("&nbsp;")); // insert filler cell
+					scores[0].forEach((score, column) => {
+						$sumRow.append(
+							$("<td/>").text(
+								scores.reduce((sum, row) => {
+									return sum + BowBuddy.scoreToPoints(row[column]);
+								}, 0)));
+					});
+					$playerScoreEntries.append($sumRow);
+				}
+				
+				BowBuddy.storage.getCourseForGame(urlParams.gid)
+					.then((course) => {
+						const stations = +course.stations; // TODO remove type coercion with new db!
+						let playerNames;
+						let scores = new Array(stations);
+						let scoreCount = 0;
+						
+						$("#course-label").text((course.place ? course.place + " " : "") + course.name);
+						$("#back-btn")
+							.on("click", (e) => {
+								window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + stations;
+							});
 							
-							if (player.score) {
-								const $scoreBadge = $("<span/>").addClass("badge");
-								
-								playersWithScore++;
-								
-								if (player.score === "miss") {
-									$scoreBadge.html("Miss&nbsp;&nbsp;&nbsp;(+0)");
-								} else {
-									const scoreParts = player.score.split(":");
-									let penalty;
-									let scoredPoints;
-									let scoreLabel;
+						for (let i = 1; i <= stations; i++) {
+							const station = i;
+							
+							BowBuddy.storage.getPlayersWithScore(urlParams.gid, station)
+								.then((players) => {
+									if (station === 1) {
+										playerNames = players.map((p) => p.name);
+										console.log(playerNames);
+									}
+									scores[station - 1] = players.map((p) => p.score);
 									
-									switch (scoreParts[0]) {
-										case "first-turn":
-											scoreLabel = "1<sup>st</sup>";
-											penalty = 0;
-											break;
-										case "second-turn":
-											scoreLabel = "2<sup>nd</sup>";
-											penalty = 1;
-											break;
-										case "third-turn":
-											scoreLabel = "3<sup>rd</sup>";
-											penalty = 2;
-											break;
-										default:
-											throw new Error("Invalid score format '" + player.score + "'");
+									console.log(scores[station - 1]);
+									if (++scoreCount === stations) { 
+										console.log(scoreCount + " = " + stations);
+										generateScoreTable(playerNames, scores);
+									} else {
+										console.log(scoreCount + "/" + stations);
 									}
-									scoreLabel += " - ";
-									switch (scoreParts[1]) {
-										case "body-hit":
-											scoreLabel += "Body";
-											scoredPoints = 16 - penalty * 6;
-											break;
-										case "kill-hit":
-											scoreLabel += "Kill";
-											scoredPoints = 18 - penalty * 6;
-											break;
-										case "center-kill-hit":
-											scoreLabel += "Center Kill";
-											scoredPoints = 20 - penalty * 6;
-											break;
-										default:
-											throw new Error("Invalid score format '" + player.score + "'");
-									}
-									$scoreBadge.html(scoreLabel + "&nbsp;&nbsp;&nbsp;(+" + scoredPoints + ")");
-								}								
-								$playerEntry.append($scoreBadge);
-							}
-							
-							$playerSelectionList.append($playerEntry);
-						});
-						
-						if (playersWithScore === players.length) {
-							$("#next-station-btn").removeAttr("disabled");
+								});
 						}
 					});
 			});
