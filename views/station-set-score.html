@@ -20,7 +20,7 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<title>BowBuddy 1.0 (Prototype) - New Game</title>
+		<title>BowBuddy 1.0 (Prototype) - Set score</title>
 		<meta name="description" content="An app for keeping track of your score">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="../css/bootstrap.min.css">
@@ -99,16 +99,17 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 		</nav>
 		<div class="container-fluid" id="main">
 			<div class="row">
-				<div class="col-md-12"><h1>Station <span id="station-no">?</span> - <span class="player-name">...</span>: Set score</h1></div>
+				<div class="col-md-12"><h1>Set score:<br/>Station <span id="station-no">?</span> - <span class="player-name">...</span></h1></div>
 			</div>
 			
+			<!-- TODO think up something better, this info text does not have the desired effect
 			<div class="row">
 				<div class="col-md-12">
 					<div class="alert alert-info usage-info" role="alert">Swipe a circle from the left onto one on the right to mark your score!</div>
 				</div>
-			</div>
+			</div>-->
 			
-			<div class="row score-button-group">
+			<div class="row score-button-group" style="margin-top: 20px;">
 				<div class="col-xs-6">
 					<div class="btn-group-vertical" role="group" aria-label="type of shot">
 						<a class="btn btn-info btn-lg hit" href="#" role="button" draggable="true" data-dnd="body-hit">Body</a>
@@ -156,13 +157,32 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 		<script src="../js/main.js"></script>
 		<script>
 			$(function(){
-				const navigateBackDelay = 1100;
+				const navigationDelay = 950;
 				const urlParams = BowBuddy.getUrlParams();
 				
 				console.log(urlParams); // TODO remove
 				
 				function navigateBack() {
 					window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + urlParams.station;
+				}
+				
+				function navigateToNextPlayer(nextPid, remainingPids) {
+					const qaParam = (remainingPids.length > 0) ? "&qa=" + remainingPids.join("+") : "";
+					window.location.href = "station-set-score.html?gid=" + urlParams.gid + "&pid=" + nextPid + "" + qaParam + "&station=" + urlParams.station;
+				}
+				
+				function navigateNext() {
+					if (urlParams.qa) {
+						const qaPlayers = ("" + urlParams.qa).split("+"); // if qa has only one entry left it becomes and integer
+						
+						if (qaPlayers.length > 0) {
+							navigateToNextPlayer(qaPlayers[0], qaPlayers.slice(1));
+						} else {
+							throw new Error("Invalid qa parameter '" + urlParams.qa + "'");
+						}
+					} else {
+						navigateBack();
+					}
 				}
 			
 				function getHitButton(hit) {
@@ -196,10 +216,10 @@ along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 						.then((score) => {
 							const timeDiff = Date.now() - before;
 							
-							if (timeDiff >= navigateBackDelay) {
-								navigateBack();
+							if (timeDiff >= navigationDelay) {
+								navigateNext();
 							} else {
-								window.setTimeout(navigateBack, navigateBackDelay - timeDiff);
+								window.setTimeout(navigateNext, navigationDelay - timeDiff);
 							}
 						});
 				}
