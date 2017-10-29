@@ -1,6 +1,5 @@
 # proto-bow-buddy
-An app for keeping track of your score in archery.
+A mobile app for keeping track of your score in archery for 3D parcours.
 
-This is a web-based prototyp for an actual Android app called BowBuddy, written in Kotlin.
+This is a web-based prototype for an Android app called BowBuddy, written in Kotlin.
 
-TODO write more

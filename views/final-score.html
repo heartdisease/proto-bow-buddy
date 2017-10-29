@@ -108,7 +108,7 @@ Copyright 2017 Christoph Matscheko
 					$playerScoreEntries.append($sumRow);
 				}
 				
-				// TODO set property enttime for current game!
+				// TODO set property endtime for current game!
 				BowBuddy.storage.getCourseForGame(urlParams.gid)
 					.then((course) => {
 						const stations = +course.stations; // TODO remove type coercion with new db!
