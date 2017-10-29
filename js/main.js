@@ -195,38 +195,6 @@ window.BowBuddy = window.BowBuddy || {
 								}, {})
 							: transaction.objectStore(objectStores);
 					});
-				},
-			
-				players: function(readonly) {
-					return dbPromise.then((db) => {
-						return new Promise((resolve, reject) => {
-							resolve(db.transaction("players", readonly ? "readonly" : "readwrite").objectStore("players"));
-						});
-					});
-				},
-				
-				courses: function(readonly) {
-					return dbPromise.then((db) => {
-						return new Promise((resolve, reject) => {
-							resolve(db.transaction("courses", readonly ? "readonly" : "readwrite").objectStore("courses"));
-						});
-					});
-				},
-				
-				games: function(readonly) {
-					return dbPromise.then((db) => {
-						return new Promise((resolve, reject) => {
-							resolve(db.transaction("games", readonly ? "readonly" : "readwrite").objectStore("games"));
-						});
-					});
-				},
-				
-				scores: function(readonly) {
-					return dbPromise.then((db) => {
-						return new Promise((resolve, reject) => {
-							resolve(db.transaction("scores", readonly ? "readonly" : "readwrite").objectStore("scores"));
-						});
-					});
 				}
 			};
 		}
@@ -283,11 +251,11 @@ window.BowBuddy = window.BowBuddy || {
 		return {
 			
 			getPlayers: function() {
-				return db().players(true).then((playerObjectStore) => fetchAll(playerObjectStore));
+				return db().transaction("players").then((playerObjectStore) => fetchAll(playerObjectStore));
 			},
 			
 			getPlayer: function(pid) {
-				return db().players(true).then((playerObjectStore) => fetchById(playerObjectStore, "pid", pid));
+				return db().transaction("players").then((playerObjectStore) => fetchById(playerObjectStore, "pid", pid));
 			},
 			
 			getPlayersWithScore: function(gid, station) {
@@ -304,7 +272,7 @@ window.BowBuddy = window.BowBuddy || {
 						if (players.length === 0) {
 							return [];
 						} else {
-							return db().scores(true)
+							return db().transaction("scores")
 								.then((scoreObjectStore) => {
 									let playersWithScore = [];
 								
@@ -326,7 +294,7 @@ window.BowBuddy = window.BowBuddy || {
 			},
 			
 			addPlayer: function(name, email) {
-				return db().players().then((playerObjectStore) => {
+				return db().transaction("players", true).then((playerObjectStore) => {
 					const request = playerObjectStore.add({ name: name, email: email });
 					
 					return new Promise((resolve, reject) => {
@@ -337,7 +305,7 @@ window.BowBuddy = window.BowBuddy || {
 			},
 			
 			getCourses: function() {
-				return db().courses(true).then((courseObjectStore) => fetchAll(courseObjectStore));
+				return db().transaction("courses").then((courseObjectStore) => fetchAll(courseObjectStore));
 			},
 			
 			getCourseForGame: function(gid) {
@@ -349,7 +317,7 @@ window.BowBuddy = window.BowBuddy || {
 			
 			addCourse: function(name, place, geolocation, stations) {
 				stations = +stations; // coerce stations into being a number
-				return db().courses()
+				return db().transaction("courses", true)
 					.then((courseObjectStore) => {
 						const request = courseObjectStore.add({
 							name: name,
@@ -372,56 +340,60 @@ window.BowBuddy = window.BowBuddy || {
 			},
 			
 			getGames: function() {
-				return db().games(true).then((gameObjectStore) => fetchAll(gameObjectStore));
+				return db().transaction("games").then((gameObjectStore) => fetchAll(gameObjectStore));
 			},
 			
 			getGame: function(gid) {
-				return db().games(true).then((gameObjectStore) => fetchById(gameObjectStore, "gid", gid));
+				return db().transaction("games").then((gameObjectStore) => fetchById(gameObjectStore, "gid", gid));
 			},
 			
 			addGame: function(cid, pids, starttime, endtime) {
-				return db().games().then((gameObjectStore) => {
-					const request = gameObjectStore.add({
-						cid: cid,
-						pids: pids,
-						starttime: starttime || new Date().toISOString(),
-						endtime: endtime || null
-					});
-					
-					return new Promise((resolve, reject) => {
-						request.onsuccess = (event) => resolve({
-							gid: event.target.result,
+				return db().transaction("games", true)
+					.then((gameObjectStore) => {
+						const request = gameObjectStore.add({
 							cid: cid,
 							pids: pids,
-							starttime: starttime,
-							endtime: endtime
+							starttime: starttime || new Date().toISOString(),
+							endtime: endtime || null
 						});
-						request.onerror = (event) => reject(event);
+					
+						return new Promise((resolve, reject) => {
+							request.onsuccess = (event) => resolve({
+								gid: event.target.result,
+								cid: cid,
+								pids: pids,
+								starttime: starttime,
+								endtime: endtime
+							});
+							request.onerror = (event) => reject(event);
+						});
 					});
-				});
 			},
 			
 			setScore: function(gid, pid, station, score) {
-				return db().scores().then((scoreObjectStore) => {
-					const request = scoreObjectStore.put({
-						//sid: [gid, pid, station],
-						gid: gid,
-						pid: pid,
-						station: station,
-						score: score
-					});
-					
-					return new Promise((resolve, reject) => {
-						request.onsuccess = (event) => resolve({
-							//sid: [gid, pid, station],
+				return db().transaction("scores", true)
+					.then((scoreObjectStore) => {
+						const request = scoreObjectStore.put({
 							gid: gid,
 							pid: pid,
 							station: station,
 							score: score
 						});
-						request.onerror = (event) => reject(event);
+					
+						return new Promise((resolve, reject) => {
+							request.onsuccess = (event) => resolve({
+								gid: gid,
+								pid: pid,
+								station: station,
+								score: score
+							});
+							request.onerror = (event) => reject(event);
+						});
 					});
-				});
+			},
+			
+			dump: function() {
+				return null; // TODO return promise that returns the entire database as a JSON object
 			},
 			
 			erase: function() {
