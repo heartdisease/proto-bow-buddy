@@ -195,6 +195,10 @@ window.BowBuddy = window.BowBuddy || {
 								}, {})
 							: transaction.objectStore(objectStores);
 					});
+				},
+				
+				objectStoreNames: function() {
+					return dbPromise.then((db) => Array.prototype.slice.call(db.objectStoreNames));
 				}
 			};
 		}
@@ -248,6 +252,24 @@ window.BowBuddy = window.BowBuddy || {
 			});
 		}
 		
+		function updateRecord(objectStore, indexName, keyPath, update) {
+			return new Promise((resolve, reject) => {
+				const index = objectStore.index(indexName);
+				
+				index.openCursor(keyPath).onsuccess = (event) => {
+					const cursor = event.target.result;
+				
+					if (cursor) {
+						const updatedRecord = update(cursor.value);
+						
+						cursor.update(updatedRecord).onsuccess = () => resolve(updatedRecord);
+					} else {
+						reject(new Error("Cannot find record"));
+					}
+				}
+			});
+		}
+		
 		return {
 			
 			getPlayers: function() {
@@ -260,14 +282,13 @@ window.BowBuddy = window.BowBuddy || {
 			
 			getPlayersWithScore: function(gid, station) {
 				return db().transaction(["players", "games"])
-					.then((objectStores) => fetchById(objectStores.games, "gid", gid)
-						.then((game) =>
-							fetchAll(
-								objectStores.players,
-								IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
-								(player) => game.pids.indexOf(player.pid) !== -1)
-						)
-					)
+					.then((objectStores) => {
+						return fetchById(objectStores.games, "gid", gid)
+							.then((game) => fetchAll(
+									objectStores.players,
+									IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
+									(player) => game.pids.indexOf(player.pid) !== -1));
+					})
 					.then((players) => {
 						if (players.length === 0) {
 							return [];
@@ -370,6 +391,19 @@ window.BowBuddy = window.BowBuddy || {
 					});
 			},
 			
+			finishGame: function(gid) {
+				return db().transaction("games", true)
+					.then((gameObjectStore) => {
+						updateRecord(gameObjectStore, "gid", gid, (game) => {
+							// change timestamp only if it has not already been set!
+							if (!game.endtime) {
+								game.endtime = new Date().toISOString();
+							}
+							return game;
+						});
+					});
+			},
+			
 			setScore: function(gid, pid, station, score) {
 				return db().transaction("scores", true)
 					.then((scoreObjectStore) => {
@@ -393,7 +427,28 @@ window.BowBuddy = window.BowBuddy || {
 			},
 			
 			dump: function() {
-				return null; // TODO return promise that returns the entire database as a JSON object
+				const dbRef = db();
+				let dbObject = {};
+				
+				return dbRef.objectStoreNames()
+					.then((objectStoreNames) => {
+						return dbRef.transaction(objectStoreNames)
+							.then((objectStores) => {
+								let storagesDumped = 0;
+								
+								return new Promise((resolve, reject) => {
+									objectStoreNames.forEach((objectStoreName) => {
+										return fetchAll(objectStores[objectStoreName])
+											.then((records) => {
+												dbObject[objectStoreName] = records;
+												if (++storagesDumped === objectStoreNames.length) {
+													resolve(dbObject);
+												}
+											});
+									});
+								});
+							});
+					});
 			},
 			
 			erase: function() {

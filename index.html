@@ -91,11 +91,34 @@ Copyright 2017 Christoph Matscheko
 		<script src="js/main.js"></script>
 		<script>
 			$(function(){
+				let logoCounter = 0;
 				let quitCounter = 0;
 			
-				$(".app-logo").on("click", BowBuddy.switchToFullscreenFunc());
+				$(".app-logo")
+					.on("click", BowBuddy.switchToFullscreenFunc())
+					.on("click", (e) => {
+						if (++logoCounter % 3 === 0) {
+							BowBuddy.storage.dump()
+								.then((dbObject) => {
+									const dbDump = JSON.stringify(dbObject);
+									const $textarea = $("<textarea/>")
+										.css({ "margin-top": "14px", "margin-bottom": "14px", "font-family": "monospace"})
+										.attr("rows", "25")
+										.attr("cols", "35")
+										.text(dbDump)
+										.insertBefore($("#delete-db-modal a.btn").css("display", "block"));
+									
+									console.log("BowBuddyDb dump:");
+									console.log(dbObject); // show db object in console for close inspection
+									
+									$("#delete-db-modal .modal-msg").empty();
+									$("#delete-db-modal").modal('show');	
+									window.setTimeout(() => $textarea.select(), 500);
+								});
+						}
+					});
 				$("#quit-btn").on("click", (e) => {
-					if (++quitCounter % 4 === 0) {
+					if (++quitCounter % 4 === 0 && window.confirm("Are you sure you want to erase the entire database?")) {
 						BowBuddy.storage.erase()
 							.then((e) => {
 								$("#delete-db-modal .modal-msg").text("Database was successfully deleted!");

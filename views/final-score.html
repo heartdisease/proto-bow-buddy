@@ -27,8 +27,8 @@ Copyright 2017 Christoph Matscheko
 		<meta name="author" content="Christoph Matscheko" />
 		<meta name="description" content="An app for keeping track of your score in archery" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="stylesheet" href="css/bootstrap.min.css" />
-		<link rel="stylesheet" href="css/main.css" />
+		<link rel="stylesheet" href="../css/bootstrap.min.css" />
+		<link rel="stylesheet" href="../css/main.css" />
 		<style>
 			.app-logo {
 				margin-bottom: 45px;
@@ -96,19 +96,17 @@ Copyright 2017 Christoph Matscheko
 						$playerScoreEntries.append($tr);
 					});
 					
+					// TODO improve this by already summing up all the points when iterating over scores for the first time!
 					let $sumRow = $("<tr/>").addClass("info").css("font-weight", "bold");
 					$sumRow.append($("<td/>").html("&nbsp;")); // insert filler cell
 					scores[0].forEach((score, column) => {
 						$sumRow.append(
-							$("<td/>").text(
-								scores.reduce((sum, row) => {
-									return sum + BowBuddy.scoreToPoints(row[column]);
-								}, 0)));
+							$("<td/>").text(scores.reduce((sum, row) => sum + BowBuddy.scoreToPoints(row[column]), 0)));
 					});
 					$playerScoreEntries.append($sumRow);
 				}
 				
-				// TODO set property endtime for current game!
+				BowBuddy.storage.finishGame(urlParams.gid); // sets timestamp for field 'endtime'
 				BowBuddy.storage.getCourseForGame(urlParams.gid)
 					.then((course) => {
 						const stations = +course.stations; // TODO remove type coercion with new db!
