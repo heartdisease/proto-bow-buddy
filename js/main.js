@@ -43,7 +43,7 @@ window.BowBuddy = window.BowBuddy || {
 		let clickCounter = 0;
 		
 		return () => {
-			if ((++clickCounter%2 === 0) & !document.fullscreenElement) {
+			if ((++clickCounter % 3 === 0) & !document.fullscreenElement) {
 				console.log("Init fullscreen...");
 		
 				if (document.documentElement.requestFullscreen) {
@@ -199,6 +199,10 @@ window.BowBuddy = window.BowBuddy || {
 				
 				objectStoreNames: function() {
 					return dbPromise.then((db) => Array.prototype.slice.call(db.objectStoreNames));
+				},
+				
+				close: function() {
+					return dbPromise.then((db) => db.close());
 				}
 			};
 		}
@@ -442,7 +446,9 @@ window.BowBuddy = window.BowBuddy || {
 											.then((records) => {
 												dbObject[objectStoreName] = records;
 												if (++storagesDumped === objectStoreNames.length) {
-													resolve(dbObject);
+													// close db connection as it interferes with deleting the database later
+													// TODO actually erase() should take care of that itself...
+													dbRef.close().then(() => resolve(dbObject));
 												}
 											});
 									});
@@ -451,12 +457,60 @@ window.BowBuddy = window.BowBuddy || {
 					});
 			},
 			
-			erase: function() {
-				const deletedRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
+			// Note: do not call this method unless all db handles are closed!
+			importDb: function(dbObject) {
+				// unfortunately we cannot call erase() at this point...
+				const deletionRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
 				
 				return new Promise((resolve, reject) => {
-					deletedRequest.onsuccess = (e) => resolve(e);
-					deletedRequest.onerror = (e) => reject(e);
+					console.log("almost there ...");
+					
+					deletionRequest.onsuccess = (e) => {
+						console.log(">> Step 1: Delete old database");
+						
+						const objectStoreNames = Object.getOwnPropertyNames(dbObject);
+						
+						db().transaction(objectStoreNames, true)
+							.then((objectStores) => {
+								console.log(">> Step 2: Requested transactions for " + objectStoreNames);
+						
+								let objectStoresCompleted = 0;
+								let steps = 2;
+								
+								objectStoreNames.forEach((objectStoreName) => {
+									console.log(">> Step " + (++steps) + ": Add all data records into object storage '" + objectStoreName + "'");
+						
+									const dataRecords = dbObject[objectStoreName];
+									let recordsAdded = 0;
+									
+									dataRecords.forEach((dataRecord) => {
+										let addRequest = objectStores[objectStoreName].add(dataRecord);
+										
+										addRequest.onsuccess = (e) => {
+											console.log("recordsAdded: " + recordsAdded);
+											console.log("objectStoresCompleted: " + objectStoresCompleted);
+											
+											if (++recordsAdded === dataRecords.length &&
+												++objectStoresCompleted === objectStoreNames.length)
+											{
+												resolve();
+											}
+										};
+										addRequest.onerror = (e) => reject(e);
+									});
+								});
+							});
+					};
+					deletionRequest.onerror = (e) => reject(e);
+				});
+			},
+			
+			erase: function() {
+				const deletionRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
+				
+				return new Promise((resolve, reject) => {
+					deletionRequest.onsuccess = (e) => resolve(e);
+					deletionRequest.onerror = (e) => reject(e);
 				});
 			}
 		};

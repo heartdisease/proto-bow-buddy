@@ -23,11 +23,11 @@ Copyright 2017 Christoph Matscheko
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<title>BowBuddy 1.0 (Prototype)</title>
+		<title>BowBuddy 1.1 (Prototype)</title>
 		<meta name="author" content="Christoph Matscheko" />
 		<meta name="description" content="An app for keeping track of your score in archery" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/materialize.min.css" />
 		<link rel="stylesheet" href="css/main.css" />
 		<style>
 			body {
@@ -57,14 +57,18 @@ Copyright 2017 Christoph Matscheko
 				top: 2px;
 				left: -4px;
 			}
+			
+			#db-dump-modal textarea {
+				margin-top: 14px;
+				font-family: monospace;
+			}
 		</style>
-		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
 		<script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
 	</head>
 	<body>
 		<div class="container" id="main">
 			<div class="app-logo">
-				<h1>BowBuddy 1.0 (Prototype)</h1>
+				<h1>BowBuddy 1.1 (Prototype)</h1>
 			</div>
 
 			<div class="container-fluid main-menu">
@@ -84,10 +88,23 @@ Copyright 2017 Christoph Matscheko
 					</div>
 				</div>
 			</div>
+			
+			<div class="modal fade" tabindex="-1" role="dialog" id="db-dump-modal">
+				<div class="modal-dialog modal-sm" role="document">
+					<div class="modal-content">
+						<textarea rows="25" cols="35"></textarea>
+						
+						<div class="btn-group btn-group-justified" role="group">
+							<a type="button" class="btn btn-default" data-dismiss="modal">Close</a>
+							<a type="button" class="btn btn-primary" id="update-db-btn">Update Database</a>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		
 		<script src="js/vendor/jquery-1.11.2.min.js"></script>
-		<script src="js/vendor/bootstrap.min.js"></script>
+		<script src="js/vendor/materialize.min.js"></script>
 		<script src="js/main.js"></script>
 		<script>
 			$(function(){
@@ -97,22 +114,25 @@ Copyright 2017 Christoph Matscheko
 				$(".app-logo")
 					.on("click", BowBuddy.switchToFullscreenFunc())
 					.on("click", (e) => {
-						if (++logoCounter % 3 === 0) {
+						if (++logoCounter % 2 === 0) {
 							BowBuddy.storage.dump()
 								.then((dbObject) => {
 									const dbDump = JSON.stringify(dbObject);
-									const $textarea = $("<textarea/>")
-										.css({ "margin-top": "14px", "margin-bottom": "14px", "font-family": "monospace"})
-										.attr("rows", "25")
-										.attr("cols", "35")
-										.text(dbDump)
-										.insertBefore($("#delete-db-modal a.btn").css("display", "block"));
+									const $textarea = $("#db-dump-modal textarea").text(dbDump);
+									
+									$("#update-db-btn")
+										.on("click", (e) => {
+											if (window.confirm("Do you want to rewrite the entire database with input JSON?")) {
+												BowBuddy.storage.erase(JSON.parse($textarea.text()))
+													.then(() => window.alert("Database successfully imported!"))
+													.catch((error) => console.error(error));
+											}
+										});
 									
 									console.log("BowBuddyDb dump:");
 									console.log(dbObject); // show db object in console for close inspection
 									
-									$("#delete-db-modal .modal-msg").empty();
-									$("#delete-db-modal").modal('show');	
+									$("#db-dump-modal").modal('show');	
 									window.setTimeout(() => $textarea.select(), 500);
 								});
 						}
