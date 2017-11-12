@@ -23,7 +23,7 @@ Copyright 2017 Christoph Matscheko
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-		<title>BowBuddy 1.1 (Prototype) - Set score</title>
+		<title>BowBuddy {$version} (Prototype) - Set score</title>
 		<meta name="author" content="Christoph Matscheko" />
 		<meta name="description" content="An app for keeping track of your score in archery" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -106,13 +106,6 @@ Copyright 2017 Christoph Matscheko
 				<div class="col-md-12"><h1>Set score:<br/>Station <span id="station-no">?</span> - <span class="player-name">...</span></h1></div>
 			</div>
 			
-			<!-- TODO think up something better, this info text does not have the desired effect
-			<div class="row">
-				<div class="col-md-12">
-					<div class="alert alert-info usage-info" role="alert">Swipe a circle from the left onto one on the right to mark your score!</div>
-				</div>
-			</div>-->
-			
 			<div class="row score-button-group" style="margin-top: 20px;">
 				<div class="col-xs-6">
 					<div class="btn-group-vertical" role="group" aria-label="type of shot">
@@ -161,6 +154,10 @@ Copyright 2017 Christoph Matscheko
 		<script src="../js/main.js"></script>
 		<script>
 			$(function(){
+				"use strict";
+				
+				BowBuddy.updateWindowTitle(BowBuddy.getVersion());
+				
 				const navigationDelay = 850;
 				const urlParams = BowBuddy.getUrlParams();
 				

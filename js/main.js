@@ -17,8 +17,17 @@
  * 
  * Copyright 2017 Christoph Matscheko
  */
+"use strict";
 
 window.BowBuddy = window.BowBuddy || {
+	
+	getVersion: function() {
+		return "1.1";
+	},
+	
+	updateWindowTitle: function(version) {
+		document.title = document.title.replace(/\{\$version\}/g, version);
+	},
 
 	getUrlParams: function() {
 		if (!window.location.search) {
@@ -125,6 +134,7 @@ window.BowBuddy = window.BowBuddy || {
 	},
 	
 	storage: (function(){
+		let dbConnected = false;
 		let dbPromise = null;
 	
 		function requestDb() {
@@ -132,7 +142,8 @@ window.BowBuddy = window.BowBuddy || {
 				return dbPromise;
 			}
 			return dbPromise = new Promise((resolve, reject) => {
-				dbRequest = window.indexedDB.open("BowBuddyDb", 1);
+				const dbRequest = window.indexedDB.open("BowBuddyDb", 1);
+				
 				dbRequest.onupgradeneeded = (event) => {
 					console.log("dbRequest.onupgradeneeded");
 					
@@ -164,46 +175,99 @@ window.BowBuddy = window.BowBuddy || {
 					scoreStore.createIndex("station", "station", { unique: false });
 					scoreStore.createIndex("score", "score", { unique: false }); // string format: "first-turn:body-hit" OR "miss"
 				};
-				dbRequest.onerror = (event) => {
-					window.alert("This app does not work without IndexedDB enabled!");
-					reject(event);
-				};
 				dbRequest.onsuccess = (event) => {
 					console.log("dbRequest.onsuccess");
-					resolve(event.target.result);
+					
+					if (!dbConnected) {
+						dbConnected = true;
+						resolve(event.target.result);
+					}
+				};
+				dbRequest.onerror = (event) => {
+					console.log("dbRequest.onerror");
+					
+					if (!dbConnected) {
+						window.alert("This app does not work without IndexedDB enabled!");
+						reject(event);
+					}
+					dbPromise = null;
+					dbConnected = false;
+				};
+				dbRequest.onclose = (event) => {
+					console.log("dbRequest.onclose");
+					
+					dbPromise = null;
+					dbConnected = false;
+					window.alert("The database got closed unexpectedly!");
 				};
 			});
 		}
 	
 		// TODO choose less inefficient design (functions have to be created each time again)
 		function db() {
-			const dbPromise = requestDb();
+			// objectStores {Array|String}
+			// writeAccess {boolean}
+			function transaction(objectStores, writeAccess) {
+				console.log("db.transaction array = " + Array.isArray(objectStores));
+				
+				return requestDb().then((db) => {
+					const transaction = db.transaction(objectStores, writeAccess ? "readwrite" : "readonly");
+					
+					console.log("db.transaction -> let's return the object stores");
+					return Array.isArray(objectStores)
+						? objectStores.reduce(
+							(map, objectStore) => {
+								map[objectStore] = transaction.objectStore(objectStore);
+								return map;
+							}, {})
+						: transaction.objectStore(objectStores);
+				});
+			}
 			
-			return {
+			function objectStoreNames() {
+				return requestDb().then((db) => Array.prototype.slice.call(db.objectStoreNames));
+			}
 			
-				// objectStores {Array|String}
-				// writeAccess {boolean}
-				transaction: function(objectStores, writeAccess) {
-					return dbPromise.then((db) => {
-						const transaction = db.transaction(objectStores, writeAccess ? "readwrite" : "readonly");
-						
-						return Array.isArray(objectStores)
-							? objectStores.reduce(
-								(map, objectStore) => {
-									map[objectStore] = transaction.objectStore(objectStore);
-									return map;
-								}, {})
-							: transaction.objectStore(objectStores);
+			function erase() {
+				return close().then(() => {
+					return new Promise((resolve, reject) => {
+						(function tryDeleteDb(){
+							console.info("We now try to erase the db...");
+							const deletionRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
+							
+							deletionRequest.onsuccess = (e) => {
+								console.info("deletionRequest.onsuccess");
+								resolve(e);
+							};
+							deletionRequest.onblocked = () => {
+								console.info("deletionRequest.onblocked");
+								window.setTimeout(tryDeleteDb, 50); // try again indefinitely
+							};
+							deletionRequest.onerror = (e) => {
+								console.info("deletionRequest.onerror");
+								reject(e);
+							};
+						}());
 					});
-				},
-				
-				objectStoreNames: function() {
-					return dbPromise.then((db) => Array.prototype.slice.call(db.objectStoreNames));
-				},
-				
-				close: function() {
-					return dbPromise.then((db) => db.close());
-				}
+				});
+			}
+			
+			function close() {
+				// TODO check if db is even open before calling requestDb()
+				return requestDb().then((db) => {
+					// reset db handle promise
+					dbPromise = null;
+					dbConnected = false;
+					db.close();
+				});
+			}
+			
+			// do not call any of these functions after calling erase() or close()!
+			return {
+				"transaction": transaction,
+				"objectStoreNames": objectStoreNames,
+				"erase": erase,
+				"close": close
 			};
 		}
 		
@@ -446,9 +510,7 @@ window.BowBuddy = window.BowBuddy || {
 											.then((records) => {
 												dbObject[objectStoreName] = records;
 												if (++storagesDumped === objectStoreNames.length) {
-													// close db connection as it interferes with deleting the database later
-													// TODO actually erase() should take care of that itself...
-													dbRef.close().then(() => resolve(dbObject));
+													resolve(dbObject);
 												}
 											});
 									});
@@ -457,39 +519,36 @@ window.BowBuddy = window.BowBuddy || {
 					});
 			},
 			
-			// Note: do not call this method unless all db handles are closed!
 			importDb: function(dbObject) {
-				// unfortunately we cannot call erase() at this point...
-				const deletionRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
+				console.log(">> Step 1: Delete old database");
 				
-				return new Promise((resolve, reject) => {
-					console.log("almost there ...");
+				return db().erase().then((e) => {
+					const objectStoreNames = Object.getOwnPropertyNames(dbObject);
 					
-					deletionRequest.onsuccess = (e) => {
-						console.log(">> Step 1: Delete old database");
+					console.log(">> Step 2: Requested transactions for " + objectStoreNames);
+					
+					return db().transaction(objectStoreNames, true)
+						.then((objectStores) => {
+							// TODO check why we never get here!!
+							console.log(">> Step 2.1: We now have all the requested object stores");
 						
-						const objectStoreNames = Object.getOwnPropertyNames(dbObject);
-						
-						db().transaction(objectStoreNames, true)
-							.then((objectStores) => {
-								console.log(">> Step 2: Requested transactions for " + objectStoreNames);
-						
-								let objectStoresCompleted = 0;
-								let steps = 2;
-								
+							let objectStoresCompleted = 0;
+							let steps = 2;
+							
+							return new Promise((resolve, reject) => {
 								objectStoreNames.forEach((objectStoreName) => {
 									console.log(">> Step " + (++steps) + ": Add all data records into object storage '" + objectStoreName + "'");
-						
+					
 									const dataRecords = dbObject[objectStoreName];
 									let recordsAdded = 0;
-									
+								
 									dataRecords.forEach((dataRecord) => {
 										let addRequest = objectStores[objectStoreName].add(dataRecord);
-										
+									
 										addRequest.onsuccess = (e) => {
 											console.log("recordsAdded: " + recordsAdded);
 											console.log("objectStoresCompleted: " + objectStoresCompleted);
-											
+										
 											if (++recordsAdded === dataRecords.length &&
 												++objectStoresCompleted === objectStoreNames.length)
 											{
@@ -500,18 +559,16 @@ window.BowBuddy = window.BowBuddy || {
 									});
 								});
 							});
-					};
-					deletionRequest.onerror = (e) => reject(e);
+						})
+						.catch((error) => {
+							console.error("Cannot open transaction: " + error);
+							throw error;
+						});
 				});
 			},
 			
 			erase: function() {
-				const deletionRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
-				
-				return new Promise((resolve, reject) => {
-					deletionRequest.onsuccess = (e) => resolve(e);
-					deletionRequest.onerror = (e) => reject(e);
-				});
+				return db().erase();
 			}
 		};
 	}())
