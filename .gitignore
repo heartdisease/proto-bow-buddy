@@ -3,4 +3,5 @@
 .idea
 .git
 proto-bow-buddy.token
+*.dbdump
 
