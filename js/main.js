@@ -133,6 +133,25 @@ window.BowBuddy = window.BowBuddy || {
 		return scoreLabel;
 	},
 	
+	getDuration: function(starttime, endtime) {
+		const startDate = new Date(starttime);
+		const endDate = new Date(endtime);
+		const diffInMs = endDate.getTime() - startDate.getTime();
+		let duration = "";
+		
+		if (diffInMs < 0) {
+			throw new Error("Start time is after end time!");
+		}
+		const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+		const diffInHours = Math.floor(diffInMinutes / 60);
+		
+		if (diffInHours >= 1) {
+			duration += diffInHours + "h ";
+		}
+		duration += (diffInMinutes - diffInHours * 60) + "m";
+		return duration;
+	},
+	
 	storage: (function(){
 		let dbConnected = false;
 		let dbPromise = null;
@@ -323,18 +342,27 @@ window.BowBuddy = window.BowBuddy || {
 		function updateRecord(objectStore, indexName, keyPath, update) {
 			return new Promise((resolve, reject) => {
 				const index = objectStore.index(indexName);
+				const cursorRequest = index.openCursor(keyPath);
 				
-				index.openCursor(keyPath).onsuccess = (event) => {
+				cursorRequest.onsuccess = (event) => {
 					const cursor = event.target.result;
-				
+					
 					if (cursor) {
-						const updatedRecord = update(cursor.value);
+						const dataRecord = cursor.value;
 						
-						cursor.update(updatedRecord).onsuccess = () => resolve(updatedRecord);
+						if (update(dataRecord)) {
+							const updateRequest = cursor.update(dataRecord);
+							
+							updateRequest.onsuccess = () => resolve(dataRecord);
+							updateRequest.onerror = (e) => reject(e);
+						} else {
+							resolve(dataRecord);
+						}
 					} else {
 						reject(new Error("Cannot find record"));
 					}
-				}
+				};
+				cursorRequest.onerror = (e) => reject(e);
 			});
 		}
 		
@@ -459,15 +487,17 @@ window.BowBuddy = window.BowBuddy || {
 					});
 			},
 			
+			// returns promise with updated game record
 			finishGame: function(gid) {
 				return db().transaction("games", true)
 					.then((gameObjectStore) => {
-						updateRecord(gameObjectStore, "gid", gid, (game) => {
+						return updateRecord(gameObjectStore, "gid", gid, (game) => {
 							// change timestamp only if it has not already been set!
 							if (!game.endtime) {
 								game.endtime = new Date().toISOString();
+								return true;
 							}
-							return game;
+							return false;
 						});
 					});
 			},

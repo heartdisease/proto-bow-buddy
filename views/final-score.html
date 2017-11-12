@@ -37,6 +37,10 @@ Copyright 2017 Christoph Matscheko
 			#main {
 				padding-bottom: 15px;
 			}
+			
+			h2 {
+				font-size: 20px;
+			}
 		</style>
 		<link rel="stylesheet" href="../css/bootstrap-theme.min.css">
 		<script src="../js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
@@ -47,6 +51,8 @@ Copyright 2017 Christoph Matscheko
 		</nav>
 		<div class="container" id="main">
 			<h1>Course complete:<br/><span id="course-label"></span></h1>
+			
+			<h2>Duration: <span id="course-duration"></span></h2>
 
 			<table class="table table-striped">
 				<thead>
@@ -81,8 +87,6 @@ Copyright 2017 Christoph Matscheko
 				
 				// TODO really ugly algo to sum up values... -_-'
 				function generateScoreTable(playerNames, scores) {
-					console.log("generateScoreTable");
-				
 					const $playerHeaderRow = $("#player-header-row");
 					const $playerScoreEntries = $("#player-score-entries");
 					
@@ -105,10 +109,15 @@ Copyright 2017 Christoph Matscheko
 					$playerScoreEntries.append($sumRow);
 				}
 				
-				BowBuddy.storage.finishGame(urlParams.gid); // sets timestamp for field 'endtime'
+				// sets timestamp for field 'endtime'
+				BowBuddy.storage.finishGame(urlParams.gid)
+					.then((game) => {
+						$("#course-duration").text(BowBuddy.getDuration(game.starttime, game.endtime));
+					});
+				
 				BowBuddy.storage.getCourseForGame(urlParams.gid)
 					.then((course) => {
-						const stations = +course.stations; // TODO remove type coercion with new db!
+						const stations = course.stations;
 						let playerNames;
 						let scores = new Array(stations);
 						let scoreCount = 0;
@@ -126,16 +135,11 @@ Copyright 2017 Christoph Matscheko
 								.then((players) => {
 									if (station === 1) {
 										playerNames = players.map((p) => p.name);
-										console.log(playerNames);
 									}
 									scores[station - 1] = players.map((p) => p.score);
 									
-									console.log(scores[station - 1]);
-									if (++scoreCount === stations) { 
-										console.log(scoreCount + " = " + stations);
+									if (++scoreCount === stations) {
 										generateScoreTable(playerNames, scores);
-									} else {
-										console.log(scoreCount + "/" + stations);
 									}
 								});
 						}
