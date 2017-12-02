@@ -30,10 +30,16 @@ Copyright 2017 Christoph Matscheko
 		<meta name="description" content="An app for keeping track of your score in archery" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		
-		<link rel="preload" href="views/new-game.html" />
-		<link rel="preload" href="views/station-select-player.html" />
-		<link rel="preload" href="views/station-set-score.html" />
-		<link rel="preload" href="views/final-score.html" />
+		<link rel="prefetch" href="views/new-game.html" />
+		<link rel="prefetch" href="views/station-select-player.html" />
+		<link rel="prefetch" href="views/station-set-score.html" />
+		<link rel="prefetch" href="views/final-score.html" />
+		
+		<link rel="preload" as="style" type="text/css" href="css/bootstrap.min.css" />
+		<link rel="preload" as="style" type="text/css" href="css/bootstrap-theme.min.css" />
+		
+		<link rel="preload" as="script" type="text/javascript" href="js/vendor/bootstrap.min.js" />
+		<link rel="preload" as="script" type="text/javascript" href="js/vendor/touch-dnd.js" />
 		
 		<link rel="stylesheet" href="css/materialize.min.css" />
 		<link rel="stylesheet" href="css/main.css" />
