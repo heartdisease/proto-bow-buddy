@@ -22,7 +22,7 @@
 window.BowBuddy = window.BowBuddy || {
 	
 	getVersion: function() {
-		return "1.5";
+		return "1.6";
 	},
 	
 	updateWindowTitle: function(version) {
