@@ -22,7 +22,7 @@
 window.BowBuddy = window.BowBuddy || {
 	
 	getVersion: function() {
-		return "1.1";
+		return "1.5";
 	},
 	
 	updateWindowTitle: function(version) {
@@ -30,14 +30,14 @@ window.BowBuddy = window.BowBuddy || {
 	},
 
 	getUrlParams: function() {
-		if (!window.location.search) {
+		if (!window.location.hash) {
 			return {}
 		}
 		const numRegExp = /^(0|-?[1-9][0-9]*)$/;
 		
 		return window.location.search
-			.substring(1)
-			.split("&")
+			.substring(1) // omit the # at the beginning
+			.split(";")
 			.map((keyValueStr) => keyValueStr.split("="))
 			.reduce((urlParams, keyValuePair) => {
 				const key = keyValuePair[0];

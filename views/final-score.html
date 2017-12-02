@@ -125,7 +125,7 @@ Copyright 2017 Christoph Matscheko
 						$("#course-label").text((course.place ? course.place + " " : "") + course.name);
 						$("#back-btn")
 							.on("click", (e) => {
-								window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + stations;
+								window.location.href = "station-select-player.html#gid=" + urlParams.gid + ";station=" + stations;
 							});
 							
 						for (let i = 1; i <= stations; i++) {

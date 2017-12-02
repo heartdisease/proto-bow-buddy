@@ -88,7 +88,7 @@ Copyright 2017 Christoph Matscheko
 						const station = urlParams.station;
 						
 						if (station > 1) {
-							window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + (station - 1);
+							window.location.href = "station-select-player.html#gid=" + urlParams.gid + ";station=" + (station - 1);
 						} else {
 							const result = window.confirm("Do you really want to go back to the game menu? All progess will be lost!");
 							
@@ -107,10 +107,10 @@ Copyright 2017 Christoph Matscheko
 						if (urlParams.station >= stations) {
 							$("#next-station-btn")
 								.html("<span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span> Finish course")
-								.on("click", (e) => window.location.href = "final-score.html?gid=" + urlParams.gid);
+								.on("click", (e) => window.location.href = "final-score.html#gid=" + urlParams.gid);
 						} else {
 							$("#next-station-btn")
-								.on("click", (e) => window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + (urlParams.station + 1));
+								.on("click", (e) => window.location.href = "station-select-player.html#gid=" + urlParams.gid + ";station=" + (urlParams.station + 1));
 						}
 						
 						BowBuddy.storage.getPlayersWithScore(urlParams.gid, urlParams.station)
@@ -124,14 +124,14 @@ Copyright 2017 Christoph Matscheko
 						
 								$("#quick-assign-btn")
 									.on("click", (e) => {
-										const qaParam = (players.length > 1) ? "&qa=" + players.slice(1).map((p) => p.pid).join("+") : "";
-										window.location.href = "station-set-score.html?gid=" + urlParams.gid + "&pid=" + players[0].pid + qaParam + "&station=" + urlParams.station;
+										const qaParam = (players.length > 1) ? ";qa=" + players.slice(1).map((p) => p.pid).join("+") : "";
+										window.location.href = "station-set-score.html#gid=" + urlParams.gid + ";pid=" + players[0].pid + qaParam + ";station=" + urlParams.station;
 									});
 						
 								players.forEach((player) => {
 									const $playerEntry = $("<a/>")
 											.addClass("btn btn-default")
-											.attr("href", "station-set-score.html?gid=" + urlParams.gid + "&pid=" + player.pid + "&station=" + urlParams.station)
+											.attr("href", "station-set-score.html#gid=" + urlParams.gid + ";pid=" + player.pid + ";station=" + urlParams.station)
 											.attr("role", "button")
 											.text(player.name + " "); // add space separator here for score badge
 							

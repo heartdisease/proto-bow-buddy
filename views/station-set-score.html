@@ -162,12 +162,12 @@ Copyright 2017 Christoph Matscheko
 				const urlParams = BowBuddy.getUrlParams();
 				
 				function navigateBack() {
-					window.location.href = "station-select-player.html?gid=" + urlParams.gid + "&station=" + urlParams.station;
+					window.location.href = "station-select-player.html#gid=" + urlParams.gid + ";station=" + urlParams.station;
 				}
 				
 				function navigateToNextPlayer(nextPid, remainingPids) {
-					const qaParam = (remainingPids.length > 0) ? "&qa=" + remainingPids.join("+") : "";
-					window.location.href = "station-set-score.html?gid=" + urlParams.gid + "&pid=" + nextPid + "" + qaParam + "&station=" + urlParams.station;
+					const qaParam = (remainingPids.length > 0) ? ";qa=" + remainingPids.join("+") : "";
+					window.location.href = "station-set-score.html#gid=" + urlParams.gid + ";pid=" + nextPid + "" + qaParam + ";station=" + urlParams.station;
 				}
 				
 				function navigateNext() {
