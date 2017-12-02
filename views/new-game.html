@@ -214,9 +214,6 @@ Copyright 2017 Christoph Matscheko
 				}
 				
 				function addCourseToTable(course) {
-					console.log("addCourseToTable");
-					console.log(course);
-				
 					$("#course-entries")
 						.empty()
 						.append($("<tr/>")
@@ -234,7 +231,6 @@ Copyright 2017 Christoph Matscheko
 				let lockCourseDropdown = false;
 				
 				const urlParams = BowBuddy.getUrlParams();
-				console.log(urlParams);
 				
 				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
 				

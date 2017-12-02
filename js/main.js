@@ -31,11 +31,11 @@ window.BowBuddy = window.BowBuddy || {
 
 	getUrlParams: function() {
 		if (!window.location.hash) {
-			return {}
+			console.log("getUrlParams(): {}");
+			return {};
 		}
 		const numRegExp = /^(0|-?[1-9][0-9]*)$/;
-		
-		return window.location.search
+		const urlParams = window.location.hash
 			.substring(1) // omit the # at the beginning
 			.split(";")
 			.map((keyValueStr) => keyValueStr.split("="))
@@ -46,6 +46,9 @@ window.BowBuddy = window.BowBuddy || {
 				urlParams[key] = numRegExp.test(value) ? +value : value;
 				return urlParams;
 			}, {});
+			
+		console.log("getUrlParams(): " + JSON.stringify(urlParams));
+		return urlParams;
 	},
 
 	switchToFullscreenFunc: function() {
@@ -227,12 +230,9 @@ window.BowBuddy = window.BowBuddy || {
 			// objectStores {Array|String}
 			// writeAccess {boolean}
 			function transaction(objectStores, writeAccess) {
-				console.log("db.transaction array = " + Array.isArray(objectStores));
-				
 				return requestDb().then((db) => {
 					const transaction = db.transaction(objectStores, writeAccess ? "readwrite" : "readonly");
 					
-					console.log("db.transaction -> let's return the object stores");
 					return Array.isArray(objectStores)
 						? objectStores.reduce(
 							(map, objectStore) => {
