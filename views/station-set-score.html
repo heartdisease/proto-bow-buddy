@@ -255,7 +255,7 @@ Copyright 2017 Christoph Matscheko
 					
 					$("#back-btn").on("click", (e) => {
 						e.preventDefault();
-						navigateBack();
+						navigateBack(urlParams.gid, urlParams.station);
 					});
 					
 					$("#station-no").text(urlParams.station);
