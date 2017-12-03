@@ -22,7 +22,7 @@
 window.BowBuddy = window.BowBuddy || {
 	
 	getVersion: function() {
-		return "1.6";
+		return "1.7";
 	},
 	
 	updateWindowTitle: function(version) {
@@ -32,20 +32,21 @@ window.BowBuddy = window.BowBuddy || {
 	getUrlParams: function() {
 		if (!window.location.hash) {
 			console.log("getUrlParams(): {}");
-			return {};
+			return Object.freeze({});
 		}
 		const numRegExp = /^(0|-?[1-9][0-9]*)$/;
-		const urlParams = window.location.hash
-			.substring(1) // omit the # at the beginning
-			.split(";")
-			.map((keyValueStr) => keyValueStr.split("="))
-			.reduce((urlParams, keyValuePair) => {
-				const key = keyValuePair[0];
-				const value = keyValuePair[1];
-				
-				urlParams[key] = numRegExp.test(value) ? +value : value;
-				return urlParams;
-			}, {});
+		const urlParams = Object.freeze(
+			window.location.hash
+				.substring(1) // omit the # at the beginning
+				.split(";")
+				.map((keyValueStr) => keyValueStr.split("="))
+				.reduce((urlParams, keyValuePair) => {
+					const key = keyValuePair[0];
+					const value = keyValuePair[1];
+					
+					urlParams[key] = numRegExp.test(value) ? +value : value;
+					return urlParams;
+				}, {}));
 			
 		console.log("getUrlParams(): " + JSON.stringify(urlParams));
 		return urlParams;
@@ -54,8 +55,10 @@ window.BowBuddy = window.BowBuddy || {
 	switchToFullscreenFunc: function() {
 		let clickCounter = 0;
 		
-		return () => {
-			if ((++clickCounter % 3 === 0) & !document.fullscreenElement) {
+		return (clickEvent) => {
+			clickEvent.preventDefault();
+			
+			if ((++clickCounter % 3 === 0) && !document.fullscreenElement) {
 				console.log("Init fullscreen...");
 		
 				if (document.documentElement.requestFullscreen) {

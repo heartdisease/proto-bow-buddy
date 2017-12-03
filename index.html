@@ -30,17 +30,6 @@ Copyright 2017 Christoph Matscheko
 		<meta name="description" content="An app for keeping track of your score in archery" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		
-		<link rel="prefetch" href="views/new-game.html" />
-		<link rel="prefetch" href="views/station-select-player.html" />
-		<link rel="prefetch" href="views/station-set-score.html" />
-		<link rel="prefetch" href="views/final-score.html" />
-		
-		<link rel="preload" as="style" type="text/css" href="css/bootstrap.min.css" />
-		<link rel="preload" as="style" type="text/css" href="css/bootstrap-theme.min.css" />
-		
-		<link rel="preload" as="script" type="text/javascript" href="js/vendor/bootstrap.min.js" />
-		<link rel="preload" as="script" type="text/javascript" href="js/vendor/touch-dnd.js" />
-		
 		<link rel="stylesheet" href="css/materialize.min.css" />
 		<link rel="stylesheet" href="css/main.css" />
 		
@@ -80,8 +69,24 @@ Copyright 2017 Christoph Matscheko
 				height: auto;
 				font-family: monospace;
 			}
+			
+			#db-dump-modal .btn-flat {
+				padding: 0 0.6rem;
+			}
 		</style>
+		
 		<script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
+		
+		<link rel="prefetch" href="views/new-game.html" />
+		<link rel="prefetch" href="views/station-select-player.html" />
+		<link rel="prefetch" href="views/station-set-score.html" />
+		<link rel="prefetch" href="views/final-score.html" />
+		
+		<link rel="prefetch" href="css/bootstrap.min.css" />
+		<link rel="prefetch" href="css/bootstrap-theme.min.css" />
+		
+		<link rel="prefetch" href="js/vendor/bootstrap.min.js" />
+		<link rel="prefetch" href="js/vendor/touch-dnd.js" />
 	</head>
 	<body>
 		<div class="container" id="main">
@@ -113,6 +118,7 @@ Copyright 2017 Christoph Matscheko
 				<div class="modal-footer">
 					<div class="btn-group btn-group-justified">
 						<a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">Close</a>
+						<a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" id="copy-json-btn">Copy JSON</a>
 						<a type="button" class="modal-action waves-effect waves-blue btn-flat" id="update-db-btn">Update Database</a>
 					</div>
 				</div>
@@ -136,6 +142,7 @@ Copyright 2017 Christoph Matscheko
 				let quitCounter = 0;
 			
 				$(".app-logo")
+					 // TODO save fullscreen-flag in sessionStorage so other views act accordingly!
 					.on("click", BowBuddy.switchToFullscreenFunc())
 					.on("click", (e) => {
 						if (++logoCounter % 2 === 0) {
@@ -143,6 +150,19 @@ Copyright 2017 Christoph Matscheko
 								.then((dbObject) => {
 									const dbDump = JSON.stringify(dbObject);
 									const $textarea = $("#db-dump-modal textarea").val(dbDump);
+									
+									$("#copy-json-btn")
+										.on("click", (e) => {
+											$textarea.select();
+											
+											try {
+												if (!document.execCommand("copy")) {
+													throw new Error("execCommand copy could not be executed");
+												}
+											} catch (e) {
+												console.error(e.message);
+											}
+										});
 									
 									$("#update-db-btn")
 										.on("click", (e) => {

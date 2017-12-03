@@ -66,7 +66,7 @@ Copyright 2017 Christoph Matscheko
 			
 			<div class="btn-group btn-group-justified" role="group">
 				<a class="btn btn-success btn-lg" href="#" id="next-station-btn" role="button" disabled="disabled">
-					<!-- next button text -->
+					<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Next station
 				</a>
 			</div>
 		</div>
@@ -81,6 +81,7 @@ Copyright 2017 Christoph Matscheko
 				function reset() {
 					$("nav.navbar").off("click");
 					$("#back-btn").off("click");
+					
 					$("#next-station-btn")
 						.off("click")
 						.attr("disabled", "disabled")
@@ -88,24 +89,24 @@ Copyright 2017 Christoph Matscheko
 					$("#quick-assign-btn")
 						.off("click")
 						.attr("disabled", "disabled");
+					
 					$("#player-selection-list").empty();
 				}
 				
 				function init() {
 					const urlParams = BowBuddy.getUrlParams();
 					
-					$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
-					
 					$("#back-btn")
 						.on("click", (e) => {
+							e.preventDefault();
+							
 							if (urlParams.station > 1) {
-								e.preventDefault();
 								pushState("#gid=" + urlParams.gid + ";station=" + (urlParams.station - 1));
 							} else {
 								const result = window.confirm("Do you really want to go back to the game menu? All progess will be lost!");
 								
 								if (result) {
-									// TODO replace native dialog with bootstrap dialog and actually delete all scores for current game!
+									// TODO actually delete all scores for current game!
 									window.location.href = "new-game.html";
 								}
 							}
@@ -117,7 +118,10 @@ Copyright 2017 Christoph Matscheko
 							if (urlParams.station >= course.stations) {
 								$("#next-station-btn")
 									.html("<span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span> Finish course")
-									.on("click", (e) => window.location.href = "final-score.html#gid=" + urlParams.gid);
+									.on("click", (e) => {
+										e.preventDefault();
+										window.location.href = "final-score.html#gid=" + urlParams.gid;
+									});
 							} else {
 								$("#next-station-btn")
 									.on("click", (e) => {
@@ -138,6 +142,8 @@ Copyright 2017 Christoph Matscheko
 									$("#quick-assign-btn")
 										.on("click", (e) => {
 											const qaParam = (players.length > 1) ? ";qa=" + players.slice(1).map((p) => p.pid).join("+") : "";
+											
+											e.preventDefault();
 											window.location.href = "station-set-score.html#gid=" + urlParams.gid + ";pid=" + players[0].pid + qaParam + ";station=" + urlParams.station;
 										});
 							
@@ -185,9 +191,8 @@ Copyright 2017 Christoph Matscheko
 				}
 				
 				BowBuddy.updateWindowTitle(BowBuddy.getVersion());
-				
 				window.addEventListener("popstate", (popstateEvent) => loadView());
-				loadView();
+				init();
 			});
 		</script>
 	</body>

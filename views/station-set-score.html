@@ -23,12 +23,16 @@ Copyright 2017 Christoph Matscheko
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+		
 		<title>BowBuddy {$version} (Prototype) - Set score</title>
+		
 		<meta name="author" content="Christoph Matscheko" />
 		<meta name="description" content="An app for keeping track of your score in archery" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
 		<link rel="stylesheet" href="../css/bootstrap.min.css" />
 		<link rel="stylesheet" href="../css/main.css" />
+		
 		<style>
 			.app-logo {
 				margin-bottom: 45px;
@@ -103,22 +107,18 @@ Copyright 2017 Christoph Matscheko
 		</nav>
 		<div class="container-fluid" id="main">
 			<div class="row">
-				<div class="col-md-12"><h1>Set score:<br/>Station <span id="station-no">?</span> - <span class="player-name">...</span></h1></div>
+				<div class="col-md-12"><h1>Set score:<br/>Station <span id="station-no">?</span> - <span class="player-name">???</span></h1></div>
 			</div>
 			
 			<div class="row score-button-group" style="margin-top: 20px;">
 				<div class="col-xs-6">
-					<div class="btn-group-vertical" role="group" aria-label="type of shot">
-						<a class="btn btn-info btn-lg hit" href="#" role="button" draggable="true" data-dnd="body-hit">Body</a>
-						<a class="btn btn-warning btn-lg hit" href="#" role="button" draggable="true" data-dnd="kill-hit">Kill</a>
-						<a class="btn btn-danger btn-lg hit" href="#" role="button" draggable="true" data-dnd="center-kill-hit">Center Kill</a>
+					<div class="btn-group-vertical" role="group" aria-label="type of shot" id="hit-draggable-container">
+						<!-- HIT DRAGGABLES -->
 					</div>
 				</div>
 				<div class="col-xs-6">
-					<div class="btn-group-vertical" role="group" aria-label="turn">
-						<a class="btn btn-success btn-lg turn" href="#" role="button" draggable="true" data-dnd="first-turn">1<sup>st</sup></a>
-						<a class="btn btn-primary btn-lg turn" href="#" role="button" draggable="true" data-dnd="second-turn">2<sup>nd</sup></a>
-						<a class="btn btn-default btn-lg turn" href="#" role="button" draggable="true" data-dnd="third-turn">3<sup>rd</sup></a>
+					<div class="btn-group-vertical" role="group" aria-label="turn" id="turn-draggable-container">
+						<!-- TURN DRAGGABLES -->
 					</div>
 				</div>
 			</div>
@@ -156,31 +156,29 @@ Copyright 2017 Christoph Matscheko
 			$(function(){
 				"use strict";
 				
-				BowBuddy.updateWindowTitle(BowBuddy.getVersion());
-				
-				const navigationDelay = 850;
-				const urlParams = BowBuddy.getUrlParams();
-				
-				function navigateBack() {
-					window.location.href = "station-select-player.html#gid=" + urlParams.gid + ";station=" + urlParams.station;
+				function navigateBack(gid, station) {
+					window.location.href = "station-select-player.html#gid=" + gid + ";station=" + station;
 				}
 				
-				function navigateToNextPlayer(nextPid, remainingPids) {
+				function navigateToNextPlayer(gid, station, nextPid, remainingPids) {
 					const qaParam = (remainingPids.length > 0) ? ";qa=" + remainingPids.join("+") : "";
-					window.location.href = "station-set-score.html#gid=" + urlParams.gid + ";pid=" + nextPid + "" + qaParam + ";station=" + urlParams.station;
+					pushState("#gid=" + gid + ";pid=" + nextPid + "" + qaParam + ";station=" + station);
+					loadView();
 				}
 				
-				function navigateNext() {
+				function navigateNext(urlParams) {
+					console.log("URL params in navigatenext: " + JSON.stringify(urlParams));
+					
 					if (urlParams.qa) {
-						const qaPlayers = ("" + urlParams.qa).split("+"); // if qa has only one entry left it becomes and integer
+						const qaPlayers = ("" + urlParams.qa).split("+"); // if qa has only one entry left it becomes an integer
 						
 						if (qaPlayers.length > 0) {
-							navigateToNextPlayer(qaPlayers[0], qaPlayers.slice(1));
+							navigateToNextPlayer(urlParams.gid, urlParams.station, qaPlayers[0], qaPlayers.slice(1));
 						} else {
 							throw new Error("Invalid qa parameter '" + urlParams.qa + "'");
 						}
 					} else {
-						navigateBack();
+						navigateBack(urlParams.gid, urlParams.station);
 					}
 				}
 			
@@ -200,50 +198,118 @@ Copyright 2017 Christoph Matscheko
 					}
 				}
 			
-				function logScore(dragInitiator, hit, turn) {
+				function logScore(urlParams, navigationDelay, hit, turn) {
 					const before = Date.now();
 					const miss = hit === undefined || turn === undefined;
 					const score = miss ? "miss" : turn + ":" + hit;
 					
-					$("#scoreDisplay").html(
-						miss
+					$("#scoreDisplay")
+						.html(miss
 							? '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>'
 							: getTurnButton(turn) + getHitButton(hit));
 					$("#scoreModal").modal({ keyboard: false });
 					
 					BowBuddy.storage.setScore(urlParams.gid, urlParams.pid, urlParams.station, score)
 						.then((score) => {
+							console.log("URL params in setScore: " + JSON.stringify(urlParams));
+					
 							const timeDiff = Date.now() - before;
 							
 							if (timeDiff >= navigationDelay) {
-								navigateNext();
+								navigateNext(urlParams);
 							} else {
-								window.setTimeout(navigateNext, navigationDelay - timeDiff);
+								window.setTimeout(() => navigateNext(urlParams), navigationDelay - timeDiff);
 							}
 						});
 				}
 				
-				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
-				$("#back-btn").on("click", navigateBack);
+				function reset() {
+					$("#scoreModal").modal("hide");
+					
+					$("#hit-draggable-container").empty();
+					$("#turn-draggable-container").empty();
+					
+					$("nav.navbar").off("click");
+					$("#back-btn").off("click");
+					
+					$(".hit").off("droppable:drop");
+					$(".turn").off("droppable:drop");
+					
+					$(".miss-btn").off("click");
+					
+					$("#scoreDisplay").empty();
+				}
 				
-				$("#station-no").text(urlParams.station);
-				BowBuddy.storage.getPlayer(urlParams.pid).then((player) => $("span.player-name").text(player.name));
-				
-				$(".hit")
-					.draggable({ connectWith: ".turn" })
-					.droppable({ accept: ".turn", activeClass: "active", hoverClass: "dropZone" })
-					.on("droppable:drop", function(e, ui) {
-						logScore("hit", e.target.getAttribute("data-dnd"), ui.item[0].getAttribute("data-dnd"));
-					});
-			
-				$(".turn")
-					.draggable({ connectWith: ".turn" })
-					.droppable({ accept: ".hit", activeClass: "active", hoverClass: "dropZone" })
-					.on("droppable:drop", function(e, ui) {
-						logScore("turn", ui.item[0].getAttribute("data-dnd"), e.target.getAttribute("data-dnd"));
+				function init() {
+					const urlParams = BowBuddy.getUrlParams();
+					const navigationDelay = 650;
+					
+					$("#hit-draggable-container").html(
+'<a class="btn btn-info btn-lg hit" href="#" role="button" draggable="true" data-dnd="body-hit">Body</a>\
+<a class="btn btn-warning btn-lg hit" href="#" role="button" draggable="true" data-dnd="kill-hit">Kill</a>\
+<a class="btn btn-danger btn-lg hit" href="#" role="button" draggable="true" data-dnd="center-kill-hit">Center Kill</a>');
+					$("#turn-draggable-container").html(
+'<a class="btn btn-success btn-lg turn" href="#" role="button" draggable="true" data-dnd="first-turn">1<sup>st</sup></a>\
+<a class="btn btn-primary btn-lg turn" href="#" role="button" draggable="true" data-dnd="second-turn">2<sup>nd</sup></a>\
+<a class="btn btn-default btn-lg turn" href="#" role="button" draggable="true" data-dnd="third-turn">3<sup>rd</sup></a>');
+					
+					$("#back-btn").on("click", (e) => {
+						e.preventDefault();
+						navigateBack();
 					});
 					
-				$(".miss-btn").on("click", (e) => logScore())
+					$("#station-no").text(urlParams.station);
+					BowBuddy.storage.getPlayer(urlParams.pid)
+						.then((player) => $("span.player-name").text(player.name));
+					
+					// TODO check if draggable and droppable are correctly reset in reset()
+					$(".hit")
+						.draggable({ connectWith: ".turn" })
+						.droppable({ accept: ".turn", activeClass: "active", hoverClass: "dropZone" })
+						.on("droppable:drop", (e, ui) => {
+							console.log("URL params in hit: " + JSON.stringify(urlParams));
+					
+							
+							logScore(
+								urlParams,
+								navigationDelay,
+								e.target.getAttribute("data-dnd"),
+								ui.item[0].getAttribute("data-dnd"));
+						});
+				
+					$(".turn")
+						.draggable({ connectWith: ".turn" })
+						.droppable({ accept: ".hit", activeClass: "active", hoverClass: "dropZone" })
+						.on("droppable:drop", (e, ui) => {
+							console.log("URL params in turn: " + JSON.stringify(urlParams));
+							
+							logScore(
+								urlParams,
+								navigationDelay,
+								ui.item[0].getAttribute("data-dnd"),
+								e.target.getAttribute("data-dnd"));
+						});
+						
+					$(".miss-btn").on("click", (e) => {
+						e.preventDefault();
+						logScore(urlParams, navigationDelay)
+					});
+				}
+				
+				function loadView() {
+					reset();
+					init();
+				}
+				
+				function pushState(url) {
+					console.log("pushState: " + url);
+					window.history.pushState(null, null, url);
+					loadView();
+				}
+				
+				BowBuddy.updateWindowTitle(BowBuddy.getVersion());
+				window.addEventListener("popstate", (popstateEvent) => loadView());
+				init();
 			});
 		</script>
 	</body>

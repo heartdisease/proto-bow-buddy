@@ -232,8 +232,6 @@ Copyright 2017 Christoph Matscheko
 				
 				const urlParams = BowBuddy.getUrlParams();
 				
-				$("nav.navbar").on("click", BowBuddy.switchToFullscreenFunc());
-				
 				function updatePlayerSelectionMenu(excludedPlayers) {
 					BowBuddy.storage.getPlayers().then((players) => {
 						const $playerMenu = $(".player-dropdown > .dropdown-menu");
