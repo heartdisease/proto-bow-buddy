@@ -1,0 +1,66 @@
+.app-logo {
+  margin-bottom: 45px;
+}
+
+.score-button-group a.btn {
+  width: 100px;
+  height: 100px;
+  border-radius: 50px !important;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.score-button-group .btn-group-vertical {
+  width: 100%;
+}
+
+.hit,
+.turn {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+a.hit.active,
+a.turn.active {
+  z-index: 2;
+}
+
+a.hit.dropZone,
+a.turn.dropZone {
+  outline: 2px dashed #666;
+  z-index: 1;
+}
+
+.alert.usage-info {
+  font-size: 8.5pt;
+  padding: 8px;
+  text-align: center;
+}
+
+a.miss-btn {
+  height: 67px;
+  background-image: linear-gradient(to bottom, #323232 0, #000 100%);
+  color: #fff;
+  font-weight: bold;
+}
+
+#scoreModal.in {
+  display: flex !important;
+  align-items: center;
+}
+
+#scoreModal > .modal-dialog {
+  width: 100% !important;
+}
+
+#scoreDisplay > a.btn {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#scoreDisplay > a.btn:last-child {
+  margin-bottom: 0;
+}

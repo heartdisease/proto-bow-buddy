@@ -1,0 +1,38 @@
+body {
+  padding-top: 10px;
+  padding-bottom: 20px;
+  font-family: "Roboto", sans-serif;
+}
+
+#main {
+  text-align: center;
+}
+
+.app-logo {
+  margin-bottom: 45px;
+}
+
+.main-menu > a {
+  display: block;
+  clear: both;
+  width: 250px;
+  margin-bottom: 15px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-menu > a > span.glyphicon {
+  top: 2px;
+  left: -4px;
+}
+
+#db-dump-modal textarea {
+  margin-top: 14px;
+  width: 100%;
+  height: auto;
+  font-family: monospace;
+}
+
+#db-dump-modal .btn-flat {
+  padding: 0 0.6rem;
+}
