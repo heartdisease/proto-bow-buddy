@@ -2,7 +2,9 @@
 .*
 .idea
 .git
+!.vscode
 proto-bow-buddy.token
 *.dbdump
 /node_modules
 *.js.map
+*.css.map
