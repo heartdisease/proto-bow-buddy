@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "system",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outFile": "js/main.compiled.js",
+    "allowJs": true,
+    "target": "es2015",
+    "sourceMap": true
+  },
+  "include": ["js/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
