@@ -1,10 +1,11 @@
 *~
 .*
-.idea
-.git
-!.vscode
-proto-bow-buddy.token
-*.dbdump
+
 /node_modules
+!/.vscode
+
+*.dbdump
+proto-bow-buddy.token
+
 *.js.map
 *.css.map
