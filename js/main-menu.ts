@@ -21,8 +21,18 @@ import * as $ from "jquery";
 import { BowBuddy } from "main";
 
 export class MainMenuView {
-  public init() {
+  private loadTemplate(): void {
+    const viewContainer = document.querySelector("#main");
+    const template = <HTMLTemplateElement>document.querySelector("#main-menu-template");
+    const clone = document.importNode(template.content, true);
+
+    viewContainer.appendChild(clone);
+  }
+
+  public init(): void {
     BowBuddy.updateWindowTitle(BowBuddy.getVersion());
+    this.loadTemplate();
+
     $(".app-logo > h1").text(document.title);
 
     // jQuery Plugin Initialization

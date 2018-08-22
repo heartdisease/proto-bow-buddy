@@ -7,5 +7,6 @@
 *.dbdump
 proto-bow-buddy.token
 
+/src/*.js
 *.js.map
 *.css.map

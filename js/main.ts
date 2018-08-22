@@ -1,3 +1,5 @@
+import { MainMenuView } from "./main-menu";
+
 /**
  * This file is part of BowBuddy.
  *
@@ -542,6 +544,11 @@ class DbAccess {
 export class BowBuddy {
   private static storage: DbAccess = null;
 
+  public static initApplication(): void {
+    const mainMenuView = new MainMenuView();
+    mainMenuView.init();
+  }
+
   public static getStorage(): DbAccess {
     if (BowBuddy.storage === null) {
       BowBuddy.storage = new DbAccess();
@@ -690,3 +697,5 @@ export class BowBuddy {
     return duration;
   }
 }
+
+BowBuddy.initApplication();
