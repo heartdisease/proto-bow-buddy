@@ -4,8 +4,6 @@
     "module": "es2015",
     "target": "es2015",
     "noImplicitAny": false,
-    "outFile": "js/main.compiled.js",
-    "lib": ["dom", "es6"]
   },
   "include": ["js/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
