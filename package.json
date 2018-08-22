@@ -18,6 +18,7 @@
   "homepage": "https://github.com/heartdisease/proto-bow-buddy#readme",
   "dependencies": {
     "@types/bootstrap": "^3.3.39",
+    "@types/jquery": "^3.3.6",
     "@types/materialize-css": "^1.0.4"
   }
 }

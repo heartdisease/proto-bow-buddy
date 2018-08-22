@@ -32,6 +32,7 @@ Copyright 2017-2018 Christoph Matscheko
 
     <link rel="stylesheet" href="css/materialize.min.css" />
     <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/main-menu.css" />
 
     <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
 
@@ -43,7 +44,7 @@ Copyright 2017-2018 Christoph Matscheko
   </head>
 
   <body>
-    <nav class="navbar">
+    <nav class="navbar" style="display: none;">
       <a class="btn" href="../index.html" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
     </nav>
     <div class="container" id="main">
@@ -52,7 +53,7 @@ Copyright 2017-2018 Christoph Matscheko
 
     <template id="main-menu-template">
       <div class="app-logo">
-        <h1>&nbsp;
+        <h1>
           <!-- INSERT APP TITLE HERE -->
         </h1>
       </div>
@@ -61,13 +62,11 @@ Copyright 2017-2018 Christoph Matscheko
         <a class="waves-effect waves-light btn-large green" href="views/new-game.html" role="button">
           <span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span> New Game
         </a>
-        <a class="waves-effect waves-light btn-large disabled" href="#" role="button">< span class="glyphicon glyphicon-cog"
-            aria-hidden="true"></span>
-            Course Settings
+        <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
+          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Course Settings
         </a>
         <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
-          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
-          Player Settings
+          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Player Settings
         </a>
         <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
           <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Hall Of Fame
@@ -291,6 +290,6 @@ Copyright 2017-2018 Christoph Matscheko
 
     <script src="js/vendor/jquery-3.3.1.min.js"></script>
     <script src="js/vendor/materialize.min.js"></script>
-    <script src="js/main.compiled.js"></script>
+    <script src="js/main.js"></script>
   </body>
 </html>

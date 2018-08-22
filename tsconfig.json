@@ -1,10 +1,21 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "module": "es2015",
-    "target": "es2015",
+    "module": "none",
+    "target": "es5",
+    "outFile": "./js/main.js",
+    "removeComments": true,
+    "inlineSources": true,
     "noImplicitAny": false,
+    "lib": ["es2015.promise", "es2015.collection", "es5", "dom"]
   },
-  "include": ["js/*.ts"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "include": ["./src/*.ts"],
+  "exclude": ["./node_modules", "./**/*.spec.ts"],
+  "files": [
+    "./src/main.ts",
+    "./src/main-menu.ts",
+    "./src/station-select-player.ts",
+    "./src/station-set-score.ts",
+    "./src/final-score.ts"
+  ]
 }

@@ -8,5 +8,5 @@
 proto-bow-buddy.token
 
 /js/*.js
-*.js.map
-*.css.map
+/js/*.js.map
+/css/*.css.map
