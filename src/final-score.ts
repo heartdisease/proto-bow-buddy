@@ -22,8 +22,21 @@
 
 namespace BowBuddy {
   export class FinalScoreView {
-    public init() {
+    private loadTemplate(): void {
+      const viewContainer = document.querySelector("#main");
+      const template = <HTMLTemplateElement>document.querySelector("#final-score-template");
+      const clone = document.importNode(template.content, true);
+      let child;
+
+      while ((child = viewContainer.firstChild)) {
+        viewContainer.removeChild(child);
+      }
+      viewContainer.appendChild(clone);
+    }
+
+    public onLoad(): void {
       Application.updateWindowTitle(Application.getVersion());
+      this.loadTemplate();
 
       const urlParams = Application.getUrlParams();
 
@@ -34,7 +47,7 @@ namespace BowBuddy {
           $("#course-duration").text(Application.getDuration(game.starttime, game.endtime));
         });
 
-        Application.getStorage()
+      Application.getStorage()
         .getCourseForGame(urlParams.get("gid"))
         .then(course => {
           const stations = course.stations;
@@ -44,7 +57,7 @@ namespace BowBuddy {
 
           $("#course-label").text((course.place ? course.place + " " : "") + course.name);
           $("#back-btn").on("click", e => {
-            window.location.href = "station-select-player.html#gid=" + urlParams.get("gid") + ";station=" + stations;
+            window.location.href = "#station-select-player;gid=" + urlParams.get("gid") + ";station=" + stations;
           });
 
           for (let i = 1; i <= stations; i++) {

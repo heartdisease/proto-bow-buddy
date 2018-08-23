@@ -28,8 +28,21 @@ namespace BowBuddy {
     private existingCourses = [];
     private configuredPlayers = [];
 
-    public init() {
+    private loadTemplate(): void {
+      const viewContainer = document.querySelector("#main");
+      const template = <HTMLTemplateElement>document.querySelector("#new-game-template");
+      const clone = document.importNode(template.content, true);
+      let child;
+
+      while ((child = viewContainer.firstChild)) {
+        viewContainer.removeChild(child);
+      }
+      viewContainer.appendChild(clone);
+    }
+
+    public onLoad(): void {
       Application.updateWindowTitle(Application.getVersion());
+      this.loadTemplate();
 
       let lockPlayerDropdown = false;
       let lockCourseDropdown = false;
@@ -104,7 +117,7 @@ namespace BowBuddy {
         Application.getStorage()
           .addGame(cid, pids)
           .then(game => {
-            window.location.href = "station-select-player.html#gid=" + game.gid + ";station=1";
+            window.location.href = "#station-select-player;gid=" + game.gid + ";station=1";
           });
       });
     }

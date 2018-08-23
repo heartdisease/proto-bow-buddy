@@ -22,25 +22,24 @@
 
 namespace BowBuddy {
   export class StationSelectPlayerView {
-    public reset() {
-      $("nav.navbar").off("click");
-      $("#back-btn").off("click");
+    private loadTemplate(): void {
+      const viewContainer = document.querySelector("#main");
+      const template = <HTMLTemplateElement>document.querySelector("#main-menu-template");
+      const clone = document.importNode(template.content, true);
+      let child;
 
-      $("#next-station-btn")
-        .off("click")
-        .attr("disabled", "disabled")
-        .html('<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Next station');
-      $("#quick-assign-btn")
-        .off("click")
-        .attr("disabled", "disabled");
-
-      $("#player-selection-list").empty();
+      while ((child = viewContainer.firstChild)) {
+        viewContainer.removeChild(child);
+      }
+      viewContainer.appendChild(clone);
     }
 
-    public init() {
+    public onLoad(): void {
       const urlParams = Application.getUrlParams();
 
       Application.updateWindowTitle(Application.getVersion());
+      this.loadTemplate();
+
       window.addEventListener("popstate", popstateEvent => this.loadView());
 
       $("#back-btn").on("click", e => {
@@ -53,7 +52,7 @@ namespace BowBuddy {
 
           if (result) {
             // TODO actually delete all scores for current game!
-            window.location.href = "new-game.html";
+            window.location.href = "#new-game";
           }
         }
       });
@@ -67,12 +66,14 @@ namespace BowBuddy {
               .html('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Finish course')
               .on("click", e => {
                 e.preventDefault();
-                window.location.href = "final-score.html#gid=" + urlParams.get("gid");
+                window.location.href = "#final-score;gid=" + urlParams.get("gid");
               });
           } else {
             $("#next-station-btn").on("click", e => {
               e.preventDefault();
-              this.pushState("#gid=" + urlParams.get("gid") + ";station=" + (+urlParams.get("station") + 1));
+              this.pushState(
+                "#final-score;gid=" + urlParams.get("gid") + ";station=" + (+urlParams.get("station") + 1)
+              );
             });
           }
 
@@ -98,7 +99,7 @@ namespace BowBuddy {
 
                 e.preventDefault();
                 window.location.href =
-                  "station-set-score.html#gid=" +
+                  "#station-set-score;gid=" +
                   urlParams.get("gid") +
                   ";pid=" +
                   players[0].pid +
@@ -112,7 +113,7 @@ namespace BowBuddy {
                   .addClass("btn btn-default")
                   .attr(
                     "href",
-                    "station-set-score.html#gid=" +
+                    "#station-set-score;gid=" +
                       urlParams.get("gid") +
                       ";pid=" +
                       player.pid +
@@ -152,9 +153,24 @@ namespace BowBuddy {
         });
     }
 
+    public reset() {
+      $("nav.navbar").off("click");
+      $("#back-btn").off("click");
+
+      $("#next-station-btn")
+        .off("click")
+        .attr("disabled", "disabled")
+        .html('<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Next station');
+      $("#quick-assign-btn")
+        .off("click")
+        .attr("disabled", "disabled");
+
+      $("#player-selection-list").empty();
+    }
+
     public loadView() {
       this.reset();
-      this.init();
+      this.onLoad();
     }
 
     public pushState(url) {

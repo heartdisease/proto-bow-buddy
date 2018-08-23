@@ -550,7 +550,33 @@ namespace BowBuddy {
 
     public static initApplication(): void {
       const mainMenuView = new MainMenuView();
-      mainMenuView.init();
+
+      window.addEventListener("hashchange", e => Application.onHashChange(window.location.hash.split(";")));
+      mainMenuView.onLoad();
+    }
+
+    private static onHashChange(params: string[]) {
+      const viewToken = params[0];
+      let view;
+
+      switch (viewToken) {
+        case "#new-game":
+          view = new NewGameView();
+          break;
+        case "#station-select-player":
+          view = new StationSelectPlayerView();
+          break;
+        case "#station-set-score":
+          view = new StationSetScoreView();
+          break;
+        case "#final-score":
+          view = new FinalScoreView();
+          break;
+        default:
+          console.log("Unknown place: " + view);
+          return;
+      }
+      view.onLoad();
     }
 
     public static getStorage(): DbAccess {

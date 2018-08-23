@@ -26,11 +26,15 @@ namespace BowBuddy {
       const viewContainer = document.querySelector("#main");
       const template = <HTMLTemplateElement>document.querySelector("#main-menu-template");
       const clone = document.importNode(template.content, true);
+      let child;
 
+      while ((child = viewContainer.firstChild)) {
+        viewContainer.removeChild(child);
+      }
       viewContainer.appendChild(clone);
     }
 
-    public init(): void {
+    public onLoad(): void {
       Application.updateWindowTitle(Application.getVersion());
       this.loadTemplate();
 

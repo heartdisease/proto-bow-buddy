@@ -22,8 +22,85 @@
 
 namespace BowBuddy {
   export class StationSetScoreView {
+    private loadTemplate(): void {
+      const viewContainer = document.querySelector("#main");
+      const template = <HTMLTemplateElement>document.querySelector("#station-set-score-template");
+      const clone = document.importNode(template.content, true);
+      let child;
+
+      while ((child = viewContainer.firstChild)) {
+        viewContainer.removeChild(child);
+      }
+      viewContainer.appendChild(clone);
+    }
+
+    public onLoad(): void {
+      const urlParams = Application.getUrlParams();
+      const navigationDelay = 650;
+
+      Application.updateWindowTitle(Application.getVersion());
+      this.loadTemplate();
+
+      window.addEventListener("popstate", popstateEvent => this.loadView());
+
+      $("#hit-draggable-container").html(
+        '<a class="btn btn-info btn-lg hit" href="#" role="button" draggable="true" data-dnd="body-hit">Body</a>\
+<a class="btn btn-warning btn-lg hit" href="#" role="button" draggable="true" data-dnd="kill-hit">Kill</a>\
+<a class="btn btn-danger btn-lg hit" href="#" role="button" draggable="true" data-dnd="center-kill-hit">Center Kill</a>'
+      );
+      $("#turn-draggable-container").html(
+        '<a class="btn btn-success btn-lg turn" href="#" role="button" draggable="true" data-dnd="first-turn">1<sup>st</sup></a>\
+<a class="btn btn-primary btn-lg turn" href="#" role="button" draggable="true" data-dnd="second-turn">2<sup>nd</sup></a>\
+<a class="btn btn-default btn-lg turn" href="#" role="button" draggable="true" data-dnd="third-turn">3<sup>rd</sup></a>'
+      );
+
+      $("#back-btn").on("click", e => {
+        e.preventDefault();
+        this.navigateBack(urlParams.get("gid"), urlParams.get("station"));
+      });
+
+      $("#station-no").text(urlParams.get("station"));
+      Application.getStorage()
+        .getPlayer(urlParams.get("pid"))
+        .then(player => $("span.player-name").text(player.name));
+
+      // TODO check if draggable and droppable are correctly reset in reset()
+      (<any>$(".hit")) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
+        .draggable({ connectWith: ".turn" })
+        .droppable({ accept: ".turn", activeClass: "active", hoverClass: "dropZone" })
+        .on("droppable:drop", (e, ui) => {
+          console.log("URL params in hit: " + JSON.stringify(urlParams));
+
+          this.logScore(
+            urlParams,
+            navigationDelay,
+            e.target.getAttribute("data-dnd"),
+            ui.item[0].getAttribute("data-dnd")
+          );
+        });
+
+      (<any>$(".turn")) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
+        .draggable({ connectWith: ".turn" })
+        .droppable({ accept: ".hit", activeClass: "active", hoverClass: "dropZone" })
+        .on("droppable:drop", (e, ui) => {
+          console.log("URL params in turn: " + JSON.stringify(urlParams));
+
+          this.logScore(
+            urlParams,
+            navigationDelay,
+            ui.item[0].getAttribute("data-dnd"),
+            e.target.getAttribute("data-dnd")
+          );
+        });
+
+      $(".miss-btn").on("click", e => {
+        e.preventDefault();
+        this.logScore(urlParams, navigationDelay);
+      });
+    }
+
     public navigateBack(gid, station) {
-      window.location.href = "station-select-player.html#gid=" + gid + ";station=" + station;
+      window.location.href = "#station-select-player;gid=" + gid + ";station=" + station;
     }
 
     public navigateToNextPlayer(gid, station, nextPid, remainingPids) {
@@ -115,72 +192,9 @@ namespace BowBuddy {
       $("#scoreDisplay").empty();
     }
 
-    public init() {
-      const urlParams = Application.getUrlParams();
-      const navigationDelay = 650;
-
-      Application.updateWindowTitle(Application.getVersion());
-      window.addEventListener("popstate", popstateEvent => this.loadView());
-
-      $("#hit-draggable-container").html(
-        '<a class="btn btn-info btn-lg hit" href="#" role="button" draggable="true" data-dnd="body-hit">Body</a>\
-<a class="btn btn-warning btn-lg hit" href="#" role="button" draggable="true" data-dnd="kill-hit">Kill</a>\
-<a class="btn btn-danger btn-lg hit" href="#" role="button" draggable="true" data-dnd="center-kill-hit">Center Kill</a>'
-      );
-      $("#turn-draggable-container").html(
-        '<a class="btn btn-success btn-lg turn" href="#" role="button" draggable="true" data-dnd="first-turn">1<sup>st</sup></a>\
-<a class="btn btn-primary btn-lg turn" href="#" role="button" draggable="true" data-dnd="second-turn">2<sup>nd</sup></a>\
-<a class="btn btn-default btn-lg turn" href="#" role="button" draggable="true" data-dnd="third-turn">3<sup>rd</sup></a>'
-      );
-
-      $("#back-btn").on("click", e => {
-        e.preventDefault();
-        this.navigateBack(urlParams.get("gid"), urlParams.get("station"));
-      });
-
-      $("#station-no").text(urlParams.get("station"));
-      Application.getStorage()
-        .getPlayer(urlParams.get("pid"))
-        .then(player => $("span.player-name").text(player.name));
-
-      // TODO check if draggable and droppable are correctly reset in reset()
-      (<any>$(".hit")) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
-        .draggable({ connectWith: ".turn" })
-        .droppable({ accept: ".turn", activeClass: "active", hoverClass: "dropZone" })
-        .on("droppable:drop", (e, ui) => {
-          console.log("URL params in hit: " + JSON.stringify(urlParams));
-
-          this.logScore(
-            urlParams,
-            navigationDelay,
-            e.target.getAttribute("data-dnd"),
-            ui.item[0].getAttribute("data-dnd")
-          );
-        });
-
-      (<any>$(".turn")) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
-        .draggable({ connectWith: ".turn" })
-        .droppable({ accept: ".hit", activeClass: "active", hoverClass: "dropZone" })
-        .on("droppable:drop", (e, ui) => {
-          console.log("URL params in turn: " + JSON.stringify(urlParams));
-
-          this.logScore(
-            urlParams,
-            navigationDelay,
-            ui.item[0].getAttribute("data-dnd"),
-            e.target.getAttribute("data-dnd")
-          );
-        });
-
-      $(".miss-btn").on("click", e => {
-        e.preventDefault();
-        this.logScore(urlParams, navigationDelay);
-      });
-    }
-
     public loadView() {
       this.reset();
-      this.init();
+      this.onLoad();
     }
 
     public pushState(url) {
