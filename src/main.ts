@@ -549,10 +549,10 @@ namespace BowBuddy {
     private static storage: DbAccess = null;
 
     public static initApplication(): void {
-      const mainMenuView = new MainMenuView();
-
       window.addEventListener("hashchange", e => Application.onHashChange(window.location.hash.split(";")));
-      mainMenuView.onLoad();
+
+      const mainMenuView = new MainMenuView();
+      mainMenuView.initView();
     }
 
     private static onHashChange(params: string[]) {
@@ -560,6 +560,10 @@ namespace BowBuddy {
       let view;
 
       switch (viewToken) {
+        case "":
+        case "#main-menu":
+          view = new MainMenuView();
+          break;
         case "#new-game":
           view = new NewGameView();
           break;
@@ -576,7 +580,7 @@ namespace BowBuddy {
           console.log("Unknown place: " + view);
           return;
       }
-      view.onLoad();
+      view.initView();
     }
 
     public static getStorage(): DbAccess {

@@ -18,25 +18,17 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 /// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
+/// <reference path="./base-view.ts" />
 /// <reference path="./main.ts" />
 
 namespace BowBuddy {
-  export class MainMenuView {
-    private loadTemplate(): void {
-      const viewContainer = document.querySelector("#main");
-      const template = <HTMLTemplateElement>document.querySelector("#main-menu-template");
-      const clone = document.importNode(template.content, true);
-      let child;
-
-      while ((child = viewContainer.firstChild)) {
-        viewContainer.removeChild(child);
-      }
-      viewContainer.appendChild(clone);
+  export class MainMenuView extends BaseView {
+    getTemplateLocator(): string {
+      return "#main-menu-template";
     }
 
-    public onLoad(): void {
-      Application.updateWindowTitle(Application.getVersion());
-      this.loadTemplate();
+    onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+      $(this. getTemplateLocator() + ' select').formSelect(); // init materialize
 
       $(".app-logo > h1").text(document.title);
 

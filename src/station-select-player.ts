@@ -18,28 +18,16 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 /// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
+/// <reference path="./base-view.ts" />
 /// <reference path="./main.ts" />
 
 namespace BowBuddy {
-  export class StationSelectPlayerView {
-    private loadTemplate(): void {
-      const viewContainer = document.querySelector("#main");
-      const template = <HTMLTemplateElement>document.querySelector("#main-menu-template");
-      const clone = document.importNode(template.content, true);
-      let child;
-
-      while ((child = viewContainer.firstChild)) {
-        viewContainer.removeChild(child);
-      }
-      viewContainer.appendChild(clone);
+  export class StationSelectPlayerView extends BaseView {
+    getTemplateLocator(): string {
+      return "#station-select-player-template";
     }
 
-    public onLoad(): void {
-      const urlParams = Application.getUrlParams();
-
-      Application.updateWindowTitle(Application.getVersion());
-      this.loadTemplate();
-
+    onReveal(urlParams: Readonly<Map<string, string | number>>): void {
       window.addEventListener("popstate", popstateEvent => this.loadView());
 
       $("#back-btn").on("click", e => {
@@ -153,7 +141,7 @@ namespace BowBuddy {
         });
     }
 
-    public reset() {
+    reset() {
       $("nav.navbar").off("click");
       $("#back-btn").off("click");
 
@@ -168,12 +156,12 @@ namespace BowBuddy {
       $("#player-selection-list").empty();
     }
 
-    public loadView() {
+    loadView() {
       this.reset();
-      this.onLoad();
+      this.initView();
     }
 
-    public pushState(url) {
+    pushState(url) {
       console.log("pushState: " + url);
       window.history.pushState(null, null, url);
       this.loadView();

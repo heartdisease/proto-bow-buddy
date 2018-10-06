@@ -18,28 +18,16 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 /// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
+/// <reference path="./base-view.ts" />
 /// <reference path="./main.ts" />
 
 namespace BowBuddy {
-  export class FinalScoreView {
-    private loadTemplate(): void {
-      const viewContainer = document.querySelector("#main");
-      const template = <HTMLTemplateElement>document.querySelector("#final-score-template");
-      const clone = document.importNode(template.content, true);
-      let child;
-
-      while ((child = viewContainer.firstChild)) {
-        viewContainer.removeChild(child);
-      }
-      viewContainer.appendChild(clone);
+  export class FinalScoreView extends BaseView {
+    getTemplateLocator(): string {
+      return "#final-score-template";
     }
 
-    public onLoad(): void {
-      Application.updateWindowTitle(Application.getVersion());
-      this.loadTemplate();
-
-      const urlParams = Application.getUrlParams();
-
+    onReveal(urlParams: Readonly<Map<string, string | number>>): void {
       // sets timestamp for field 'endtime'
       Application.getStorage()
         .finishGame(urlParams.get("gid"))
@@ -80,7 +68,7 @@ namespace BowBuddy {
     }
 
     // TODO really ugly algo to sum up values... -_-'
-    public generateScoreTable(playerNames, scores) {
+    generateScoreTable(playerNames, scores) {
       const $playerHeaderRow = $("#player-header-row");
       const $playerScoreEntries = $("#player-score-entries");
 

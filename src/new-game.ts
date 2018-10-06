@@ -18,36 +18,24 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 /// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
+/// <reference path="./base-view.ts" />
 /// <reference path="./main.ts" />
 
 namespace BowBuddy {
-  export class NewGameView {
+  export class NewGameView extends BaseView {
     private playerConfigured = false;
     private courseConfigured = false;
     private existingPlayers = [];
     private existingCourses = [];
     private configuredPlayers = [];
 
-    private loadTemplate(): void {
-      const viewContainer = document.querySelector("#main");
-      const template = <HTMLTemplateElement>document.querySelector("#new-game-template");
-      const clone = document.importNode(template.content, true);
-      let child;
-
-      while ((child = viewContainer.firstChild)) {
-        viewContainer.removeChild(child);
-      }
-      viewContainer.appendChild(clone);
+    getTemplateLocator(): string {
+      return "#new-game-template";
     }
 
-    public onLoad(): void {
-      Application.updateWindowTitle(Application.getVersion());
-      this.loadTemplate();
-
+    onReveal(urlParams: Readonly<Map<string, string | number>>): void {
       let lockPlayerDropdown = false;
       let lockCourseDropdown = false;
-
-      const urlParams = Application.getUrlParams();
 
       this.updatePlayerSelectionMenu();
       this.updateCourseSelectionMenu();
@@ -122,7 +110,7 @@ namespace BowBuddy {
       });
     }
 
-    public addPlayerToTable(player) {
+    addPlayerToTable(player) {
       $("#dummy-player-entry").remove();
       $("#player-entries").append(
         $("<tr/>")
@@ -138,7 +126,7 @@ namespace BowBuddy {
       }
     }
 
-    public addCourseToTable(course) {
+    addCourseToTable(course) {
       $("#course-entries")
         .empty()
         .append(
@@ -158,7 +146,7 @@ namespace BowBuddy {
       }
     }
 
-    public updatePlayerSelectionMenu(excludedPlayers = undefined) {
+    updatePlayerSelectionMenu(excludedPlayers = undefined) {
       Application.getStorage()
         .getPlayers()
         .then(players => {
@@ -190,7 +178,7 @@ namespace BowBuddy {
         });
     }
 
-    public updateCourseSelectionMenu(excludedCourse = undefined) {
+    updateCourseSelectionMenu(excludedCourse = undefined) {
       Application.getStorage()
         .getCourses()
         .then(courses => {
@@ -219,7 +207,7 @@ namespace BowBuddy {
         });
     }
 
-    public verifyPlayerInput() {
+    verifyPlayerInput() {
       const playerName = <string>$("#new-player-name").val();
 
       if (
@@ -234,7 +222,7 @@ namespace BowBuddy {
       }
     }
 
-    public verifyCourseInput() {
+    verifyCourseInput() {
       const courseName = <string>$("#new-course-name").val();
       const noOfStations = <string>$("#new-course-no-of-stations").val();
 

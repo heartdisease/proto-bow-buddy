@@ -18,28 +18,17 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 /// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
+/// <reference path="./base-view.ts" />
 /// <reference path="./main.ts" />
 
 namespace BowBuddy {
-  export class StationSetScoreView {
-    private loadTemplate(): void {
-      const viewContainer = document.querySelector("#main");
-      const template = <HTMLTemplateElement>document.querySelector("#station-set-score-template");
-      const clone = document.importNode(template.content, true);
-      let child;
-
-      while ((child = viewContainer.firstChild)) {
-        viewContainer.removeChild(child);
-      }
-      viewContainer.appendChild(clone);
+  export class StationSetScoreView extends BaseView {
+    getTemplateLocator(): string {
+      return "#station-set-score-template";
     }
 
-    public onLoad(): void {
-      const urlParams = Application.getUrlParams();
+    onReveal(urlParams: Readonly<Map<string, string | number>>): void {
       const navigationDelay = 650;
-
-      Application.updateWindowTitle(Application.getVersion());
-      this.loadTemplate();
 
       window.addEventListener("popstate", popstateEvent => this.loadView());
 
@@ -99,18 +88,18 @@ namespace BowBuddy {
       });
     }
 
-    public navigateBack(gid, station) {
+    navigateBack(gid, station) {
       window.location.href = "#station-select-player;gid=" + gid + ";station=" + station;
     }
 
-    public navigateToNextPlayer(gid, station, nextPid, remainingPids) {
+    navigateToNextPlayer(gid, station, nextPid, remainingPids) {
       const qaParam = remainingPids.length > 0 ? ";qa=" + remainingPids.join("+") : "";
 
       this.pushState("#gid=" + gid + ";pid=" + nextPid + "" + qaParam + ";station=" + station);
       this.loadView();
     }
 
-    public navigateNext(urlParams) {
+    navigateNext(urlParams) {
       console.log("URL params in navigatenext: " + JSON.stringify(urlParams));
 
       if (urlParams.get("qa")) {
@@ -126,7 +115,7 @@ namespace BowBuddy {
       }
     }
 
-    public getHitButton(hit) {
+    getHitButton(hit) {
       switch (hit) {
         case "body-hit":
           return '<a class="btn btn-info btn-lg hit" href="#" role="button">Body</a>';
@@ -137,7 +126,7 @@ namespace BowBuddy {
       }
     }
 
-    public getTurnButton(turn) {
+    getTurnButton(turn) {
       switch (turn) {
         case "first-turn":
           return '<a class="btn btn-success btn-lg turn" href="#" role="button">1<sup>st</sup></a>';
@@ -148,7 +137,7 @@ namespace BowBuddy {
       }
     }
 
-    public logScore(urlParams, navigationDelay, hit: string = undefined, turn: string = undefined) {
+    logScore(urlParams, navigationDelay, hit: string = undefined, turn: string = undefined) {
       const before = Date.now();
       const miss = hit === undefined || turn === undefined;
       const score = miss ? "miss" : turn + ":" + hit;
@@ -176,7 +165,7 @@ namespace BowBuddy {
         });
     }
 
-    public reset() {
+    reset() {
       // TODO write TS wrapper for touch-dnd
       (<any>$("#scoreModal")).modal("hide");
 
@@ -194,12 +183,12 @@ namespace BowBuddy {
       $("#scoreDisplay").empty();
     }
 
-    public loadView() {
+    loadView() {
       this.reset();
-      this.onLoad();
+      this.initView();
     }
 
-    public pushState(url) {
+    pushState(url) {
       console.log("pushState: " + url);
       window.history.pushState(null, null, url);
       this.loadView();
