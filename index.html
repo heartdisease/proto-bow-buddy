@@ -30,17 +30,13 @@ Copyright 2017-2018 Christoph Matscheko
     <meta name="description" content="An app for keeping track of your score in archery" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link rel="stylesheet" href="css/materialize.min.css" />
+    <link rel="stylesheet" href="node_modules/materialize-css/dist/css/materialize.min.css" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/main-menu.css" />
-
-    <script src="js/vendor/modernizr-2.8.3-respond-1.4.2.min.js"></script>
-
-    <link rel="prefetch" href="css/bootstrap.min.css" />
-    <link rel="prefetch" href="css/bootstrap-theme.min.css" />
-
-    <link rel="prefetch" href="js/vendor/bootstrap.min.js" />
-    <link rel="prefetch" href="js/vendor/touch-dnd.js" />
+    <link rel="stylesheet" href="css/new-game.css" />
+    <link rel="stylesheet" href="css/station-select-player.css" />
+    <link rel="stylesheet" href="css/station-set-score.css" />
+    <link rel="stylesheet" href="css/final-score.css" />
   </head>
 
   <body>
@@ -92,7 +88,8 @@ Copyright 2017-2018 Christoph Matscheko
         <div class="modal-footer">
           <div class="btn-group btn-group-justified">
             <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">Close</a>
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" id="copy-json-btn">Copy JSON</a>
+            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" id="copy-json-btn">Copy
+              JSON</a>
             <a type="button" class="modal-action waves-effect waves-blue btn-flat" id="update-db-btn">Update Database</a>
           </div>
         </div>
@@ -109,7 +106,8 @@ Copyright 2017-2018 Christoph Matscheko
             <button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
               Add player...
             </button>
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
@@ -154,7 +152,8 @@ Copyright 2017-2018 Christoph Matscheko
             <button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
               Set course...
             </button>
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+              aria-expanded="false">
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
@@ -223,7 +222,7 @@ Copyright 2017-2018 Christoph Matscheko
     <template id="station-set-score">
       <div class="row">
         <div class="col-md-12">
-          <h1>Set score:<br/>Station <span id="station-no">?</span> - <span class="player-name">???</span></h1>
+          <h1>Set score:<br />Station <span id="station-no">?</span> - <span class="player-name">???</span></h1>
         </div>
       </div>
 
@@ -266,7 +265,7 @@ Copyright 2017-2018 Christoph Matscheko
     </template>
 
     <template id="final-score-template">
-      <h1>Course complete:<br/><span id="course-label"></span></h1>
+      <h1>Course complete:<br /><span id="course-label"></span></h1>
 
       <h2>Duration: <span id="course-duration"></span></h2>
 
@@ -288,8 +287,9 @@ Copyright 2017-2018 Christoph Matscheko
       </div>
     </template>
 
-    <script src="js/vendor/jquery-3.3.1.min.js"></script>
-    <script src="js/vendor/materialize.min.js"></script>
+    <script src="node_modules/jquery/dist/jquery.slim.min.js"></script>
+    <script src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
+    <script src="node_modules/touch-dnd/dist/touch-dnd.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

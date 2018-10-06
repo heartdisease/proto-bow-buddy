@@ -158,7 +158,8 @@ namespace BowBuddy {
           ? '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>'
           : this.getTurnButton(turn) + this.getHitButton(hit)
       );
-      $("#scoreModal").modal({ keyboard: false });
+      // TODO write TS wrapper for touch-dnd
+      (<any>$("#scoreModal")).modal({ keyboard: false });
 
       Application.getStorage()
         .setScore(urlParams.get("gid"), urlParams.get("pid"), urlParams.get("station"), score)
@@ -176,7 +177,8 @@ namespace BowBuddy {
     }
 
     public reset() {
-      $("#scoreModal").modal("hide");
+      // TODO write TS wrapper for touch-dnd
+      (<any>$("#scoreModal")).modal("hide");
 
       $("#hit-draggable-container").empty();
       $("#turn-draggable-container").empty();
