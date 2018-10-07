@@ -17,6 +17,7 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
+/// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
 
 namespace BowBuddy {
   export abstract class BaseView {
@@ -24,14 +25,11 @@ namespace BowBuddy {
       const viewContainer = document.querySelector("#main");
       const template = <HTMLTemplateElement>document.querySelector(this.getTemplateLocator());
       const clone = document.importNode(template.content, true);
-      let child;
 
-      while ((child = viewContainer.firstChild)) {
-        viewContainer.removeChild(child);
-      }
+      $(viewContainer).empty(); // we use jQuery here so all jQuery-specific stuff is properly deregistered
       viewContainer.appendChild(clone);
 
-      console.log("load template " + this.getTemplateLocator());
+      console.log('Loaded template ' + this.getTemplateLocator() + '.');
     }
 
     initView(): void {
@@ -40,8 +38,8 @@ namespace BowBuddy {
       this.onReveal(Application.getUrlParams());
     }
 
-    abstract onReveal(urlParams: Readonly<Map<string, string | number>>): void;
+    protected abstract onReveal(urlParams: Readonly<Map<string, string | number>>): void;
 
-    abstract getTemplateLocator(): string;
+    protected abstract getTemplateLocator(): string;
   }
 }

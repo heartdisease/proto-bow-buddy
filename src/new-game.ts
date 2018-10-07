@@ -34,11 +34,31 @@ namespace BowBuddy {
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-      let lockPlayerDropdown = false;
-      let lockCourseDropdown = false;
+      $("#main .collapsible").collapsible();
+      $("#main select").formSelect();
+
+      this.registerEventHandlers();
 
       this.updatePlayerSelectionMenu();
       this.updateCourseSelectionMenu();
+    }
+
+    private registerEventHandlers(): void {
+      let lockPlayerDropdown = false;
+      let lockCourseDropdown = false;
+
+      $("#player-dropdown").on("change", e => {
+        const pid = (<HTMLSelectElement>e.target).value;
+        const $playerDropdown = $("#player-dropdown");
+        const $playerOption = $playerDropdown.find("option[value=" + pid + "]");
+        const player = $playerOption.data("player");
+
+        this.addPlayerToTable(player);
+
+        $playerDropdown.find("option[value=" + pid + "]").remove();
+        $playerDropdown.find('option[value=""]').select();
+        $playerDropdown.formSelect(); // re-init widget
+      });
 
       $("#new-player-name")
         .on("focus", e => (lockPlayerDropdown = true))
@@ -110,7 +130,7 @@ namespace BowBuddy {
       });
     }
 
-    addPlayerToTable(player) {
+    private addPlayerToTable(player: Player): void {
       $("#dummy-player-entry").remove();
       $("#player-entries").append(
         $("<tr/>")
@@ -126,7 +146,7 @@ namespace BowBuddy {
       }
     }
 
-    addCourseToTable(course) {
+    private addCourseToTable(course: Course): void {
       $("#course-entries")
         .empty()
         .append(
@@ -146,39 +166,34 @@ namespace BowBuddy {
       }
     }
 
-    updatePlayerSelectionMenu(excludedPlayers = undefined) {
+    private updatePlayerSelectionMenu(excludedPlayers: Array<Player> = undefined): void {
       Application.getStorage()
         .getPlayers()
         .then(players => {
-          const $playerMenu = $(".player-dropdown > .dropdown-menu");
+          const $playerMenu = $("#player-dropdown");
 
           this.existingPlayers = players;
-          $playerMenu.find("li[data-pid]").remove();
+
+          $playerMenu.find('option:not([value=""])').remove();
           players.reverse().forEach(player => {
             if (
-              excludedPlayers !== undefined &&
-              excludedPlayers.some(excludedPlayer => excludedPlayer.pid === player.pid)
+              excludedPlayers === undefined ||
+              !excludedPlayers.some(excludedPlayer => excludedPlayer.pid === player.pid)
             ) {
-              return;
+              const $playerEntry = $("<option/>")
+                .attr("value", player.pid)
+                .data("player", player)
+                .text(player.name);
+
+              $playerMenu.prepend($playerEntry);
             }
-
-            const $playerEntry = $("<li/>")
-              .attr("data-pid", player.pid)
-              .append(
-                $("<a/>")
-                  .on("click", e => {
-                    $playerEntry.remove();
-                    this.addPlayerToTable(player);
-                  })
-                  .text(player.name)
-              );
-
-            $playerMenu.prepend($playerEntry);
           });
+
+          $playerMenu.formSelect(); // re-init widget
         });
     }
 
-    updateCourseSelectionMenu(excludedCourse = undefined) {
+    private updateCourseSelectionMenu(excludedCourse: Course = undefined): void {
       Application.getStorage()
         .getCourses()
         .then(courses => {
@@ -207,7 +222,7 @@ namespace BowBuddy {
         });
     }
 
-    verifyPlayerInput() {
+    private verifyPlayerInput(): void {
       const playerName = <string>$("#new-player-name").val();
 
       if (
@@ -222,7 +237,7 @@ namespace BowBuddy {
       }
     }
 
-    verifyCourseInput() {
+    private verifyCourseInput(): void {
       const courseName = <string>$("#new-course-name").val();
       const noOfStations = <string>$("#new-course-no-of-stations").val();
 

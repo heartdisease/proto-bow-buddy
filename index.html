@@ -30,6 +30,8 @@ Copyright 2017-2018 Christoph Matscheko
     <meta name="description" content="An app for keeping track of your score in archery" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
     <link rel="stylesheet" href="node_modules/materialize-css/dist/css/materialize.min.css" />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/main-menu.css" />
@@ -104,98 +106,105 @@ Copyright 2017-2018 Christoph Matscheko
     <template id="new-game-template">
       <h1>New Game</h1>
 
-      <div class="panel panel-default" style="margin-top: 20px;">
-        <div class="panel-heading config-panel-heading">
-          <div class="header">Choose players:</div>
-          <div class="btn-group player-dropdown">
-            <button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
-              Add player...
-            </button>
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">
-              <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-              <li role="separator" class="divider"></li>
-              <li>
-                <div class="input-group">
-                  <input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
-                  <span class="input-group-btn">
-                    <a class="btn btn-success" href="#" role="button" id="add-player-btn" disabled="disabled">
-                      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </a>
-                  </span>
-                </div>
-              </li>
-            </ul>
+      <ul class="collapsible">
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">person_pin</i>
+            Choose players
           </div>
-        </div>
-        <div class="panel-body">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Player</th>
-                <th>Email</th>
-                <th>Rang</th>
-              </tr>
-            </thead>
-            <tbody id="player-entries">
-              <tr id="dummy-player-entry">
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+          <div class="collapsible-body">
+            <!-- BEGIN PLAYER SELECTION -->
 
-      <div class="panel panel-default">
-        <div class="panel-heading config-panel-heading">
-          <div class="header">Choose course:</div>
-          <div class="btn-group course-dropdown">
-            <button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
-              Set course...
-            </button>
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-              aria-expanded="false">
-              <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-              <li role="separator" class="divider"></li>
-              <li>
-                <div class="input-group">
-                  <input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
-                  <input type="number" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
-                  <span class="input-group-btn">
-                    <a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled="disabled">
-                      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                    </a>
-                  </span>
-                </div>
-              </li>
-            </ul>
+            <div class="input-group">
+              <input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
+              <span class="input-group-btn">
+                <a class="btn btn-success" href="#" role="button" id="add-player-btn" disabled="disabled">
+                  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </a>
+              </span>
+            </div>
+
+            <div class="input-field col s12">
+              <select id="player-dropdown">
+                <option value="" disabled selected>Choose player</option>
+              </select>
+              <label>Add player...</label>
+            </div>
+
+            <table class="striped">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Email</th>
+                  <th>Rang</th>
+                </tr>
+              </thead>
+              <tbody id="player-entries">
+                <tr id="dummy-player-entry">
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- END PLAYER SELECTION -->
           </div>
-        </div>
-        <div class="panel-body">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th>Course</th>
-                <th>Place</th>
-                <th>Stations</th>
-              </tr>
-            </thead>
-            <tbody id="course-entries">
-              <tr>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">place</i>
+            Choose course
+          </div>
+          <div class="collapsible-body">
+            <!-- BEGIN COURSE SELECTION -->
+
+            <div class="btn-group course-dropdown">
+              <button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
+                Set course...
+              </button>
+              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu">
+                <li role="separator" class="divider"></li>
+                <li>
+                  <div class="input-group">
+                    <input type="text" placeholder="Add new course" id="new-course-name" class="form-control"
+                      aria-label="Add new course">
+                    <input type="number" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
+                    <span class="input-group-btn">
+                      <a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled="disabled">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                      </a>
+                    </span>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <table class="striped">
+              <thead>
+                <tr>
+                  <th>Course</th>
+                  <th>Place</th>
+                  <th>Stations</th>
+                </tr>
+              </thead>
+              <tbody id="course-entries">
+                <tr>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>-</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- END PLAYER SELECTION -->
+          </div>
+        </li>
+      </ul>
 
       <div class="btn-group btn-group-justified" role="group">
         <a class="btn btn-success btn-lg" href="#" id="start-game-btn" role="button" disabled="disabled">

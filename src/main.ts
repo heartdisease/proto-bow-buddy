@@ -18,15 +18,19 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 /// <reference path="./main-menu.ts" />
+/// <reference path="./new-game.ts" />
+/// <reference path="./station-select-player.ts" />
+/// <reference path="./station-set-score.ts" />
+/// <reference path="./final-score.ts" />
 
 namespace BowBuddy {
-  interface Player {
+  export interface Player {
     readonly pid: number;
     name: string;
     email: string;
   }
 
-  interface Course {
+  export interface Course {
     readonly cid: number;
     name: string;
     place: string;
@@ -34,7 +38,7 @@ namespace BowBuddy {
     stations: number;
   }
 
-  interface Game {
+  export interface Game {
     readonly gid: number;
     readonly cid: number;
     readonly pids: number[];
@@ -42,7 +46,7 @@ namespace BowBuddy {
     endtime: string; // new Date().toISOString() = ISO 8601 (UTC)
   }
 
-  interface Score {
+  export interface Score {
     readonly sid: number;
     readonly gid: number;
     readonly pid: number;
@@ -550,9 +554,7 @@ namespace BowBuddy {
 
     public static initApplication(): void {
       window.addEventListener("hashchange", e => Application.onHashChange(window.location.hash.split(";")));
-
-      const mainMenuView = new MainMenuView();
-      mainMenuView.initView();
+      Application.onHashChange(window.location.hash.split(";"));
     }
 
     private static onHashChange(params: string[]) {
