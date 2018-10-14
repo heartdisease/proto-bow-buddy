@@ -44,71 +44,81 @@ namespace BowBuddy {
     }
 
     private registerEventHandlers(): void {
-      let lockPlayerDropdown = false;
-      let lockCourseDropdown = false;
-
       $("#player-dropdown").on("change", e => {
         const pid = (<HTMLSelectElement>e.target).value;
         const $playerDropdown = $("#player-dropdown");
         const $playerOption = $playerDropdown.find("option[value=" + pid + "]");
-        const player = $playerOption.data("player");
 
-        this.addPlayerToTable(player);
+        if (pid === "new") {
+          $("#select-player-container").hide();
+          $("#add-player-container").show();
+        } else {
+          const player = $playerOption.data("player");
 
-        $playerDropdown.find("option[value=" + pid + "]").remove();
-        $playerDropdown.find('option[value=""]').select();
-        $playerDropdown.formSelect(); // re-init widget
+          this.addPlayerToTable(player);
+
+          $playerDropdown.find("option[value=" + pid + "]").remove();
+          $playerDropdown.find('option[value=""]').select();
+          $playerDropdown.formSelect(); // re-init widget
+        }
       });
-
-      $("#new-player-name")
-        .on("focus", e => (lockPlayerDropdown = true))
-        .on("blur", e => (lockPlayerDropdown = false))
-        .on("keyup", e => this.verifyPlayerInput());
-      $("#new-course-name")
-        .on("focus", e => (lockCourseDropdown = true))
-        .on("blur", e => (lockCourseDropdown = false))
-        .on("keyup", e => this.verifyCourseInput());
-      $("#new-course-no-of-stations")
-        .on("focus", e => (lockCourseDropdown = true))
-        .on("blur", e => (lockCourseDropdown = false))
-        .on("keyup", e => this.verifyCourseInput());
-
+      $("#new-player-name").on("keyup", e => this.verifyPlayerInput());
       $("#add-player-btn").on("click", e => {
         const playerName = $("#new-player-name").val();
 
-        $(".player-dropdown").addClass("disabled"); // TODO what is this doing?
+        $("#new-player-name").val("");
+        $("#add-player-btn").attr("disabled", "disabled");
+
         Application.getStorage()
           .addPlayer(playerName, "")
-          .then(player => this.addPlayerToTable(player));
+          .then(player => {
+            this.addPlayerToTable(player);
+            $("#add-player-container").hide();
+            $("#select-player-container").show();
+            $("#player-dropdown").find('option[value=""]').select();
+          });
+
+        e.preventDefault();
       });
+
+      $("#course-dropdown").on("change", e => {
+        const cid = (<HTMLSelectElement>e.target).value;
+        const $courseDropdown = $("#course-dropdown");
+        const $courseOption = $courseDropdown.find("option[value=" + cid + "]");
+
+        if (cid === "new") {
+          $("#select-course-container").hide();
+          $("#add-course-container").show();
+        } else {
+          const course = $courseOption.data("course");
+
+          this.addCourseToTable(course);
+
+          $courseDropdown.find("option[value=" + cid + "]").remove();
+          $courseDropdown.find('option[value=""]').select();
+          $courseDropdown.formSelect(); // re-init widget
+        }
+      });
+      $("#new-course-name").on("keyup", e => this.verifyCourseInput());
+      $("#new-course-no-of-stations").on("keyup", e => this.verifyCourseInput());
       $("#set-course-btn").on("click", e => {
         const courseName = $("#new-course-name").val();
         const noOfStations = $("#new-course-no-of-stations").val();
 
-        $(".course-dropdown").addClass("disabled"); // TODO what is this doing?
+        $("#new-course-name").val("");
+        $("#new-course-no-of-stations").val("");
+        $("#set-course-btn").attr("disabled", "disabled");
+
         Application.getStorage()
           .addCourse(courseName, "", "", noOfStations)
-          .then(course => this.addCourseToTable(course));
-      });
+          .then(course => {
+            this.addCourseToTable(course);
+            $("#add-course-container").hide();
+            $("#select-course-container").show();
+            $("#course-dropdown").find('option[value=""]').select();
+          });
 
-      $(".player-dropdown").on("hide.bs.dropdown", e => {
-        console.info("hide player dropdown");
-        if (lockPlayerDropdown) {
-          e.preventDefault();
-        } else {
-          $("#new-player-name").val("");
-          $("#add-player-btn").attr("disabled", "disabled");
-        }
-      });
-      $(".course-dropdown").on("hide.bs.dropdown", e => {
-        console.info("hide course dropdown");
-        if (lockCourseDropdown) {
-          e.preventDefault();
-        } else {
-          $("#new-course-name").val("");
-          $("#new-course-no-of-stations").val("");
-          $("#set-course-btn").attr("disabled", "disabled");
-        }
+        e.preventDefault();
       });
 
       $("#start-game-btn").on("click", e => {
@@ -174,7 +184,7 @@ namespace BowBuddy {
 
           this.existingPlayers = players;
 
-          $playerMenu.find('option:not([value=""])').remove();
+          //$playerMenu.find('option:not([value=""]), option:not([value="new"])').remove();
           players.reverse().forEach(player => {
             if (
               excludedPlayers === undefined ||
@@ -185,7 +195,7 @@ namespace BowBuddy {
                 .data("player", player)
                 .text(player.name);
 
-              $playerMenu.prepend($playerEntry);
+              $playerMenu.append($playerEntry);
             }
           });
 

@@ -107,7 +107,7 @@ Copyright 2017-2018 Christoph Matscheko
       <h1>New Game</h1>
 
       <ul class="collapsible">
-        <li>
+        <li class="active">
           <div class="collapsible-header">
             <i class="material-icons">person_pin</i>
             Choose players
@@ -115,20 +115,26 @@ Copyright 2017-2018 Christoph Matscheko
           <div class="collapsible-body">
             <!-- BEGIN PLAYER SELECTION -->
 
-            <div class="input-group">
-              <input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
-              <span class="input-group-btn">
-                <a class="btn btn-success" href="#" role="button" id="add-player-btn" disabled="disabled">
-                  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                </a>
-              </span>
-            </div>
-
-            <div class="input-field col s12">
-              <select id="player-dropdown">
-                <option value="" disabled selected>Choose player</option>
-              </select>
-              <label>Add player...</label>
+            <div class="container">
+              <div id="select-player-container" class="row">
+                <div class="col s12">
+                  <select id="player-dropdown">
+                    <option value="" disabled selected>Choose player</option>
+                    <option value="new">New player...</option>
+                  </select>
+                  <label>Choose player</label>
+                </div>
+              </div>
+              <div id="add-player-container" class="row" style="display: none;">
+                <div class="col s10">
+                  <input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
+                </div>
+                <div class="col s2">
+                  <a class="btn btn-success" href="#" role="button" id="add-player-btn" disabled="disabled" class="col s2">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                  </a>
+                </div>
+              </div>
             </div>
 
             <table class="striped">
@@ -159,29 +165,23 @@ Copyright 2017-2018 Christoph Matscheko
           <div class="collapsible-body">
             <!-- BEGIN COURSE SELECTION -->
 
-            <div class="btn-group course-dropdown">
-              <button class="btn btn-default" type="button" aria-haspopup="true" aria-expanded="true">
-                Set course...
-              </button>
-              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-                aria-expanded="false">
-                <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu">
-                <li role="separator" class="divider"></li>
-                <li>
-                  <div class="input-group">
-                    <input type="text" placeholder="Add new course" id="new-course-name" class="form-control"
-                      aria-label="Add new course">
-                    <input type="number" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
-                    <span class="input-group-btn">
-                      <a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled="disabled">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                      </a>
-                    </span>
-                  </div>
-                </li>
-              </ul>
+            <div class="">
+              <div id="select-course-container">
+                <select id="course-dropdown">
+                  <option value="" disabled selected>Choose course</option>
+                  <option value="new">New course...</option>
+                </select>
+                <label>Choose course</label>
+              </div>
+              <div id="add-course-container" style="display: none;">
+                <input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
+                <input type="number" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
+                <span class="input-group-btn">
+                  <a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled="disabled">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                  </a>
+                </span>
+              </div>
             </div>
 
             <table class="striped">
