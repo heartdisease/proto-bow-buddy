@@ -67,6 +67,10 @@ namespace BowBuddy {
         });
     }
 
+    onHide(): void {
+      // nothing to do
+    }
+
     // TODO really ugly algo to sum up values... -_-'
     generateScoreTable(playerNames, scores) {
       const $playerHeaderRow = $("#player-header-row");

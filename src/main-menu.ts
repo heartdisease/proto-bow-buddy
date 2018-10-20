@@ -28,7 +28,7 @@ namespace BowBuddy {
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-      $(this. getTemplateLocator() + ' select').formSelect(); // init materialize
+      $(this.getTemplateLocator() + " select").formSelect(); // init materialize
 
       $(".app-logo > h1").text(document.title);
 
@@ -93,6 +93,13 @@ namespace BowBuddy {
             });
         }
       });
+
+      console.info("MainMenuView.onReveal()");
+    }
+
+    onHide(): void {
+      // nothing to do
+      console.info("MainMenuView.onHide()");
     }
   }
 }

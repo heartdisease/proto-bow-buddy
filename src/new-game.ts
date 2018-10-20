@@ -23,103 +23,50 @@
 
 namespace BowBuddy {
   export class NewGameView extends BaseView {
-    private playerConfigured = false;
-    private courseConfigured = false;
-    private existingPlayers = [];
-    private existingCourses = [];
-    private configuredPlayers = [];
+    private existingPlayers: Array<Player> = [];
+    private existingCourses: Array<Course> = [];
+    private configuredPlayers: Array<Player> = [];
+    private configuredCourse: Course;
+    private collapsibleElement: HTMLElement;
+    private playerSelectElement: HTMLElement;
+    private courseSelectElement: HTMLElement;
 
     getTemplateLocator(): string {
       return "#new-game-template";
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-      $("#main .collapsible").collapsible();
-      $("#main select").formSelect();
+      const viewElement = document.querySelector("#main");
 
-      this.registerEventHandlers();
+      this.collapsibleElement = viewElement.querySelector(".collapsible");
+      this.playerSelectElement = viewElement.querySelector("select#player-select");
+      this.courseSelectElement = viewElement.querySelector("select#course-select");
 
-      this.updatePlayerSelectionMenu();
-      this.updateCourseSelectionMenu();
+      Promise.all([this.updatePlayerSelectionMenu(), this.updateCourseSelectionMenu()]).then(nil => {
+        this.initControls();
+        this.registerEventHandlers();
+      });
+
+      console.info("NewGameView.onReveal()");
+    }
+
+    onHide(): void {
+      M.Collapsible.getInstance(this.collapsibleElement).destroy();
+      M.FormSelect.getInstance(this.playerSelectElement).destroy();
+      M.FormSelect.getInstance(this.courseSelectElement).destroy();
+
+      console.info("NewGameView.onHide()");
+    }
+
+    private initControls(): void {
+      M.Collapsible.init(this.collapsibleElement, {});
+      M.FormSelect.init(this.playerSelectElement, {});
+      M.FormSelect.init(this.courseSelectElement, {});
     }
 
     private registerEventHandlers(): void {
-      $("#player-dropdown").on("change", e => {
-        const pid = (<HTMLSelectElement>e.target).value;
-        const $playerDropdown = $("#player-dropdown");
-        const $playerOption = $playerDropdown.find("option[value=" + pid + "]");
-
-        if (pid === "new") {
-          $("#select-player-container").hide();
-          $("#add-player-container").show();
-        } else {
-          const player = $playerOption.data("player");
-
-          this.addPlayerToTable(player);
-
-          $playerDropdown.find("option[value=" + pid + "]").remove();
-          $playerDropdown.find('option[value=""]').select();
-          $playerDropdown.formSelect(); // re-init widget
-        }
-      });
-      $("#new-player-name").on("keyup", e => this.verifyPlayerInput());
-      $("#add-player-btn").on("click", e => {
-        const playerName = $("#new-player-name").val();
-
-        $("#new-player-name").val("");
-        $("#add-player-btn").attr("disabled", "disabled");
-
-        Application.getStorage()
-          .addPlayer(playerName, "")
-          .then(player => {
-            this.addPlayerToTable(player);
-            $("#add-player-container").hide();
-            $("#select-player-container").show();
-            $("#player-dropdown").find('option[value=""]').select();
-          });
-
-        e.preventDefault();
-      });
-
-      $("#course-dropdown").on("change", e => {
-        const cid = (<HTMLSelectElement>e.target).value;
-        const $courseDropdown = $("#course-dropdown");
-        const $courseOption = $courseDropdown.find("option[value=" + cid + "]");
-
-        if (cid === "new") {
-          $("#select-course-container").hide();
-          $("#add-course-container").show();
-        } else {
-          const course = $courseOption.data("course");
-
-          this.addCourseToTable(course);
-
-          $courseDropdown.find("option[value=" + cid + "]").remove();
-          $courseDropdown.find('option[value=""]').select();
-          $courseDropdown.formSelect(); // re-init widget
-        }
-      });
-      $("#new-course-name").on("keyup", e => this.verifyCourseInput());
-      $("#new-course-no-of-stations").on("keyup", e => this.verifyCourseInput());
-      $("#set-course-btn").on("click", e => {
-        const courseName = $("#new-course-name").val();
-        const noOfStations = $("#new-course-no-of-stations").val();
-
-        $("#new-course-name").val("");
-        $("#new-course-no-of-stations").val("");
-        $("#set-course-btn").attr("disabled", "disabled");
-
-        Application.getStorage()
-          .addCourse(courseName, "", "", noOfStations)
-          .then(course => {
-            this.addCourseToTable(course);
-            $("#add-course-container").hide();
-            $("#select-course-container").show();
-            $("#course-dropdown").find('option[value=""]').select();
-          });
-
-        e.preventDefault();
-      });
+      this.registerPlayerSelectEventHandlers();
+      this.registerCourseSelectEventHandlers();
 
       $("#start-game-btn").on("click", e => {
         let cid;
@@ -134,14 +81,117 @@ namespace BowBuddy {
 
         Application.getStorage()
           .addGame(cid, pids)
-          .then(game => {
-            window.location.href = "#station-select-player;gid=" + game.gid + ";station=1";
-          });
+          .then(game => (window.location.href = "#station-select-player;gid=" + game.gid + ";station=1"));
+
+        e.preventDefault();
       });
     }
 
+    private registerPlayerSelectEventHandlers(): void {
+      const $playerSelect = $(this.playerSelectElement);
+
+      $playerSelect.off("change").on("change", e => {
+        const pid = (<HTMLSelectElement>e.target).value;
+        const $playerOption = $playerSelect.find('option[value="' + pid + '"]');
+
+        console.log("pid change: " + pid);
+
+        if (pid === "new") {
+          $("#select-player-container").hide();
+          $("#add-player-container").show();
+        } else {
+          this.addPlayerToTable($playerOption.data("player"));
+        }
+      });
+      $("#new-player-name")
+        .off("keyup")
+        .on("keyup", e => this.verifyPlayerInput());
+      $("#add-player-btn")
+        .off("click")
+        .on("click", e => {
+          const playerName = $("#new-player-name").val();
+
+          $("#new-player-name").val("");
+          $("#add-player-btn").attr("disabled", "disabled");
+
+          Application.getStorage()
+            .addPlayer(playerName, "")
+            .then(player => {
+              this.addPlayerToTable(player);
+
+              $playerSelect.off("change"); // deregister handler first, because invalid option is default selection
+              M.FormSelect.getInstance(this.playerSelectElement).destroy();
+
+              window.setTimeout(() => {
+                this.updatePlayerSelectionMenu().then(nil => {
+                  // re-init widget
+                  M.FormSelect.init(this.playerSelectElement, {});
+
+                  this.registerPlayerSelectEventHandlers();
+
+                  $("#add-player-container").hide();
+                  $("#select-player-container").show();
+                });
+              }, 500); // TODO is this random delay even necessary?
+            });
+
+          e.preventDefault();
+        });
+    }
+
+    private registerCourseSelectEventHandlers(): void {
+      const $courseSelect = $(this.courseSelectElement);
+
+      $courseSelect.off("change").on("change", e => {
+        const cid = (<HTMLSelectElement>e.target).value;
+        const $courseOption = $courseSelect.find('option[value="' + cid + '"]');
+
+        if (cid === "new") {
+          $("#select-course-container").hide();
+          $("#add-course-container").show();
+        } else {
+          const course = $courseOption.data("course");
+
+          this.addCourseToTable(course);
+
+          M.FormSelect.getInstance(this.courseSelectElement).destroy();
+          $courseSelect.find('option[value="' + cid + '"]').remove();
+          $courseSelect.find('option[value=""]').attr("selected", "selected");
+          M.FormSelect.init(this.courseSelectElement, {}); // re-init widget
+        }
+      });
+      $("#new-course-name")
+        .off("keyup")
+        .on("keyup", e => this.verifyCourseInput());
+      $("#new-course-no-of-stations")
+        .off("keyup")
+        .on("keyup", e => this.verifyCourseInput());
+      $("#set-course-btn")
+        .off("click")
+        .on("click", e => {
+          const courseName = $("#new-course-name").val();
+          const noOfStations = $("#new-course-no-of-stations").val();
+
+          $("#new-course-name").val("");
+          $("#new-course-no-of-stations").val("");
+          $("#set-course-btn").attr("disabled", "disabled");
+
+          Application.getStorage()
+            .addCourse(courseName, "", "", noOfStations)
+            .then(course => {
+              this.addCourseToTable(course);
+              $("#add-course-container").hide();
+              $("#select-course-container").show();
+              $("#course-select")
+                .find('option[value=""]')
+                .select();
+            });
+
+          e.preventDefault();
+        });
+    }
+
     private addPlayerToTable(player: Player): void {
-      $("#dummy-player-entry").remove();
       $("#player-entries").append(
         $("<tr/>")
           .attr("data-pid", player.pid)
@@ -149,9 +199,8 @@ namespace BowBuddy {
       );
 
       this.configuredPlayers.push(player);
-      this.updatePlayerSelectionMenu(this.configuredPlayers);
-      this.playerConfigured = true;
-      if (this.playerConfigured && this.courseConfigured) {
+
+      if (this.isPlayerConfigured() && this.isCourseConfigured()) {
         $("#start-game-btn").removeAttr("disabled");
       }
     }
@@ -169,67 +218,93 @@ namespace BowBuddy {
             )
         );
 
-      this.updateCourseSelectionMenu(course);
-      this.courseConfigured = true;
-      if (this.playerConfigured && this.courseConfigured) {
+      this.configuredCourse = course;
+
+      if (this.isPlayerConfigured() && this.isCourseConfigured()) {
         $("#start-game-btn").removeAttr("disabled");
       }
     }
 
-    private updatePlayerSelectionMenu(excludedPlayers: Array<Player> = undefined): void {
-      Application.getStorage()
+    private updatePlayerSelectionMenu(): Promise<void> {
+      const $playerSelect = $(this.playerSelectElement);
+
+      $playerSelect.empty();
+
+      return Application.getStorage()
         .getPlayers()
         .then(players => {
-          const $playerMenu = $("#player-dropdown");
+          const $defaultOption = $("<option/>").text("Choose player");
 
           this.existingPlayers = players;
 
-          //$playerMenu.find('option:not([value=""]), option:not([value="new"])').remove();
-          players.reverse().forEach(player => {
-            if (
-              excludedPlayers === undefined ||
-              !excludedPlayers.some(excludedPlayer => excludedPlayer.pid === player.pid)
-            ) {
-              const $playerEntry = $("<option/>")
-                .attr("value", player.pid)
-                .data("player", player)
-                .text(player.name);
+          $playerSelect.append($defaultOption).append(
+            $("<option/>")
+              .val("new")
+              .text("New player...")
+          );
 
-              $playerMenu.append($playerEntry);
-            }
-          });
+          players
+            .filter(player => !this.configuredPlayers.some(excludedPlayer => excludedPlayer.pid === player.pid))
+            .reverse()
+            .forEach(player => {
+              $playerSelect.append(
+                $("<option/>")
+                  .attr("value", player.pid)
+                  .data("player", player)
+                  .text(player.name)
+              );
+            });
 
-          $playerMenu.formSelect(); // re-init widget
-        });
+          $defaultOption.attr("selected", "selected").attr("disabled", "disabled");
+
+          console.log("Rebuilt player selection menu.");
+        })
+        .catch(e => console.error(e));
     }
 
-    private updateCourseSelectionMenu(excludedCourse: Course = undefined): void {
-      Application.getStorage()
+    private updateCourseSelectionMenu(): Promise<void> {
+      const $courseSelect = $(this.courseSelectElement);
+
+      $courseSelect.empty();
+
+      return Application.getStorage()
         .getCourses()
         .then(courses => {
-          const $courseMenu = $(".course-dropdown > .dropdown-menu");
-
           this.existingCourses = courses;
-          $courseMenu.find("li[data-cid]").remove();
-          courses.reverse().forEach(course => {
-            if (excludedCourse !== undefined && excludedCourse.cid === course.cid) {
-              return;
-            }
 
-            const $courseEntry = $("<li/>")
-              .attr("data-cid", course.cid)
-              .append(
-                $("<a/>")
-                  .on("click", e => {
-                    $courseEntry.remove();
-                    this.addCourseToTable(course);
-                  })
+          $courseSelect.append(
+            $("<option/>")
+              .attr("disabled", "disabled")
+              .attr("selected", "selected")
+              .text("Choose course")
+          );
+          $courseSelect.append(
+            $("<option/>")
+              .val("new")
+              .text("New course...")
+          );
+
+          courses
+            .filter(course => this.configuredCourse && this.configuredCourse.cid === course.cid)
+            .reverse()
+            .forEach(course => {
+              $courseSelect.append(
+                $("<option/>")
+                  .attr("value", course.cid)
+                  .data("course", course)
                   .text(course.name + " (" + course.stations + ")")
               );
+            });
+        })
+        .catch(e => console.error(e));
+    }
 
-            $courseMenu.prepend($courseEntry);
-          });
-        });
+    private isPlayerConfigured(): boolean {
+      return this.configuredPlayers.length > 0;
+    }
+
+    private isCourseConfigured(): boolean {
+      return this.configuredCourse !== undefined;
     }
 
     private verifyPlayerInput(): void {

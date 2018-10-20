@@ -55,6 +55,8 @@ namespace BowBuddy {
   }
 
   /**
+   * TODO move into separate TS file!
+   *
    * Do not call any of these functions after calling erase() or close()!
    */
   class DbWrapper {
@@ -551,9 +553,12 @@ namespace BowBuddy {
 
   export class Application {
     private static storage: DbAccess = null;
+    private static currentView: BaseView = null;
 
     public static initApplication(): void {
       window.addEventListener("hashchange", e => Application.onHashChange(window.location.hash.split(";")));
+
+      Application.updateWindowTitle(Application.getVersion());
       Application.onHashChange(window.location.hash.split(";"));
     }
 
@@ -582,7 +587,12 @@ namespace BowBuddy {
           console.log("Unknown place: " + view);
           return;
       }
+
+      if (this.currentView !== null) {
+        this.currentView.destroyView();
+      }
       view.initView();
+      this.currentView = view;
     }
 
     public static getStorage(): DbAccess {
@@ -593,7 +603,7 @@ namespace BowBuddy {
     }
 
     public static getVersion(): string {
-      return "2.0.1";
+      return "2.0.2";
     }
 
     public static updateWindowTitle(version) {
@@ -630,13 +640,13 @@ namespace BowBuddy {
       return clickEvent => {
         clickEvent.preventDefault();
 
-        if (++clickCounter % 3 === 0 && !document.fullscreenElement) {
+        if (++clickCounter % 3 === 0 && !document["fullscreenElement"]) {
           console.log("Init fullscreen...");
 
           if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
-          } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen();
+          } else if (document.documentElement["webkitRequestFullscreen"]) {
+            document.documentElement["webkitRequestFullscreen"]();
           }
         }
       };

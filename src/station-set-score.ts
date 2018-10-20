@@ -88,6 +88,10 @@ namespace BowBuddy {
       });
     }
 
+    onHide(): void {
+      // nothing to do
+    }
+
     navigateBack(gid, station) {
       window.location.href = "#station-select-player;gid=" + gid + ";station=" + station;
     }

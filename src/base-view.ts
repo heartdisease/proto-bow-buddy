@@ -26,19 +26,34 @@ namespace BowBuddy {
       const template = <HTMLTemplateElement>document.querySelector(this.getTemplateLocator());
       const clone = document.importNode(template.content, true);
 
-      $(viewContainer).empty(); // we use jQuery here so all jQuery-specific stuff is properly deregistered
       viewContainer.appendChild(clone);
-
-      console.log('Loaded template ' + this.getTemplateLocator() + '.');
+      console.log("Loaded template " + this.getTemplateLocator() + ".");
     }
 
-    initView(): void {
-      Application.updateWindowTitle(Application.getVersion());
+    private unloadTemplate(): void {
+      $("#main").empty(); // we use jQuery here so all jQuery-specific stuff is properly deregistered
+      console.log("Un-loaded template " + this.getTemplateLocator() + ".");
+    }
+
+    /**
+     * Never override this method!
+     */
+    /*final*/ initView(): void {
       this.loadTemplate();
       this.onReveal(Application.getUrlParams());
     }
 
+    /**
+     * Never override this method!
+     */
+    /*final*/ destroyView(): void {
+      this.onHide();
+      this.unloadTemplate();
+    }
+
     protected abstract onReveal(urlParams: Readonly<Map<string, string | number>>): void;
+
+    protected abstract onHide(): void;
 
     protected abstract getTemplateLocator(): string;
   }

@@ -141,6 +141,10 @@ namespace BowBuddy {
         });
     }
 
+    onHide(): void {
+      // nothing to do
+    }
+
     reset() {
       $("nav.navbar").off("click");
       $("#back-btn").off("click");
