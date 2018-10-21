@@ -56,6 +56,7 @@ namespace BowBuddy {
   }
 
   export class Application {
+    private static /*final*/ VERSION = '2.0.3';
     private static storage: DbAccess = null;
     private static currentView: BaseView = null;
 
@@ -107,7 +108,7 @@ namespace BowBuddy {
     }
 
     public static getVersion(): string {
-      return "2.0.2";
+      return Application.VERSION;
     }
 
     public static updateWindowTitle(version) {
