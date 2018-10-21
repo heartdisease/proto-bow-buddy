@@ -51,6 +51,13 @@ namespace BowBuddy {
       this.unloadTemplate();
     }
 
+    /**
+     * Never override this method!
+     */
+    /*final*/ getStorage(): DbAccess {
+      return Application.getStorage();
+    }
+
     protected abstract onReveal(urlParams: Readonly<Map<string, string | number>>): void;
 
     protected abstract onHide(): void;

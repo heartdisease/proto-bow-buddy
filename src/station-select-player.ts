@@ -28,127 +28,104 @@ namespace BowBuddy {
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-      window.addEventListener("popstate", popstateEvent => this.loadView());
+      const gid = <number>urlParams.get("gid");
+      const station = <number>urlParams.get("station");
 
-      $("#back-btn").on("click", e => {
-        e.preventDefault();
+      $("#station-no").text(station);
 
-        if (+urlParams.get("station") > 1) {
-          this.pushState("#gid=" + urlParams.get("gid") + ";station=" + (+urlParams.get("station") - 1));
-        } else {
-          const result = window.confirm("Do you really want to go back to the game menu? All progess will be lost!");
-
-          if (result) {
-            // TODO actually delete all scores for current game!
-            window.location.href = "#new-game";
-          }
-        }
-      });
-      $("#station-no").text(urlParams.get("station"));
-
-      Application.getStorage()
-        .getCourseForGame(urlParams.get("gid"))
+      this.getStorage()
+        .getCourseForGame(gid)
         .then(course => {
-          if (urlParams.get("station") >= course.stations) {
+          console.log("course: " + course);
+
+          if (station >= course.stations) {
             $("#next-station-btn")
               .html('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Finish course')
               .on("click", e => {
                 e.preventDefault();
-                window.location.href = "#final-score;gid=" + urlParams.get("gid");
+                window.location.href = `#final-score;gid=${gid}`;
               });
           } else {
             $("#next-station-btn").on("click", e => {
               e.preventDefault();
-              this.pushState(
-                "#final-score;gid=" + urlParams.get("gid") + ";station=" + (+urlParams.get("station") + 1)
-              );
+              window.location.href = `#final-score;gid=${gid};station=${station + 1}`;
             });
           }
 
-          Application.getStorage()
-            .getPlayersWithScore(urlParams.get("gid"), urlParams.get("station"))
-            .then(players => {
-              const $playerSelectionList = $("#player-selection-list");
-              let playersWithScore = 0;
-
-              if (players.length === 0) {
-                throw new Error("Cannot load players!");
-              }
-
-              $("#quick-assign-btn").on("click", e => {
-                const qaParam =
-                  players.length > 1
-                    ? ";qa=" +
-                      players
-                        .slice(1)
-                        .map(p => p.pid)
-                        .join("+")
-                    : "";
-
-                e.preventDefault();
-                window.location.href =
-                  "#station-set-score;gid=" +
-                  urlParams.get("gid") +
-                  ";pid=" +
-                  players[0].pid +
-                  qaParam +
-                  ";station=" +
-                  urlParams.get("station");
-              });
-
-              players.forEach(player => {
-                const $playerEntry = $("<a/>")
-                  .addClass("btn btn-default")
-                  .attr(
-                    "href",
-                    "#station-set-score;gid=" +
-                      urlParams.get("gid") +
-                      ";pid=" +
-                      player.pid +
-                      ";station=" +
-                      urlParams.get("station")
-                  )
-                  .attr("role", "button")
-                  .text(player.name + " "); // add space separator here for score badge
-
-                if (player.score) {
-                  const $scoreBadge = $("<span/>").addClass("badge");
-
-                  playersWithScore++;
-
-                  if (player.score === "miss") {
-                    $scoreBadge.html("Miss&nbsp;&nbsp;&nbsp;(+0)");
-                  } else {
-                    $scoreBadge.html(
-                      Application.scoreToDisplayName(player.score) +
-                        "&nbsp;&nbsp;&nbsp;(+" +
-                        Application.scoreToPoints(player.score) +
-                        ")"
-                    );
-                  }
-                  $playerEntry.append($scoreBadge);
-                }
-
-                $playerSelectionList.append($playerEntry);
-              });
-
-              if (playersWithScore === players.length) {
-                $("#next-station-btn").removeAttr("disabled");
-              } else if (playersWithScore === 0) {
-                $("#quick-assign-btn").removeAttr("disabled"); // enable quick-assign only when no player has a score yet
-              }
-            });
-        });
+          this.initPlayerButtons(gid, station);
+        })
+        .catch(e => console.error(e));
     }
 
     onHide(): void {
-      // nothing to do
+      this.reset();
     }
 
-    reset() {
-      $("nav.navbar").off("click");
-      $("#back-btn").off("click");
+    private initPlayerButtons(gid: number, station: number): void {
+      console.log("initPlayerButtons: gid " + gid + ", station " + station);
 
+      this.getStorage()
+        .getPlayersWithScore(gid, station)
+        .then(players => {
+          const $playerSelectionList = $("#player-selection-list");
+          let playersWithScore = 0;
+
+          if (players.length === 0) {
+            throw new Error("Cannot load players!");
+          }
+
+          $("#quick-assign-btn").on("click", e => {
+            const qaParam =
+              players.length > 1
+                ? `;qa=${players
+                    .slice(1)
+                    .map(p => p.pid)
+                    .join("+")}`
+                : "";
+
+            e.preventDefault();
+            window.location.href = `#station-set-score;gid=${gid};pid=${players[0].pid}${qaParam};station=${station}`;
+          });
+
+          players.forEach(player => {
+            console.log("Init button for player " + player.name);
+
+            const $playerEntry = $("<a/>")
+              .addClass("waves-effect waves-light btn-large")
+              .attr("href", `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`)
+              .attr("role", "button")
+              .text(player.name + " "); // add space separator here for score badge
+
+            if (player.score) {
+              const $scoreBadge = $("<span/>").addClass("badge red");
+
+              playersWithScore++;
+
+              if (player.score === "miss") {
+                $scoreBadge.html("Miss&nbsp;&nbsp;&nbsp;(+0)");
+              } else {
+                $scoreBadge.html(
+                  Application.scoreToDisplayName(player.score) +
+                    "&nbsp;&nbsp;&nbsp;(+" +
+                    Application.scoreToPoints(player.score) +
+                    ")"
+                );
+              }
+              $playerEntry.append($scoreBadge);
+            }
+
+            $playerSelectionList.append($playerEntry);
+          });
+
+          if (playersWithScore === players.length) {
+            $("#next-station-btn").removeAttr("disabled");
+          } else if (playersWithScore === 0) {
+            $("#quick-assign-btn").removeAttr("disabled"); // enable quick-assign only when no player has a score yet
+          }
+        });
+    }
+
+    reset(): void {
       $("#next-station-btn")
         .off("click")
         .attr("disabled", "disabled")
@@ -158,17 +135,6 @@ namespace BowBuddy {
         .attr("disabled", "disabled");
 
       $("#player-selection-list").empty();
-    }
-
-    loadView() {
-      this.reset();
-      this.initView();
-    }
-
-    pushState(url) {
-      console.log("pushState: " + url);
-      window.history.pushState(null, null, url);
-      this.loadView();
     }
   }
 }

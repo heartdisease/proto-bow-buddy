@@ -8,5 +8,6 @@
   "editor.renderWhitespace": "all",
   "html.format.extraLiners": "",
   "html.format.indentInnerHtml": true,
+  "typescript.preferences.quoteStyle": "single",
   "prettier.printWidth": 120
 }

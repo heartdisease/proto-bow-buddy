@@ -71,7 +71,7 @@ namespace BowBuddy {
       $playerSelect.off("change"); // deregister handler first, because invalid option is default selection
       M.FormSelect.getInstance(this.playerSelectElement).destroy();
 
-      return Application.getStorage()
+      return this.getStorage()
         .getPlayers()
         .then(players => {
           window.setTimeout(() => {
@@ -117,7 +117,7 @@ namespace BowBuddy {
       $courseSelect.off("change"); // deregister handler first, because invalid option is default selection
       M.FormSelect.getInstance(this.courseSelectElement).destroy();
 
-      return Application.getStorage()
+      return this.getStorage()
         .getCourses()
         .then(courses => {
           window.setTimeout(() => {
@@ -181,12 +181,12 @@ namespace BowBuddy {
       $("#add-player-btn")
         .off("click")
         .on("click", e => {
-          const playerName = $("#new-player-name").val();
+          const playerName = <string>$("#new-player-name").val();
 
           $("#add-player-btn").attr("disabled", "disabled");
           $("#new-player-name").val("");
 
-          Application.getStorage()
+          this.getStorage()
             .addPlayer(playerName, "")
             .then(player => {
               this.addPlayerToTable(player);
@@ -227,14 +227,14 @@ namespace BowBuddy {
       $("#set-course-btn")
         .off("click")
         .on("click", e => {
-          const courseName = $("#new-course-name").val();
-          const noOfStations = $("#new-course-no-of-stations").val();
+          const courseName = <string>$("#new-course-name").val();
+          const noOfStations = <number>$("#new-course-no-of-stations").val();
 
           $("#set-course-btn").attr("disabled", "disabled");
           $("#new-course-name").val("");
           $("#new-course-no-of-stations").val("");
 
-          Application.getStorage()
+          this.getStorage()
             .addCourse(courseName, "", "", noOfStations)
             .then(course => {
               this.addCourseToTable(course);
@@ -260,7 +260,7 @@ namespace BowBuddy {
           pids.push(+$(this).attr("data-pid"));
         });
 
-        Application.getStorage()
+        this.getStorage()
           .addGame(cid, pids)
           .then(game => (window.location.href = "#station-select-player;gid=" + game.gid + ";station=1"));
 

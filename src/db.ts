@@ -25,7 +25,7 @@ namespace BowBuddy {
     private dbConnected: boolean = false;
     private dbPromise: Promise<any> | null = null;
 
-    public transaction(objectStores: any | String, writeAccess: boolean = false): Promise<any> {
+    transaction(objectStores: string | Array<string>, writeAccess: boolean = false): Promise<any> {
       return this.requestDb().then(db => {
         const transaction = db.transaction(objectStores, writeAccess ? "readwrite" : "readonly");
 
@@ -38,11 +38,11 @@ namespace BowBuddy {
       });
     }
 
-    public objectStoreNames(): Promise<any> {
+    objectStoreNames(): Promise<any> {
       return this.requestDb().then(db => Array.prototype.slice.call(db.objectStoreNames));
     }
 
-    public erase(): Promise<any> {
+    erase(): Promise<any> {
       return this.close().then(() => {
         return new Promise<any>((resolve, reject) => {
           (function tryDeleteDb() {
@@ -66,7 +66,7 @@ namespace BowBuddy {
       });
     }
 
-    public close(): Promise<any> {
+    close(): Promise<any> {
       // TODO check if db is even open before calling requestDb()
       return this.requestDb().then(db => {
         // reset db handle promise
@@ -166,102 +166,19 @@ namespace BowBuddy {
   export class DbAccess {
     private dbWrapper: DbWrapper | null = null;
 
-    private fetchAll(objectStore, keyRange: any = undefined, filter: (any) => boolean = undefined): Promise<any> {
-      if (filter !== undefined && keyRange !== undefined) {
-        return new Promise<any>((resolve, reject) => {
-          let filteredDataObjects = [];
-
-          objectStore.openCursor(keyRange).onsuccess = event => {
-            const cursor = event.target.result;
-
-            if (cursor) {
-              const dataObject = cursor.value;
-
-              if (filter(dataObject)) {
-                filteredDataObjects.push(dataObject);
-              }
-              cursor.continue();
-            } else {
-              resolve(filteredDataObjects);
-            }
-          };
-        });
-      }
-
-      return new Promise<any>((resolve, reject) => {
-        let dataObjects = [];
-
-        objectStore.openCursor().onsuccess = event => {
-          const cursor = event.target.result;
-
-          if (cursor) {
-            dataObjects.push(cursor.value);
-            cursor.continue();
-          } else {
-            resolve(dataObjects);
-          }
-        };
-      });
-    }
-
-    private fetchById(objectStore, indexName, keyPath): Promise<any> {
-      return new Promise<any>((resolve, reject) => {
-        const index = objectStore.index(indexName);
-        const request = index.get(keyPath);
-
-        request.onsuccess = event => {
-          resolve(event.target.result);
-        };
-      });
-    }
-
-    private updateRecord(objectStore, indexName, keyPath, update): Promise<any> {
-      return new Promise<any>((resolve, reject) => {
-        const index = objectStore.index(indexName);
-        const cursorRequest = index.openCursor(keyPath);
-
-        cursorRequest.onsuccess = event => {
-          const cursor = event.target.result;
-
-          if (cursor) {
-            const dataRecord = cursor.value;
-
-            if (update(dataRecord)) {
-              const updateRequest = cursor.update(dataRecord);
-
-              updateRequest.onsuccess = () => resolve(dataRecord);
-              updateRequest.onerror = e => reject(e);
-            } else {
-              resolve(dataRecord);
-            }
-          } else {
-            reject(new Error("Cannot find record"));
-          }
-        };
-        cursorRequest.onerror = e => reject(e);
-      });
-    }
-
-    private db(): DbWrapper {
-      if (this.dbWrapper === null) {
-        this.dbWrapper = new DbWrapper();
-      }
-      return this.dbWrapper;
-    }
-
-    public getPlayers(): Promise<any> {
+    getPlayers(): Promise<Array<Player>> {
       return this.db()
         .transaction("players")
         .then(playerObjectStore => this.fetchAll(playerObjectStore));
     }
 
-    public getPlayer(pid): Promise<any> {
+    getPlayer(pid: number): Promise<Player> {
       return this.db()
         .transaction("players")
         .then(playerObjectStore => this.fetchById(playerObjectStore, "pid", pid));
     }
 
-    public getPlayersWithScore(gid, station): Promise<any> {
+    getPlayersWithScore(gid: number, station: number): Promise<any> {
       return this.db()
         .transaction(["players", "games"])
         .then(objectStores => {
@@ -300,26 +217,27 @@ namespace BowBuddy {
         });
     }
 
-    public addPlayer(name, email): Promise<any> {
+    addPlayer(name: string, email: string = ""): Promise<Player> {
       return this.db()
         .transaction("players", true)
         .then(playerObjectStore => {
-          const request = playerObjectStore.add({ name: name, email: email });
+          const playerRecord = { name, email };
+          const request = playerObjectStore.add(playerRecord);
 
           return new Promise<any>((resolve, reject) => {
-            request.onsuccess = event => resolve({ pid: event.target.result, name: name, email: email });
+            request.onsuccess = event => resolve({ pid: event.target.result, ...playerRecord });
             request.onerror = event => reject(event);
           });
         });
     }
 
-    public getCourses(): Promise<any> {
+    getCourses(): Promise<Array<Course>> {
       return this.db()
         .transaction("courses")
         .then(courseObjectStore => this.fetchAll(courseObjectStore));
     }
 
-    public getCourseForGame(gid): Promise<any> {
+    getCourseForGame(gid: number): Promise<any> {
       return this.db()
         .transaction(["courses", "games"])
         .then(objectStores =>
@@ -329,45 +247,38 @@ namespace BowBuddy {
         );
     }
 
-    public addCourse(name, place, geolocation, stations): Promise<any> {
-      stations = +stations; // coerce stations into being a number
+    addCourse(name: string, place: string, geolocation: string, stations: number): Promise<any> {
       return this.db()
         .transaction("courses", true)
         .then(courseObjectStore => {
-          const request = courseObjectStore.add({
-            name: name,
-            place: place,
-            geolocation: geolocation,
-            stations: stations
-          });
+          const courseRecord = { name, place, geolocation, stations };
+          const request = courseObjectStore.add(courseRecord);
 
           return new Promise<any>((resolve, reject) => {
-            request.onsuccess = event =>
-              resolve({
-                cid: event.target.result,
-                name: name,
-                place: place,
-                geolocation: geolocation,
-                stations: stations
-              });
+            request.onsuccess = event => resolve({ cid: event.target.result, ...courseRecord });
             request.onerror = event => reject(event);
           });
         });
     }
 
-    public getGames(): Promise<any> {
+    getGames(): Promise<Array<Game>> {
       return this.db()
         .transaction("games")
         .then(gameObjectStore => this.fetchAll(gameObjectStore));
     }
 
-    public getGame(gid): Promise<any> {
+    getGame(gid: number): Promise<Game> {
       return this.db()
         .transaction("games")
         .then(gameObjectStore => this.fetchById(gameObjectStore, "gid", gid));
     }
 
-    public addGame(cid, pids, starttime: string = undefined, endtime: string = undefined): Promise<any> {
+    addGame(
+      cid: number,
+      pids: Array<number>,
+      starttime: string = undefined,
+      endtime: string = undefined
+    ): Promise<Game> {
       return this.db()
         .transaction("games", true)
         .then(gameObjectStore => {
@@ -393,7 +304,7 @@ namespace BowBuddy {
     }
 
     // returns promise with updated game record
-    public finishGame(gid): Promise<any> {
+    finishGame(gid: number): Promise<any> {
       return this.db()
         .transaction("games", true)
         .then(gameObjectStore => {
@@ -408,31 +319,21 @@ namespace BowBuddy {
         });
     }
 
-    public setScore(gid, pid, station, score): Promise<any> {
+    setScore(gid: number, pid: number, station: number, score: string): Promise<Score> {
       return this.db()
         .transaction("scores", true)
         .then(scoreObjectStore => {
-          const request = scoreObjectStore.put({
-            gid: gid,
-            pid: pid,
-            station: station,
-            score: score
-          });
+          const scoreRecord = { gid, pid, station, score };
+          const request = scoreObjectStore.put(scoreRecord);
 
           return new Promise<any>((resolve, reject) => {
-            request.onsuccess = event =>
-              resolve({
-                gid: gid,
-                pid: pid,
-                station: station,
-                score: score
-              });
+            request.onsuccess = event => resolve(scoreRecord);
             request.onerror = event => reject(event);
           });
         });
     }
 
-    public dump(): Promise<any> {
+    dump(): Promise<any> {
       const dbRef = this.db();
       let dbObject = {};
 
@@ -454,7 +355,7 @@ namespace BowBuddy {
       });
     }
 
-    public importDb(dbObject): Promise<any> {
+    importDb(dbObject): Promise<any> {
       console.log(">> Step 1: Delete old database");
 
       return this.db()
@@ -508,8 +409,102 @@ namespace BowBuddy {
         });
     }
 
-    public erase(): Promise<any> {
+    erase(): Promise<any> {
       return this.db().erase();
+    }
+
+    private fetchAll(
+      objectStore: IDBObjectStore,
+      keyRange: IDBKeyRange = undefined,
+      filter: (any) => boolean = undefined
+    ): Promise<Array<any>> {
+      if (filter !== undefined && keyRange !== undefined) {
+        return new Promise<any>((resolve, reject) => {
+          const cursorRequest = objectStore.openCursor(keyRange);
+          const filteredDataObjects = [];
+
+          cursorRequest.onsuccess = event => {
+            const cursor = cursorRequest.result;
+
+            if (cursor) {
+              const dataObject = cursor.value;
+
+              if (filter(dataObject)) {
+                filteredDataObjects.push(dataObject);
+              }
+              cursor.continue();
+            } else {
+              resolve(filteredDataObjects);
+            }
+          };
+        });
+      }
+
+      return new Promise<any>((resolve, reject) => {
+        const cursorRequest = objectStore.openCursor();
+        const dataObjects = [];
+
+        cursorRequest.onsuccess = event => {
+          const cursor = cursorRequest.result;
+
+          if (cursor) {
+            dataObjects.push(cursor.value);
+            cursor.continue();
+          } else {
+            resolve(dataObjects);
+          }
+        };
+      });
+    }
+
+    private fetchById(objectStore: IDBObjectStore, indexName: string, keyPath: number | Array<number>): Promise<any> {
+      return new Promise<any>((resolve, reject) => {
+        const index: IDBIndex = objectStore.index(indexName);
+        const request: IDBRequest = index.get(keyPath);
+
+        request.onsuccess = event => {
+          resolve(request.result);
+        };
+      });
+    }
+
+    private updateRecord(
+      objectStore: IDBObjectStore,
+      indexName: string,
+      keyPath: number,
+      update: (record: any) => boolean
+    ): Promise<any> {
+      return new Promise<any>((resolve, reject) => {
+        const index = objectStore.index(indexName);
+        const cursorRequest = index.openCursor(keyPath);
+
+        cursorRequest.onsuccess = event => {
+          const cursor = cursorRequest.result;
+
+          if (cursor) {
+            const dataRecord = cursor.value;
+
+            if (update(dataRecord)) {
+              const updateRequest = cursor.update(dataRecord);
+
+              updateRequest.onsuccess = () => resolve(dataRecord);
+              updateRequest.onerror = e => reject(e);
+            } else {
+              resolve(dataRecord);
+            }
+          } else {
+            reject(new Error("Cannot find record"));
+          }
+        };
+        cursorRequest.onerror = e => reject(e);
+      });
+    }
+
+    private db(): DbWrapper {
+      if (this.dbWrapper === null) {
+        this.dbWrapper = new DbWrapper();
+      }
+      return this.dbWrapper;
     }
   }
 }

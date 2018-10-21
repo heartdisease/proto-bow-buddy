@@ -56,7 +56,7 @@ namespace BowBuddy {
   }
 
   export class Application {
-    private static /*final*/ VERSION = '2.0.3';
+    private static /*final*/ VERSION = '2.0.4';
     private static storage: DbAccess = null;
     private static currentView: BaseView = null;
 

@@ -28,15 +28,17 @@ namespace BowBuddy {
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+      const gid = <number>urlParams.get("gid");
+
       // sets timestamp for field 'endtime'
-      Application.getStorage()
-        .finishGame(urlParams.get("gid"))
+      this.getStorage()
+        .finishGame(gid)
         .then(game => {
           $("#course-duration").text(Application.getDuration(game.starttime, game.endtime));
         });
 
-      Application.getStorage()
-        .getCourseForGame(urlParams.get("gid"))
+      this.getStorage()
+        .getCourseForGame(gid)
         .then(course => {
           const stations = course.stations;
           let playerNames;
@@ -51,8 +53,8 @@ namespace BowBuddy {
           for (let i = 1; i <= stations; i++) {
             const station = i;
 
-            Application.getStorage()
-              .getPlayersWithScore(urlParams.get("gid"), station)
+            this.getStorage()
+              .getPlayersWithScore(gid, station)
               .then(players => {
                 if (station === 1) {
                   playerNames = players.map(p => p.name);
@@ -72,7 +74,7 @@ namespace BowBuddy {
     }
 
     // TODO really ugly algo to sum up values... -_-'
-    generateScoreTable(playerNames, scores) {
+    private generateScoreTable(playerNames, scores): void {
       const $playerHeaderRow = $("#player-header-row");
       const $playerScoreEntries = $("#player-score-entries");
 

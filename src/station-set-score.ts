@@ -28,9 +28,8 @@ namespace BowBuddy {
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+      const pid = <number>urlParams.get("pid");
       const navigationDelay = 650;
-
-      window.addEventListener("popstate", popstateEvent => this.loadView());
 
       $("#hit-draggable-container").html(
         '<a class="btn btn-info btn-lg hit" href="#" role="button" draggable="true" data-dnd="body-hit">Body</a>\
@@ -50,7 +49,7 @@ namespace BowBuddy {
 
       $("#station-no").text(urlParams.get("station"));
       Application.getStorage()
-        .getPlayer(urlParams.get("pid"))
+        .getPlayer(pid)
         .then(player => $("span.player-name").text(player.name));
 
       // TODO check if draggable and droppable are correctly reset in reset()
@@ -99,8 +98,7 @@ namespace BowBuddy {
     navigateToNextPlayer(gid, station, nextPid, remainingPids) {
       const qaParam = remainingPids.length > 0 ? ";qa=" + remainingPids.join("+") : "";
 
-      this.pushState("#gid=" + gid + ";pid=" + nextPid + "" + qaParam + ";station=" + station);
-      this.loadView();
+      window.location.href = "#gid=" + gid + ";pid=" + nextPid + "" + qaParam + ";station=" + station;
     }
 
     navigateNext(urlParams) {
@@ -185,17 +183,6 @@ namespace BowBuddy {
       $(".miss-btn").off("click");
 
       $("#scoreDisplay").empty();
-    }
-
-    loadView() {
-      this.reset();
-      this.initView();
-    }
-
-    pushState(url) {
-      console.log("pushState: " + url);
-      window.history.pushState(null, null, url);
-      this.loadView();
     }
   }
 }
