@@ -58,7 +58,7 @@ namespace BowBuddy {
     }
 
     onHide(): void {
-      this.reset();
+      // nothing to do
     }
 
     private initPlayerButtons(gid: number, station: number): void {
@@ -96,7 +96,7 @@ namespace BowBuddy {
               .text(player.name + " "); // add space separator here for score badge
 
             if (player.score) {
-              const $scoreBadge = $("<span/>").addClass("new badge blue");
+              const $scoreBadge = $("<span/>").addClass("badge new blue");
 
               playersWithScore++;
 
@@ -122,18 +122,6 @@ namespace BowBuddy {
             $("#quick-assign-btn").removeAttr("disabled"); // enable quick-assign only when no player has a score yet
           }
         });
-    }
-
-    reset(): void {
-      $("#next-station-btn")
-        .off("click")
-        .attr("disabled", "disabled")
-        .html('<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Next station');
-      $("#quick-assign-btn")
-        .off("click")
-        .attr("disabled", "disabled");
-
-      $("#player-selection-list").empty();
     }
   }
 }

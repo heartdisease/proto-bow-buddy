@@ -23,48 +23,38 @@
 
 namespace BowBuddy {
   export class StationSetScoreView extends BaseView {
+    private static /*final*/ NAVIGATION_DELAY = 600;
+
+    private scoreModalElement: HTMLElement;
+
     getTemplateLocator(): string {
       return "#station-set-score-template";
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+      const viewElement = document.querySelector("#main");
+      const gid = <number>urlParams.get("gid");
       const pid = <number>urlParams.get("pid");
-      const navigationDelay = 650;
+      const station = <number>urlParams.get("station");
 
-      $("#hit-draggable-container").html(
-        '<a class="btn btn-info btn-lg hit" href="#" role="button" draggable="true" data-dnd="body-hit">Body</a>\
-<a class="btn btn-warning btn-lg hit" href="#" role="button" draggable="true" data-dnd="kill-hit">Kill</a>\
-<a class="btn btn-danger btn-lg hit" href="#" role="button" draggable="true" data-dnd="center-kill-hit">Center Kill</a>'
-      );
-      $("#turn-draggable-container").html(
-        '<a class="btn btn-success btn-lg turn" href="#" role="button" draggable="true" data-dnd="first-turn">1<sup>st</sup></a>\
-<a class="btn btn-primary btn-lg turn" href="#" role="button" draggable="true" data-dnd="second-turn">2<sup>nd</sup></a>\
-<a class="btn btn-default btn-lg turn" href="#" role="button" draggable="true" data-dnd="third-turn">3<sup>rd</sup></a>'
-      );
+      this.scoreModalElement = viewElement.querySelector("#score-modal");
 
-      $("#back-btn").on("click", e => {
-        e.preventDefault();
-        this.navigateBack(urlParams.get("gid"), urlParams.get("station"));
-      });
+      M.Modal.init(this.scoreModalElement, {});
 
-      $("#station-no").text(urlParams.get("station"));
+      $("#station-no").text(station);
+
       Application.getStorage()
         .getPlayer(pid)
         .then(player => $("span.player-name").text(player.name));
 
+      // TODO think about replacing touch-dnd with interact.js (https://github.com/taye/interact.js)
       // TODO check if draggable and droppable are correctly reset in reset()
       (<any>$(".hit")) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
         .draggable({ connectWith: ".turn" })
         .droppable({ accept: ".turn", activeClass: "active", hoverClass: "dropZone" })
         .on("droppable:drop", (e, ui) => {
           console.log("URL params in hit: " + JSON.stringify(urlParams));
-
-          this.logScore(
-            urlParams,
-            navigationDelay,
-            e.target.getAttribute("data-dnd"),
-            ui.item[0].getAttribute("data-dnd")
-          );
+          this.logScore(gid, pid, station, e.target.getAttribute("data-dnd"), ui.item[0].getAttribute("data-dnd"));
         });
 
       (<any>$(".turn")) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
@@ -72,117 +62,99 @@ namespace BowBuddy {
         .droppable({ accept: ".hit", activeClass: "active", hoverClass: "dropZone" })
         .on("droppable:drop", (e, ui) => {
           console.log("URL params in turn: " + JSON.stringify(urlParams));
-
-          this.logScore(
-            urlParams,
-            navigationDelay,
-            ui.item[0].getAttribute("data-dnd"),
-            e.target.getAttribute("data-dnd")
-          );
+          this.logScore(gid, pid, station, ui.item[0].getAttribute("data-dnd"), e.target.getAttribute("data-dnd"));
         });
 
       $(".miss-btn").on("click", e => {
         e.preventDefault();
-        this.logScore(urlParams, navigationDelay);
+        this.logScore(gid, pid, station);
       });
     }
 
     onHide(): void {
-      // nothing to do
+      M.Modal.getInstance(this.scoreModalElement).close();
+      M.Modal.getInstance(this.scoreModalElement).destroy();
     }
 
-    navigateBack(gid, station) {
-      window.location.href = "#station-select-player;gid=" + gid + ";station=" + station;
+    private navigateBack(gid: number, station: number): void {
+      window.location.href = `#station-select-player;gid=${gid};station=${station}`;
     }
 
-    navigateToNextPlayer(gid, station, nextPid, remainingPids) {
+    private navigateToNextPlayer(gid: number, station: number, nextPid: number, remainingPids: Array<string>) {
       const qaParam = remainingPids.length > 0 ? ";qa=" + remainingPids.join("+") : "";
-
-      window.location.href = "#gid=" + gid + ";pid=" + nextPid + "" + qaParam + ";station=" + station;
+      window.location.href = `#gid=${gid};pid=${nextPid}${qaParam};station=${station}`;
     }
 
-    navigateNext(urlParams) {
-      console.log("URL params in navigatenext: " + JSON.stringify(urlParams));
-
-      if (urlParams.get("qa")) {
-        const qaPlayers = ("" + urlParams.get("qa")).split("+"); // if qa has only one entry left it becomes an integer
+    private navigateNext(gid: number, pid: number, station: number, qa: string | number = undefined): void {
+      if (qa !== undefined) {
+        const qaPlayers = ("" + qa).split("+"); // if qa has only one entry left it becomes an integer
 
         if (qaPlayers.length > 0) {
-          this.navigateToNextPlayer(urlParams.get("gid"), urlParams.get("station"), qaPlayers[0], qaPlayers.slice(1));
+          this.navigateToNextPlayer(gid, station, +qaPlayers[0], qaPlayers.slice(1));
         } else {
-          throw new Error("Invalid qa parameter '" + urlParams.get("qa") + "'");
+          throw new Error(`Invalid qa parameter '${qa}'`);
         }
       } else {
-        this.navigateBack(urlParams.get("gid"), urlParams.get("station"));
+        this.navigateBack(gid, station);
       }
     }
 
-    getHitButton(hit) {
-      switch (hit) {
-        case "body-hit":
-          return '<a class="btn btn-info btn-lg hit" href="#" role="button">Body</a>';
-        case "kill-hit":
-          return '<a class="btn btn-warning btn-lg hit" href="#" role="button">Kill</a>';
-        case "center-kill-hit":
-          return '<a class="btn btn-danger btn-lg hit" href="#" role="button">Center Kill</a>';
-      }
-    }
-
-    getTurnButton(turn) {
-      switch (turn) {
-        case "first-turn":
-          return '<a class="btn btn-success btn-lg turn" href="#" role="button">1<sup>st</sup></a>';
-        case "second-turn":
-          return '<a class="btn btn-primary btn-lg turn" href="#" role="button">2<sup>nd</sup></a>';
-        case "third-turn":
-          return '<a class="btn btn-default btn-lg turn" href="#" role="button">3<sup>rd</sup></a>';
-      }
-    }
-
-    logScore(urlParams, navigationDelay, hit: string = undefined, turn: string = undefined) {
+    private logScore(
+      gid: number,
+      pid: number,
+      station: number,
+      hit: string = undefined,
+      turn: string = undefined
+    ): void {
       const before = Date.now();
       const miss = hit === undefined || turn === undefined;
       const score = miss ? "miss" : turn + ":" + hit;
 
-      $("#scoreDisplay").html(
-        miss
-          ? '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>'
-          : this.getTurnButton(turn) + this.getHitButton(hit)
-      );
-      // TODO write TS wrapper for touch-dnd
-      (<any>$("#scoreModal")).modal({ keyboard: false });
+      if (miss) {
+        $("#modal-hit-score").html('<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>');
+      } else {
+        $("#modal-hit-score").html(this.getHitButton(hit));
+        $("#modal-turn-score").html(this.getTurnButton(turn));
+      }
+
+      M.Modal.getInstance(this.scoreModalElement).open();
 
       Application.getStorage()
-        .setScore(urlParams.get("gid"), urlParams.get("pid"), urlParams.get("station"), score)
+        .setScore(gid, pid, station, score)
         .then(score => {
-          console.log("URL params in setScore: " + JSON.stringify(urlParams));
-
           const timeDiff = Date.now() - before;
 
-          if (timeDiff >= navigationDelay) {
-            this.navigateNext(urlParams);
+          if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
+            this.navigateNext(gid, pid, station);
           } else {
-            window.setTimeout(() => this.navigateNext(urlParams), navigationDelay - timeDiff);
+            window.setTimeout(
+              () => this.navigateNext(gid, pid, station),
+              StationSetScoreView.NAVIGATION_DELAY - timeDiff
+            );
           }
         });
     }
 
-    reset() {
-      // TODO write TS wrapper for touch-dnd
-      (<any>$("#scoreModal")).modal("hide");
+    private getHitButton(hit: string): string {
+      switch (hit) {
+        case "body-hit":
+          return '<a class="btn-floating btn-large light-blue accent-4 hit"><span class="draggable-text-block">Body</span></a>';
+        case "kill-hit":
+          return '<a class="btn-floating btn-large amber darken-4 hit"><span class="draggable-text-block">Kill</span></a>';
+        case "center-kill-hit":
+          return '<a class="btn-floating btn-large red darken-4 hit"><span class="draggable-text-block">Center Kill</span></a>';
+      }
+    }
 
-      $("#hit-draggable-container").empty();
-      $("#turn-draggable-container").empty();
-
-      $("nav.navbar").off("click");
-      $("#back-btn").off("click");
-
-      $(".hit").off("droppable:drop");
-      $(".turn").off("droppable:drop");
-
-      $(".miss-btn").off("click");
-
-      $("#scoreDisplay").empty();
+    private getTurnButton(turn: string): string {
+      switch (turn) {
+        case "first-turn":
+          return '<a class="btn-floating btn-large grey darken-4 turn"><span class="draggable-text-block">1<sup>st</sup></span></a>';
+        case "second-turn":
+          return '<a class="btn-floating btn-large grey darken-1 turn"><span class="draggable-text-block">2<sup>nd</sup></span></a>';
+        case "third-turn":
+          return '<a class="btn-floating btn-large grey turn"><span class="draggable-text-block">3<sup>rd</sup></span></a>';
+      }
     }
   }
 }

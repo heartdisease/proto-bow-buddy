@@ -11,3 +11,7 @@
   margin-top: 12px;
   margin-bottom: 12px;
 }
+
+#player-selection-list > a.collection-item > span.badge.new::after {
+  content: ""; /* hack to get rid of the 'new' label without losing the styling of the badge */
+}

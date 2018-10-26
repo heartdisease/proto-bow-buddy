@@ -42,6 +42,7 @@ Copyright 2017-2018 Christoph Matscheko
   </head>
   <body>
     <!-- TODO change Bootstrap-specific class names to Materialize CSS class names! -->
+    <!-- TODO clean up old CSS -->
 
     <div class="container" id="main">
       <!-- VIEW CONTAINER -->
@@ -235,37 +236,57 @@ Copyright 2017-2018 Christoph Matscheko
         </div>
       </div>
 
-      <div class="row score-button-group" style="margin-top: 20px;">
-        <div class="col-xs-6">
-          <div class="btn-group-vertical" role="group" aria-label="type of shot" id="hit-draggable-container">
-            <!-- HIT DRAGGABLES -->
+      <div class="container" style="margin-top: 20px;">
+        <div class="row">
+          <div class="col s6 hit-draggable-container">
+            <a class="btn-floating btn-large light-blue accent-4 hit" draggable="true" data-dnd="body-hit">
+              <span class="draggable-text-block">Body</span>
+            </a>
+          </div>
+          <div class="col s6 turn-draggable-container">
+            <a class="btn-floating btn-large grey darken-4 turn" draggable="true" data-dnd="first-turn">
+              <span class="draggable-text-block">1<sup>st</sup></span>
+            </a>
           </div>
         </div>
-        <div class="col-xs-6">
-          <div class="btn-group-vertical" role="group" aria-label="turn" id="turn-draggable-container">
-            <!-- TURN DRAGGABLES -->
+        <div class="row">
+          <div class="col s6 hit-draggable-container">
+            <a class="btn-floating btn-large amber darken-4 hit" draggable="true" data-dnd="kill-hit">
+              <span class="draggable-text-block">Kill</span>
+            </a>
+          </div>
+          <div class="col s6 turn-draggable-container">
+            <a class="btn-floating btn-large grey darken-1 turn" draggable="true" data-dnd="second-turn">
+              <span class="draggable-text-block">2<sup>nd</sup></span>
+            </a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s6 hit-draggable-container">
+            <a class="btn-floating btn-large red darken-4 hit" draggable="true" data-dnd="center-kill-hit">
+              <span class="draggable-text-block">Center Kill</span>
+            </a>
+          </div>
+          <div class="col s6 turn-draggable-container">
+            <a class="btn-floating btn-large grey turn" draggable="true" data-dnd="third-turn">
+              <span class="draggable-text-block">3<sup>rd</sup></span>
+            </a>
           </div>
         </div>
       </div>
 
-      <div class="btn-group btn-group-justified" role="group">
-        <a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>
-      </div>
+      <a class="btn-large brown darken-4 miss-btn" href="#" role="button">Miss</a>
 
-      <div class="modal fade" id="scoreModal" role="dialog">
-        <div class="modal-dialog modal-sm">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-              <h4 class="modal-title"><span class="player-name">...</span> scored:</h4>
-            </div>
-            <div class="modal-body">
-              <div class="row score-button-group">
-                <div class="col-xs-12">
-                  <div class="btn-group btn-group-justified" role="group" aria-label="score" id="scoreDisplay">
-                    <!-- DISPLAY SCORE HERE -->
-                  </div>
-                </div>
+      <div class="modal" id="score-modal">
+        <div class="modal-content">
+          <h4><span class="player-name">...</span> scored:</h4>
+          <div class="container">
+            <div class="row">
+              <div class="col s6" id="modal-hit-score">
+                <!-- SCORE: HIT -->
+              </div>
+              <div class="col s6" id="modal-turn-score">
+                <!-- SCORE: TURN -->
               </div>
             </div>
           </div>
