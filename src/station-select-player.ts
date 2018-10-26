@@ -91,13 +91,12 @@ namespace BowBuddy {
             console.log("Init button for player " + player.name);
 
             const $playerEntry = $("<a/>")
-              .addClass("waves-effect waves-light btn-large")
+              .addClass("collection-item")
               .attr("href", `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`)
-              .attr("role", "button")
               .text(player.name + " "); // add space separator here for score badge
 
             if (player.score) {
-              const $scoreBadge = $("<span/>").addClass("badge red");
+              const $scoreBadge = $("<span/>").addClass("new badge blue");
 
               playersWithScore++;
 

@@ -40,16 +40,18 @@ Copyright 2017-2018 Christoph Matscheko
     <link rel="stylesheet" href="css/station-set-score.css" />
     <link rel="stylesheet" href="css/final-score.css" />
   </head>
-
   <body>
+    <!-- TODO change Bootstrap-specific class names to Materialize CSS class names! -->
+
     <div class="container" id="main">
-      <!-- INSERT VIEW HERE -->
+      <!-- VIEW CONTAINER -->
     </div>
 
+    <!-- [BEGIN TEMPLATE] MAIN MENU -->
     <template id="main-menu-template">
       <div class="app-logo">
         <h1>
-          <!-- INSERT APP TITLE HERE -->
+          <!-- APP TITLE -->
         </h1>
       </div>
 
@@ -99,7 +101,9 @@ Copyright 2017-2018 Christoph Matscheko
         </div>
       </div>
     </template>
+    <!-- [END TEMPLATE] MAIN MENU -->
 
+    <!-- [BEGIN TEMPLATE] NEW GAME -->
     <template id="new-game-template">
       <h1>New Game</h1>
 
@@ -199,7 +203,9 @@ Copyright 2017-2018 Christoph Matscheko
         </a>
       </div>
     </template>
+    <!-- [END TEMPLATE] NEW GAME -->
 
+    <!-- [BEGIN TEMPLATE] SELECT PLAYER -->
     <template id="station-select-player-template">
       <h1>Station <span id="station-no">?</span>: Select player</h1>
 
@@ -209,8 +215,8 @@ Copyright 2017-2018 Christoph Matscheko
         </a>
       </div>
 
-      <div class="btn-group-vertical btn-group-lg player-selection" id="player-selection-list" role="group" aria-label="choose player">
-        <!-- PLAYER BUTTONS ARE INSERTED HERE -->
+      <div class="collection" id="player-selection-list">
+        <!-- PLAYER BUTTONS -->
       </div>
 
       <div class="btn-group btn-group-justified" role="group">
@@ -219,7 +225,9 @@ Copyright 2017-2018 Christoph Matscheko
         </a>
       </div>
     </template>
+    <!-- [END TEMPLATE] SELECT PLAYER -->
 
+    <!-- [BEGIN TEMPLATE] SET SCORE -->
     <template id="station-set-score-template">
       <div class="row">
         <div class="col-md-12">
@@ -264,7 +272,9 @@ Copyright 2017-2018 Christoph Matscheko
         </div>
       </div>
     </template>
+    <!-- [END TEMPLATE] SET SCORE -->
 
+    <!-- [BEGIN TEMPLATE] FINAL SCORE -->
     <template id="final-score-template">
       <h1>Course complete:<br /><span id="course-label"></span></h1>
 
@@ -287,6 +297,7 @@ Copyright 2017-2018 Christoph Matscheko
         </a>
       </div>
     </template>
+    <!-- [END TEMPLATE] FINAL SCORE -->
 
     <script src="node_modules/jquery/dist/jquery.slim.min.js"></script>
     <script src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
