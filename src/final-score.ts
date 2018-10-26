@@ -40,22 +40,23 @@ namespace BowBuddy {
       this.getStorage()
         .getCourseForGame(gid)
         .then(course => {
+          let playerNames: Array<string>;
           const stations = course.stations;
-          let playerNames;
-          let scores = new Array(stations);
+          const scores: Array<Array<string>> = new Array(stations);
           let scoreCount = 0;
 
           $('#course-label').text((course.place ? course.place + ' ' : '') + course.name);
-          $('#back-btn').on('click', e => {
-            window.location.href = '#station-select-player;gid=' + urlParams.get('gid') + ';station=' + stations;
-          });
+          $('#back-btn').on(
+            'click',
+            (e: any) => (window.location.href = `#station-select-player;gid=${gid};station=${stations}`)
+          );
 
           for (let i = 1; i <= stations; i++) {
             const station = i;
 
             this.getStorage()
               .getPlayersWithScore(gid, station)
-              .then(players => {
+              .then((players: Array<PlayerWithScore>) => {
                 if (station === 1) {
                   playerNames = players.map(p => p.name);
                 }
@@ -74,12 +75,12 @@ namespace BowBuddy {
     }
 
     // TODO really ugly algo to sum up values... -_-'
-    private generateScoreTable(playerNames, scores): void {
+    private generateScoreTable(playerNames: Array<string>, scores: Array<Array<string>>): void {
       const $playerHeaderRow = $('#player-header-row');
       const $playerScoreEntries = $('#player-score-entries');
 
       playerNames.forEach(playerName => $playerHeaderRow.append($('<th/>').text(playerName)));
-      scores.forEach((scoresForStation, index) => {
+      scores.forEach((scoresForStation: Array<string>, index: number) => {
         let $tr = $('<tr/>');
 
         $tr.append(
@@ -87,7 +88,7 @@ namespace BowBuddy {
             .css('font-style', 'italic')
             .text(index + 1 + '.')
         );
-        scoresForStation.forEach(score => $tr.append($('<td/>').text(Application.scoreToPoints(score))));
+        scoresForStation.forEach((score: string) => $tr.append($('<td/>').text(Application.scoreToPoints(score))));
         $playerScoreEntries.append($tr);
       });
 
@@ -96,7 +97,7 @@ namespace BowBuddy {
         .addClass('info')
         .css('font-weight', 'bold');
       $sumRow.append($('<td/>').html('&nbsp;')); // insert filler cell
-      scores[0].forEach((score, column) => {
+      scores[0].forEach((score: string, column: number) => {
         $sumRow.append($('<td/>').text(scores.reduce((sum, row) => sum + Application.scoreToPoints(row[column]), 0)));
       });
       $playerScoreEntries.append($sumRow);

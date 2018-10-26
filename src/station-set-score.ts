@@ -52,7 +52,7 @@ namespace BowBuddy {
       (<any>$('.hit')) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
         .draggable({ connectWith: '.turn' })
         .droppable({ accept: '.turn', activeClass: 'active', hoverClass: 'dropZone' })
-        .on('droppable:drop', (e, ui) => {
+        .on('droppable:drop', (e: any, ui: any) => {
           console.log('URL params in hit: ' + JSON.stringify(urlParams));
           this.logScore(gid, pid, station, e.target.getAttribute('data-dnd'), ui.item[0].getAttribute('data-dnd'));
         });
@@ -60,7 +60,7 @@ namespace BowBuddy {
       (<any>$('.turn')) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
         .draggable({ connectWith: '.turn' })
         .droppable({ accept: '.hit', activeClass: 'active', hoverClass: 'dropZone' })
-        .on('droppable:drop', (e, ui) => {
+        .on('droppable:drop', (e: any, ui: any) => {
           console.log('URL params in turn: ' + JSON.stringify(urlParams));
           this.logScore(gid, pid, station, ui.item[0].getAttribute('data-dnd'), e.target.getAttribute('data-dnd'));
         });

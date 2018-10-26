@@ -66,7 +66,7 @@ namespace BowBuddy {
 
       this.getStorage()
         .getPlayersWithScore(gid, station)
-        .then(players => {
+        .then((players: Array<PlayerWithScore>) => {
           const $playerSelectionList = $('#player-selection-list');
           let playersWithScore = 0;
 
@@ -74,12 +74,12 @@ namespace BowBuddy {
             throw new Error('Cannot load players!');
           }
 
-          $('#quick-assign-btn').on('click', e => {
+          $('#quick-assign-btn').on('click', (e: any) => {
             const qaParam =
               players.length > 1
                 ? `;qa=${players
                     .slice(1)
-                    .map(p => p.pid)
+                    .map((p: Player) => p.pid)
                     .join('+')}`
                 : '';
 
@@ -87,7 +87,7 @@ namespace BowBuddy {
             window.location.href = `#station-set-score;gid=${gid};pid=${players[0].pid}${qaParam};station=${station}`;
           });
 
-          players.forEach(player => {
+          players.forEach((player: PlayerWithScore) => {
             console.log('Init button for player ' + player.name);
 
             const $playerEntry = $('<a/>')

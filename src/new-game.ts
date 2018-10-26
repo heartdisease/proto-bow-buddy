@@ -251,7 +251,7 @@ namespace BowBuddy {
     private registerStartButtonEventHandler(): void {
       $('#start-game-btn').on('click', e => {
         let cid;
-        let pids = [];
+        const pids: Array<number> = [];
 
         $('#start-game-btn').attr('disabled', 'disabled'); // disable button while async db action is running
 

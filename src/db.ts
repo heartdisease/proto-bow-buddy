@@ -30,7 +30,7 @@ namespace BowBuddy {
         const transaction = db.transaction(objectStores, writeAccess ? 'readwrite' : 'readonly');
 
         return Array.isArray(objectStores)
-          ? objectStores.reduce((map, objectStore) => {
+          ? objectStores.reduce((map: any, objectStore: string) => {
               map[objectStore] = transaction.objectStore(objectStore);
               return map;
             }, {})
@@ -49,7 +49,7 @@ namespace BowBuddy {
             console.info('We now try to erase the db...');
             const deletionRequest = window.indexedDB.deleteDatabase('BowBuddyDb');
 
-            deletionRequest.onsuccess = e => {
+            deletionRequest.onsuccess = (e: any) => {
               console.info('deletionRequest.onsuccess');
               resolve(e);
             };
@@ -57,7 +57,7 @@ namespace BowBuddy {
               console.info('deletionRequest.onblocked');
               window.setTimeout(tryDeleteDb, 50); // try again indefinitely
             };
-            deletionRequest.onerror = e => {
+            deletionRequest.onerror = (e: any) => {
               console.info('deletionRequest.onerror');
               reject(e);
             };
@@ -83,7 +83,7 @@ namespace BowBuddy {
       return (this.dbPromise = new Promise<any>((resolve, reject) => {
         const dbRequest = window.indexedDB.open('BowBuddyDb', 1);
 
-        dbRequest.onupgradeneeded = event => {
+        dbRequest.onupgradeneeded = (event: any) => {
           console.log('dbRequest.onupgradeneeded');
 
           const request = <IDBRequest>event.target;
@@ -133,7 +133,7 @@ namespace BowBuddy {
           scoreStore.createIndex('station', 'station', { unique: false });
           scoreStore.createIndex('score', 'score', { unique: false }); // string format: 'first-turn:body-hit' OR 'miss'
         };
-        dbRequest.onsuccess = event => {
+        dbRequest.onsuccess = (event: any) => {
           console.log('dbRequest.onsuccess');
 
           if (!this.dbConnected) {
@@ -142,7 +142,7 @@ namespace BowBuddy {
             resolve(request.result);
           }
         };
-        dbRequest.onerror = event => {
+        dbRequest.onerror = (event: any) => {
           console.log('dbRequest.onerror');
 
           if (!this.dbConnected) {
@@ -152,7 +152,7 @@ namespace BowBuddy {
           this.dbPromise = null;
           this.dbConnected = false;
         };
-        // dbRequest.onclose = event => {
+        // dbRequest.onclose = (event: any) => {
         //   console.log('dbRequest.onclose');
 
         //   this.dbPromise = null;
@@ -178,7 +178,7 @@ namespace BowBuddy {
         .then(playerObjectStore => this.fetchById(playerObjectStore, 'pid', pid));
     }
 
-    getPlayersWithScore(gid: number, station: number): Promise<any> {
+    getPlayersWithScore(gid: number, station: number): Promise<Array<PlayerWithScore>> {
       return this.db()
         .transaction(['players', 'games'])
         .then(objectStores => {
@@ -197,7 +197,7 @@ namespace BowBuddy {
             return this.db()
               .transaction('scores')
               .then(scoreObjectStore => {
-                let playersWithScore = [];
+                let playersWithScore: Array<any> = [];
 
                 return new Promise<any>((resolve, reject) => {
                   players.forEach(player => {
@@ -225,8 +225,8 @@ namespace BowBuddy {
           const request = playerObjectStore.add(playerRecord);
 
           return new Promise<any>((resolve, reject) => {
-            request.onsuccess = event => resolve({ pid: event.target.result, ...playerRecord });
-            request.onerror = event => reject(event);
+            request.onsuccess = (event: any) => resolve({ pid: event.target.result, ...playerRecord });
+            request.onerror = (event: any) => reject(event);
           });
         });
     }
@@ -255,8 +255,8 @@ namespace BowBuddy {
           const request = courseObjectStore.add(courseRecord);
 
           return new Promise<any>((resolve, reject) => {
-            request.onsuccess = event => resolve({ cid: event.target.result, ...courseRecord });
-            request.onerror = event => reject(event);
+            request.onsuccess = (event: any) => resolve({ cid: event.target.result, ...courseRecord });
+            request.onerror = (event: any) => reject(event);
           });
         });
     }
@@ -290,7 +290,7 @@ namespace BowBuddy {
           });
 
           return new Promise<any>((resolve, reject) => {
-            request.onsuccess = event =>
+            request.onsuccess = (event: any) =>
               resolve({
                 gid: event.target.result,
                 cid: cid,
@@ -298,7 +298,7 @@ namespace BowBuddy {
                 starttime: starttime,
                 endtime: endtime
               });
-            request.onerror = event => reject(event);
+            request.onerror = (event: any) => reject(event);
           });
         });
     }
@@ -327,22 +327,22 @@ namespace BowBuddy {
           const request = scoreObjectStore.put(scoreRecord);
 
           return new Promise<any>((resolve, reject) => {
-            request.onsuccess = event => resolve(scoreRecord);
-            request.onerror = event => reject(event);
+            request.onsuccess = (event: any) => resolve(scoreRecord);
+            request.onerror = (event: any) => reject(event);
           });
         });
     }
 
     dump(): Promise<any> {
       const dbRef = this.db();
-      let dbObject = {};
+      let dbObject: any = {};
 
       return dbRef.objectStoreNames().then(objectStoreNames => {
         return dbRef.transaction(objectStoreNames).then(objectStores => {
           let storagesDumped = 0;
 
           return new Promise<any>((resolve, reject) => {
-            objectStoreNames.forEach(objectStoreName => {
+            objectStoreNames.forEach((objectStoreName: string) => {
               return this.fetchAll(objectStores[objectStoreName]).then(records => {
                 dbObject[objectStoreName] = records;
                 if (++storagesDumped === objectStoreNames.length) {
@@ -355,7 +355,7 @@ namespace BowBuddy {
       });
     }
 
-    importDb(dbObject): Promise<any> {
+    importDb(dbObject: any): Promise<any> {
       console.log('>> Step 1: Delete old database');
 
       return this.db()
@@ -367,7 +367,7 @@ namespace BowBuddy {
 
           return this.db()
             .transaction(objectStoreNames, true)
-            .then(objectStores => {
+            .then((objectStores: any) => {
               // TODO check why we never get here!!
               console.log('>> Step 2.1: We now have all the requested object stores');
 
@@ -381,10 +381,10 @@ namespace BowBuddy {
                   const dataRecords = dbObject[objectStoreName];
                   let recordsAdded = 0;
 
-                  dataRecords.forEach(dataRecord => {
+                  dataRecords.forEach((dataRecord: any) => {
                     let addRequest = objectStores[objectStoreName].add(dataRecord);
 
-                    addRequest.onsuccess = e => {
+                    addRequest.onsuccess = (e: any) => {
                       console.log('recordsAdded: ' + recordsAdded);
                       console.log('objectStoresCompleted: ' + objectStoresCompleted);
 
@@ -395,7 +395,7 @@ namespace BowBuddy {
                         resolve();
                       }
                     };
-                    addRequest.onerror = e => reject(e);
+                    addRequest.onerror = (e: any) => reject(e);
                   });
                 });
               });
@@ -414,14 +414,14 @@ namespace BowBuddy {
     private fetchAll(
       objectStore: IDBObjectStore,
       keyRange: IDBKeyRange = undefined,
-      filter: (any) => boolean = undefined
+      filter: (o: any) => boolean = undefined
     ): Promise<Array<any>> {
       if (filter !== undefined && keyRange !== undefined) {
         return new Promise<any>((resolve, reject) => {
           const cursorRequest = objectStore.openCursor(keyRange);
-          const filteredDataObjects = [];
+          const filteredDataObjects: Array<any> = [];
 
-          cursorRequest.onsuccess = event => {
+          cursorRequest.onsuccess = (event: any) => {
             const cursor = cursorRequest.result;
 
             if (cursor) {
@@ -440,9 +440,9 @@ namespace BowBuddy {
 
       return new Promise<any>((resolve, reject) => {
         const cursorRequest = objectStore.openCursor();
-        const dataObjects = [];
+        const dataObjects: Array<any> = [];
 
-        cursorRequest.onsuccess = event => {
+        cursorRequest.onsuccess = (event: any) => {
           const cursor = cursorRequest.result;
 
           if (cursor) {
@@ -460,7 +460,7 @@ namespace BowBuddy {
         const index: IDBIndex = objectStore.index(indexName);
         const request: IDBRequest = index.get(keyPath);
 
-        request.onsuccess = event => {
+        request.onsuccess = (event: any) => {
           resolve(request.result);
         };
       });
@@ -476,7 +476,7 @@ namespace BowBuddy {
         const index = objectStore.index(indexName);
         const cursorRequest = index.openCursor(keyPath);
 
-        cursorRequest.onsuccess = event => {
+        cursorRequest.onsuccess = (event: any) => {
           const cursor = cursorRequest.result;
 
           if (cursor) {
@@ -486,7 +486,7 @@ namespace BowBuddy {
               const updateRequest = cursor.update(dataRecord);
 
               updateRequest.onsuccess = () => resolve(dataRecord);
-              updateRequest.onerror = e => reject(e);
+              updateRequest.onerror = (e: any) => reject(e);
             } else {
               resolve(dataRecord);
             }
@@ -494,7 +494,7 @@ namespace BowBuddy {
             reject(new Error('Cannot find record'));
           }
         };
-        cursorRequest.onerror = e => reject(e);
+        cursorRequest.onerror = (e: any) => reject(e);
       });
     }
 

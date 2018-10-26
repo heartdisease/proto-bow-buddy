@@ -31,6 +31,10 @@ namespace BowBuddy {
     email: string;
   }
 
+  export interface PlayerWithScore extends Player {
+    readonly score: string | undefined;
+  }
+
   export interface Course {
     readonly cid: number;
     name: string;
@@ -67,7 +71,7 @@ namespace BowBuddy {
       Application.onHashChange(window.location.hash.split(';'));
     }
 
-    private static onHashChange(params: string[]) {
+    private static onHashChange(params: string[]): void {
       const viewToken = params[0];
       let view;
 
@@ -111,7 +115,7 @@ namespace BowBuddy {
       return Application.VERSION;
     }
 
-    public static updateWindowTitle(version) {
+    public static updateWindowTitle(version: string): void {
       document.title = document.title.replace(/\{\$version\}/g, version);
     }
 
@@ -139,19 +143,19 @@ namespace BowBuddy {
       return urlParams;
     }
 
-    public static switchToFullscreenFunc(): (e) => void {
+    public static switchToFullscreenFunc(): (e: any) => void {
       let clickCounter = 0;
 
       return clickEvent => {
         clickEvent.preventDefault();
 
-        if (++clickCounter % 3 === 0 && !document['fullscreenElement']) {
+        if (++clickCounter % 3 === 0 && !(<any>document).fullscreenElement) {
           console.log('Init fullscreen...');
 
-          if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-          } else if (document.documentElement['webkitRequestFullscreen']) {
-            document.documentElement['webkitRequestFullscreen']();
+          if ((<any>document).documentElement.requestFullscreen) {
+            (<any>document).documentElement.requestFullscreen();
+          } else if ((<any>document).documentElement.webkitRequestFullscreen) {
+            (<any>document).documentElement.webkitRequestFullscreen();
           }
         }
       };
@@ -186,7 +190,7 @@ namespace BowBuddy {
         case 'center-kill-hit':
           return 20 - penalty * 6;
         default:
-        throw new Error(`Invalid score format '${score}'`);
+          throw new Error(`Invalid score format '${score}'`);
       }
     }
 
@@ -209,7 +213,7 @@ namespace BowBuddy {
           scoreLabel = '3<sup>rd</sup>';
           break;
         default:
-        throw new Error(`Invalid score format '${score}'`);
+          throw new Error(`Invalid score format '${score}'`);
       }
       scoreLabel += ' - ';
       switch (scoreParts[1]) {
@@ -223,7 +227,7 @@ namespace BowBuddy {
           scoreLabel += 'Center Kill';
           break;
         default:
-        throw new Error(`Invalid score format '${score}'`);
+          throw new Error(`Invalid score format '${score}'`);
       }
 
       return scoreLabel;
