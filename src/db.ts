@@ -27,7 +27,7 @@ namespace BowBuddy {
 
     transaction(objectStores: string | Array<string>, writeAccess: boolean = false): Promise<any> {
       return this.requestDb().then(db => {
-        const transaction = db.transaction(objectStores, writeAccess ? "readwrite" : "readonly");
+        const transaction = db.transaction(objectStores, writeAccess ? 'readwrite' : 'readonly');
 
         return Array.isArray(objectStores)
           ? objectStores.reduce((map, objectStore) => {
@@ -46,19 +46,19 @@ namespace BowBuddy {
       return this.close().then(() => {
         return new Promise<any>((resolve, reject) => {
           (function tryDeleteDb() {
-            console.info("We now try to erase the db...");
-            const deletionRequest = window.indexedDB.deleteDatabase("BowBuddyDb");
+            console.info('We now try to erase the db...');
+            const deletionRequest = window.indexedDB.deleteDatabase('BowBuddyDb');
 
             deletionRequest.onsuccess = e => {
-              console.info("deletionRequest.onsuccess");
+              console.info('deletionRequest.onsuccess');
               resolve(e);
             };
             deletionRequest.onblocked = () => {
-              console.info("deletionRequest.onblocked");
+              console.info('deletionRequest.onblocked');
               window.setTimeout(tryDeleteDb, 50); // try again indefinitely
             };
             deletionRequest.onerror = e => {
-              console.info("deletionRequest.onerror");
+              console.info('deletionRequest.onerror');
               reject(e);
             };
           })();
@@ -81,60 +81,60 @@ namespace BowBuddy {
         return this.dbPromise;
       }
       return (this.dbPromise = new Promise<any>((resolve, reject) => {
-        const dbRequest = window.indexedDB.open("BowBuddyDb", 1);
+        const dbRequest = window.indexedDB.open('BowBuddyDb', 1);
 
         dbRequest.onupgradeneeded = event => {
-          console.log("dbRequest.onupgradeneeded");
+          console.log('dbRequest.onupgradeneeded');
 
           const request = <IDBRequest>event.target;
           const db = request.result;
 
-          const playerStore = db.createObjectStore("players", {
-            keyPath: "pid",
+          const playerStore = db.createObjectStore('players', {
+            keyPath: 'pid',
             autoIncrement: true
           });
-          playerStore.createIndex("pid", "pid", { unique: true });
-          playerStore.createIndex("name", "name", { unique: true });
-          playerStore.createIndex("email", "email", { unique: false });
+          playerStore.createIndex('pid', 'pid', { unique: true });
+          playerStore.createIndex('name', 'name', { unique: true });
+          playerStore.createIndex('email', 'email', { unique: false });
 
-          const courseStore = db.createObjectStore("courses", {
-            keyPath: "cid",
+          const courseStore = db.createObjectStore('courses', {
+            keyPath: 'cid',
             autoIncrement: true
           });
-          courseStore.createIndex("cid", "cid", { unique: true });
-          courseStore.createIndex("name", "name", { unique: false });
-          courseStore.createIndex("place", "place", { unique: false });
-          courseStore.createIndex("geolocation", "geolocation", {
+          courseStore.createIndex('cid', 'cid', { unique: true });
+          courseStore.createIndex('name', 'name', { unique: false });
+          courseStore.createIndex('place', 'place', { unique: false });
+          courseStore.createIndex('geolocation', 'geolocation', {
             unique: false
           });
-          courseStore.createIndex("stations", "stations", { unique: false });
+          courseStore.createIndex('stations', 'stations', { unique: false });
 
-          const gameStore = db.createObjectStore("games", {
-            keyPath: "gid",
+          const gameStore = db.createObjectStore('games', {
+            keyPath: 'gid',
             autoIncrement: true
           });
-          gameStore.createIndex("gid", "gid", { unique: true });
-          gameStore.createIndex("cid", "cid", { unique: false });
-          gameStore.createIndex("pids", "pids", {
+          gameStore.createIndex('gid', 'gid', { unique: true });
+          gameStore.createIndex('cid', 'cid', { unique: false });
+          gameStore.createIndex('pids', 'pids', {
             unique: false,
             multiEntry: true
           });
-          gameStore.createIndex("starttime", "date", { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
-          gameStore.createIndex("endtime", "date", { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+          gameStore.createIndex('starttime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+          gameStore.createIndex('endtime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
 
-          const scoreStore = db.createObjectStore("scores", {
-            keyPath: ["gid", "pid", "station"]
+          const scoreStore = db.createObjectStore('scores', {
+            keyPath: ['gid', 'pid', 'station']
           });
-          scoreStore.createIndex("sid", ["gid", "pid", "station"], {
+          scoreStore.createIndex('sid', ['gid', 'pid', 'station'], {
             unique: true
           }); // compound key path
-          scoreStore.createIndex("gid", "gid", { unique: false });
-          scoreStore.createIndex("pid", "pid", { unique: false });
-          scoreStore.createIndex("station", "station", { unique: false });
-          scoreStore.createIndex("score", "score", { unique: false }); // string format: "first-turn:body-hit" OR "miss"
+          scoreStore.createIndex('gid', 'gid', { unique: false });
+          scoreStore.createIndex('pid', 'pid', { unique: false });
+          scoreStore.createIndex('station', 'station', { unique: false });
+          scoreStore.createIndex('score', 'score', { unique: false }); // string format: 'first-turn:body-hit' OR 'miss'
         };
         dbRequest.onsuccess = event => {
-          console.log("dbRequest.onsuccess");
+          console.log('dbRequest.onsuccess');
 
           if (!this.dbConnected) {
             const request = <IDBRequest>event.target;
@@ -143,21 +143,21 @@ namespace BowBuddy {
           }
         };
         dbRequest.onerror = event => {
-          console.log("dbRequest.onerror");
+          console.log('dbRequest.onerror');
 
           if (!this.dbConnected) {
-            window.alert("This app does not work without IndexedDB enabled!");
+            window.alert('This app does not work without IndexedDB enabled!');
             reject(event);
           }
           this.dbPromise = null;
           this.dbConnected = false;
         };
         // dbRequest.onclose = event => {
-        //   console.log("dbRequest.onclose");
+        //   console.log('dbRequest.onclose');
 
         //   this.dbPromise = null;
         //   this.dbConnected = false;
-        //   window.alert("The database got closed unexpectedly!");
+        //   window.alert('The database got closed unexpectedly!');
         // };
       }));
     }
@@ -168,21 +168,21 @@ namespace BowBuddy {
 
     getPlayers(): Promise<Array<Player>> {
       return this.db()
-        .transaction("players")
+        .transaction('players')
         .then(playerObjectStore => this.fetchAll(playerObjectStore));
     }
 
     getPlayer(pid: number): Promise<Player> {
       return this.db()
-        .transaction("players")
-        .then(playerObjectStore => this.fetchById(playerObjectStore, "pid", pid));
+        .transaction('players')
+        .then(playerObjectStore => this.fetchById(playerObjectStore, 'pid', pid));
     }
 
     getPlayersWithScore(gid: number, station: number): Promise<any> {
       return this.db()
-        .transaction(["players", "games"])
+        .transaction(['players', 'games'])
         .then(objectStores => {
-          return this.fetchById(objectStores.games, "gid", gid).then(game =>
+          return this.fetchById(objectStores.games, 'gid', gid).then(game =>
             this.fetchAll(
               objectStores.players,
               IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
@@ -195,13 +195,13 @@ namespace BowBuddy {
             return [];
           } else {
             return this.db()
-              .transaction("scores")
+              .transaction('scores')
               .then(scoreObjectStore => {
                 let playersWithScore = [];
 
                 return new Promise<any>((resolve, reject) => {
                   players.forEach(player => {
-                    this.fetchById(scoreObjectStore, "sid", [gid, player.pid, station]).then(score => {
+                    this.fetchById(scoreObjectStore, 'sid', [gid, player.pid, station]).then(score => {
                       playersWithScore.push(
                         score && score.score ? (<any>Object).assign(player, { score: score.score }) : player
                       );
@@ -217,9 +217,9 @@ namespace BowBuddy {
         });
     }
 
-    addPlayer(name: string, email: string = ""): Promise<Player> {
+    addPlayer(name: string, email: string = ''): Promise<Player> {
       return this.db()
-        .transaction("players", true)
+        .transaction('players', true)
         .then(playerObjectStore => {
           const playerRecord = { name, email };
           const request = playerObjectStore.add(playerRecord);
@@ -233,23 +233,23 @@ namespace BowBuddy {
 
     getCourses(): Promise<Array<Course>> {
       return this.db()
-        .transaction("courses")
+        .transaction('courses')
         .then(courseObjectStore => this.fetchAll(courseObjectStore));
     }
 
     getCourseForGame(gid: number): Promise<any> {
       return this.db()
-        .transaction(["courses", "games"])
+        .transaction(['courses', 'games'])
         .then(objectStores =>
-          this.fetchById(objectStores.games, "gid", gid).then(game =>
-            this.fetchById(objectStores.courses, "cid", game.cid)
+          this.fetchById(objectStores.games, 'gid', gid).then(game =>
+            this.fetchById(objectStores.courses, 'cid', game.cid)
           )
         );
     }
 
     addCourse(name: string, place: string, geolocation: string, stations: number): Promise<any> {
       return this.db()
-        .transaction("courses", true)
+        .transaction('courses', true)
         .then(courseObjectStore => {
           const courseRecord = { name, place, geolocation, stations };
           const request = courseObjectStore.add(courseRecord);
@@ -263,14 +263,14 @@ namespace BowBuddy {
 
     getGames(): Promise<Array<Game>> {
       return this.db()
-        .transaction("games")
+        .transaction('games')
         .then(gameObjectStore => this.fetchAll(gameObjectStore));
     }
 
     getGame(gid: number): Promise<Game> {
       return this.db()
-        .transaction("games")
-        .then(gameObjectStore => this.fetchById(gameObjectStore, "gid", gid));
+        .transaction('games')
+        .then(gameObjectStore => this.fetchById(gameObjectStore, 'gid', gid));
     }
 
     addGame(
@@ -280,7 +280,7 @@ namespace BowBuddy {
       endtime: string = undefined
     ): Promise<Game> {
       return this.db()
-        .transaction("games", true)
+        .transaction('games', true)
         .then(gameObjectStore => {
           const request = gameObjectStore.add({
             cid: cid,
@@ -306,9 +306,9 @@ namespace BowBuddy {
     // returns promise with updated game record
     finishGame(gid: number): Promise<any> {
       return this.db()
-        .transaction("games", true)
+        .transaction('games', true)
         .then(gameObjectStore => {
-          return this.updateRecord(gameObjectStore, "gid", gid, game => {
+          return this.updateRecord(gameObjectStore, 'gid', gid, game => {
             // change timestamp only if it has not already been set!
             if (!game.endtime) {
               game.endtime = new Date().toISOString();
@@ -321,7 +321,7 @@ namespace BowBuddy {
 
     setScore(gid: number, pid: number, station: number, score: string): Promise<Score> {
       return this.db()
-        .transaction("scores", true)
+        .transaction('scores', true)
         .then(scoreObjectStore => {
           const scoreRecord = { gid, pid, station, score };
           const request = scoreObjectStore.put(scoreRecord);
@@ -356,29 +356,27 @@ namespace BowBuddy {
     }
 
     importDb(dbObject): Promise<any> {
-      console.log(">> Step 1: Delete old database");
+      console.log('>> Step 1: Delete old database');
 
       return this.db()
         .erase()
         .then(e => {
           const objectStoreNames = Object.getOwnPropertyNames(dbObject);
 
-          console.log(">> Step 2: Requested transactions for " + objectStoreNames);
+          console.log('>> Step 2: Requested transactions for ' + objectStoreNames);
 
           return this.db()
             .transaction(objectStoreNames, true)
             .then(objectStores => {
               // TODO check why we never get here!!
-              console.log(">> Step 2.1: We now have all the requested object stores");
+              console.log('>> Step 2.1: We now have all the requested object stores');
 
               let objectStoresCompleted = 0;
               let steps = 2;
 
               return new Promise<any>((resolve, reject) => {
                 objectStoreNames.forEach(objectStoreName => {
-                  console.log(
-                    ">> Step " + ++steps + ": Add all data records into object storage '" + objectStoreName + "'"
-                  );
+                  console.log(`>> Step ${++steps}: Add all data records into object storage '${objectStoreName}'`);
 
                   const dataRecords = dbObject[objectStoreName];
                   let recordsAdded = 0;
@@ -387,8 +385,8 @@ namespace BowBuddy {
                     let addRequest = objectStores[objectStoreName].add(dataRecord);
 
                     addRequest.onsuccess = e => {
-                      console.log("recordsAdded: " + recordsAdded);
-                      console.log("objectStoresCompleted: " + objectStoresCompleted);
+                      console.log('recordsAdded: ' + recordsAdded);
+                      console.log('objectStoresCompleted: ' + objectStoresCompleted);
 
                       if (
                         ++recordsAdded === dataRecords.length &&
@@ -403,7 +401,7 @@ namespace BowBuddy {
               });
             })
             .catch(error => {
-              console.error("Cannot open transaction: " + error);
+              console.error('Cannot open transaction: ' + error);
               throw error;
             });
         });
@@ -493,7 +491,7 @@ namespace BowBuddy {
               resolve(dataRecord);
             }
           } else {
-            reject(new Error("Cannot find record"));
+            reject(new Error('Cannot find record'));
           }
         };
         cursorRequest.onerror = e => reject(e);

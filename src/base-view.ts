@@ -17,22 +17,22 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-/// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
+/// <reference path ='../node_modules/@types/jquery/index.d.ts'/>
 
 namespace BowBuddy {
   export abstract class BaseView {
     private loadTemplate(): void {
-      const viewContainer = document.querySelector("#main");
+      const viewContainer = document.querySelector('#main');
       const template = <HTMLTemplateElement>document.querySelector(this.getTemplateLocator());
       const clone = document.importNode(template.content, true);
 
       viewContainer.appendChild(clone);
-      console.log("Loaded template " + this.getTemplateLocator() + ".");
+      console.log('Loaded template ' + this.getTemplateLocator() + '.');
     }
 
     private unloadTemplate(): void {
-      $("#main").empty(); // we use jQuery here so all jQuery-specific stuff is properly deregistered
-      console.log("Un-loaded template " + this.getTemplateLocator() + ".");
+      $('#main').empty(); // we use jQuery here so all jQuery-specific stuff is properly deregistered
+      console.log('Un-loaded template ' + this.getTemplateLocator() + '.');
     }
 
     /**

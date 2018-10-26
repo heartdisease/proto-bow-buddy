@@ -17,12 +17,12 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-/// <reference path="./db.ts" />
-/// <reference path="./main-menu.ts" />
-/// <reference path="./new-game.ts" />
-/// <reference path="./station-select-player.ts" />
-/// <reference path="./station-set-score.ts" />
-/// <reference path="./final-score.ts" />
+/// <reference path='./db.ts' />
+/// <reference path='./main-menu.ts' />
+/// <reference path='./new-game.ts' />
+/// <reference path='./station-select-player.ts' />
+/// <reference path='./station-set-score.ts' />
+/// <reference path='./final-score.ts' />
 
 namespace BowBuddy {
   export interface Player {
@@ -52,19 +52,19 @@ namespace BowBuddy {
     readonly gid: number;
     readonly pid: number;
     station: number;
-    score: string; // format: "first-turn:body-hit" OR "miss"
+    score: string; // format: 'first-turn:body-hit' OR 'miss'
   }
 
   export class Application {
-    private static /*final*/ VERSION = '2.0.4';
+    private static /*final*/ VERSION = '2.0.5';
     private static storage: DbAccess = null;
     private static currentView: BaseView = null;
 
     public static initApplication(): void {
-      window.addEventListener("hashchange", e => Application.onHashChange(window.location.hash.split(";")));
+      window.addEventListener('hashchange', e => Application.onHashChange(window.location.hash.split(';')));
 
       Application.updateWindowTitle(Application.getVersion());
-      Application.onHashChange(window.location.hash.split(";"));
+      Application.onHashChange(window.location.hash.split(';'));
     }
 
     private static onHashChange(params: string[]) {
@@ -72,32 +72,32 @@ namespace BowBuddy {
       let view;
 
       switch (viewToken) {
-        case "":
-        case "#main-menu":
+        case '':
+        case '#main-menu':
           view = new MainMenuView();
           break;
-        case "#new-game":
+        case '#new-game':
           view = new NewGameView();
           break;
-        case "#station-select-player":
+        case '#station-select-player':
           view = new StationSelectPlayerView();
           break;
-        case "#station-set-score":
+        case '#station-set-score':
           view = new StationSetScoreView();
           break;
-        case "#final-score":
+        case '#final-score':
           view = new FinalScoreView();
           break;
         default:
-          console.log("Unknown place: " + view);
+          console.log('Unknown place: ' + view);
           return;
       }
 
       if (this.currentView !== null) {
         this.currentView.destroyView();
       }
-      view.initView();
       this.currentView = view;
+      view.initView();
     }
 
     public static getStorage(): DbAccess {
@@ -117,15 +117,15 @@ namespace BowBuddy {
 
     public static getUrlParams(): Readonly<Map<string, string | number>> {
       if (!window.location.hash) {
-        console.log("getUrlParams(): {}");
+        console.log('getUrlParams(): {}');
         return Object.freeze(new Map<string, string | number>());
       }
       const numRegExp = /^(0|-?[1-9][0-9]*)$/;
       const urlParams = Object.freeze(
         window.location.hash
           .substring(1) // omit the # at the beginning
-          .split(";")
-          .map(keyValueStr => keyValueStr.split("="))
+          .split(';')
+          .map(keyValueStr => keyValueStr.split('='))
           .reduce((urlParams, keyValuePair) => {
             const key = keyValuePair[0];
             const value = keyValuePair[1];
@@ -135,95 +135,95 @@ namespace BowBuddy {
           }, new Map<string, string | number>())
       );
 
-      console.log("getUrlParams(): " + JSON.stringify(urlParams));
+      console.log('getUrlParams(): ' + JSON.stringify(urlParams));
       return urlParams;
     }
 
-    public static switchToFullscreenFunc() {
+    public static switchToFullscreenFunc(): (e) => void {
       let clickCounter = 0;
 
       return clickEvent => {
         clickEvent.preventDefault();
 
-        if (++clickCounter % 3 === 0 && !document["fullscreenElement"]) {
-          console.log("Init fullscreen...");
+        if (++clickCounter % 3 === 0 && !document['fullscreenElement']) {
+          console.log('Init fullscreen...');
 
           if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
-          } else if (document.documentElement["webkitRequestFullscreen"]) {
-            document.documentElement["webkitRequestFullscreen"]();
+          } else if (document.documentElement['webkitRequestFullscreen']) {
+            document.documentElement['webkitRequestFullscreen']();
           }
         }
       };
     }
 
     public static scoreToPoints(score: string): number {
-      if (score === "miss") {
+      if (score === 'miss') {
         return 0;
       }
 
-      const scoreParts = score.split(":");
+      const scoreParts = score.split(':');
       let penalty;
 
       switch (scoreParts[0]) {
-        case "first-turn":
+        case 'first-turn':
           penalty = 0;
           break;
-        case "second-turn":
+        case 'second-turn':
           penalty = 1;
           break;
-        case "third-turn":
+        case 'third-turn':
           penalty = 2;
           break;
         default:
-          throw new Error("Invalid score format '" + score + "'");
+          throw new Error(`Invalid score format '${score}'`);
       }
       switch (scoreParts[1]) {
-        case "body-hit":
+        case 'body-hit':
           return 16 - penalty * 6;
-        case "kill-hit":
+        case 'kill-hit':
           return 18 - penalty * 6;
-        case "center-kill-hit":
+        case 'center-kill-hit':
           return 20 - penalty * 6;
         default:
-          throw new Error("Invalid score format '" + score + "'");
+        throw new Error(`Invalid score format '${score}'`);
       }
     }
 
     public static scoreToDisplayName(score: string): string {
-      if (score === "miss") {
-        return "Miss";
+      if (score === 'miss') {
+        return 'Miss';
       }
 
-      const scoreParts = score.split(":");
+      const scoreParts = score.split(':');
       let scoreLabel;
 
       switch (scoreParts[0]) {
-        case "first-turn":
-          scoreLabel = "1<sup>st</sup>";
+        case 'first-turn':
+          scoreLabel = '1<sup>st</sup>';
           break;
-        case "second-turn":
-          scoreLabel = "2<sup>nd</sup>";
+        case 'second-turn':
+          scoreLabel = '2<sup>nd</sup>';
           break;
-        case "third-turn":
-          scoreLabel = "3<sup>rd</sup>";
+        case 'third-turn':
+          scoreLabel = '3<sup>rd</sup>';
           break;
         default:
-          throw new Error("Invalid score format '" + score + "'");
+        throw new Error(`Invalid score format '${score}'`);
       }
-      scoreLabel += " - ";
+      scoreLabel += ' - ';
       switch (scoreParts[1]) {
-        case "body-hit":
-          scoreLabel += "Body";
+        case 'body-hit':
+          scoreLabel += 'Body';
           break;
-        case "kill-hit":
-          scoreLabel += "Kill";
+        case 'kill-hit':
+          scoreLabel += 'Kill';
           break;
-        case "center-kill-hit":
-          scoreLabel += "Center Kill";
+        case 'center-kill-hit':
+          scoreLabel += 'Center Kill';
           break;
         default:
-          throw new Error("Invalid score format '" + score + "'");
+        throw new Error(`Invalid score format '${score}'`);
       }
 
       return scoreLabel;
@@ -233,18 +233,18 @@ namespace BowBuddy {
       const startDate = new Date(starttime);
       const endDate = new Date(endtime);
       const diffInMs = endDate.getTime() - startDate.getTime();
-      let duration = "";
+      let duration = '';
 
       if (diffInMs < 0) {
-        throw new Error("Start time is after end time!");
+        throw new Error('Start time is after end time!');
       }
       const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
       const diffInHours = Math.floor(diffInMinutes / 60);
 
       if (diffInHours >= 1) {
-        duration += diffInHours + "h ";
+        duration += diffInHours + 'h ';
       }
-      duration += diffInMinutes - diffInHours * 60 + "m";
+      duration += diffInMinutes - diffInHours * 60 + 'm';
       return duration;
     }
   }

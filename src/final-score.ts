@@ -17,24 +17,24 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-/// <reference path ="../node_modules/@types/jquery/index.d.ts"/>
-/// <reference path="./base-view.ts" />
-/// <reference path="./main.ts" />
+/// <reference path ='../node_modules/@types/jquery/index.d.ts'/>
+/// <reference path='./base-view.ts' />
+/// <reference path='./main.ts' />
 
 namespace BowBuddy {
   export class FinalScoreView extends BaseView {
     getTemplateLocator(): string {
-      return "#final-score-template";
+      return '#final-score-template';
     }
 
     onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-      const gid = <number>urlParams.get("gid");
+      const gid = <number>urlParams.get('gid');
 
       // sets timestamp for field 'endtime'
       this.getStorage()
         .finishGame(gid)
         .then(game => {
-          $("#course-duration").text(Application.getDuration(game.starttime, game.endtime));
+          $('#course-duration').text(Application.getDuration(game.starttime, game.endtime));
         });
 
       this.getStorage()
@@ -45,9 +45,9 @@ namespace BowBuddy {
           let scores = new Array(stations);
           let scoreCount = 0;
 
-          $("#course-label").text((course.place ? course.place + " " : "") + course.name);
-          $("#back-btn").on("click", e => {
-            window.location.href = "#station-select-player;gid=" + urlParams.get("gid") + ";station=" + stations;
+          $('#course-label').text((course.place ? course.place + ' ' : '') + course.name);
+          $('#back-btn').on('click', e => {
+            window.location.href = '#station-select-player;gid=' + urlParams.get('gid') + ';station=' + stations;
           });
 
           for (let i = 1; i <= stations; i++) {
@@ -75,29 +75,29 @@ namespace BowBuddy {
 
     // TODO really ugly algo to sum up values... -_-'
     private generateScoreTable(playerNames, scores): void {
-      const $playerHeaderRow = $("#player-header-row");
-      const $playerScoreEntries = $("#player-score-entries");
+      const $playerHeaderRow = $('#player-header-row');
+      const $playerScoreEntries = $('#player-score-entries');
 
-      playerNames.forEach(playerName => $playerHeaderRow.append($("<th/>").text(playerName)));
+      playerNames.forEach(playerName => $playerHeaderRow.append($('<th/>').text(playerName)));
       scores.forEach((scoresForStation, index) => {
-        let $tr = $("<tr/>");
+        let $tr = $('<tr/>');
 
         $tr.append(
-          $("<td/>")
-            .css("font-style", "italic")
-            .text(index + 1 + ".")
+          $('<td/>')
+            .css('font-style', 'italic')
+            .text(index + 1 + '.')
         );
-        scoresForStation.forEach(score => $tr.append($("<td/>").text(Application.scoreToPoints(score))));
+        scoresForStation.forEach(score => $tr.append($('<td/>').text(Application.scoreToPoints(score))));
         $playerScoreEntries.append($tr);
       });
 
       // TODO improve this by already summing up all the points when iterating over scores for the first time!
-      let $sumRow = $("<tr/>")
-        .addClass("info")
-        .css("font-weight", "bold");
-      $sumRow.append($("<td/>").html("&nbsp;")); // insert filler cell
+      let $sumRow = $('<tr/>')
+        .addClass('info')
+        .css('font-weight', 'bold');
+      $sumRow.append($('<td/>').html('&nbsp;')); // insert filler cell
       scores[0].forEach((score, column) => {
-        $sumRow.append($("<td/>").text(scores.reduce((sum, row) => sum + Application.scoreToPoints(row[column]), 0)));
+        $sumRow.append($('<td/>').text(scores.reduce((sum, row) => sum + Application.scoreToPoints(row[column]), 0)));
       });
       $playerScoreEntries.append($sumRow);
     }
