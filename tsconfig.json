@@ -2,7 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "module": "none",
-    "target": "es5",
+    "target": "es6",
     "outFile": "./js/main.js",
     "removeComments": true,
     "inlineSources": true,
