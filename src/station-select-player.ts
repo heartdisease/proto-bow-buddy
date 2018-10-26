@@ -48,7 +48,7 @@ namespace BowBuddy {
           } else {
             $('#next-station-btn').on('click', e => {
               e.preventDefault();
-              window.location.href = `#final-score;gid=${gid};station=${station + 1}`;
+              window.location.href = `#station-select-player;gid=${gid};station=${station + 1}`;
             });
           }
 

@@ -35,6 +35,11 @@ namespace BowBuddy {
       const viewElement = document.querySelector('#main');
       const gid = <number>urlParams.get('gid');
       const pid = <number>urlParams.get('pid');
+      const remainingPids: Array<number> = urlParams.has('qa')
+        ? String(urlParams.get('qa'))
+            .split('+')
+            .map((s: string) => +s)
+        : [];
       const station = <number>urlParams.get('station');
 
       this.scoreModalElement = viewElement.querySelector('#score-modal');
@@ -49,25 +54,32 @@ namespace BowBuddy {
 
       // TODO think about replacing touch-dnd with interact.js (https://github.com/taye/interact.js)
       // TODO check if draggable and droppable are correctly reset in reset()
-      (<any>$('.hit')) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
+
+      (<any>$('.hit')) // explicit cast to 'any' to compensate the lack of a wrapper for the draggable plug-in
         .draggable({ connectWith: '.turn' })
         .droppable({ accept: '.turn', activeClass: 'active', hoverClass: 'dropZone' })
         .on('droppable:drop', (e: any, ui: any) => {
+          const hit = e.target.getAttribute('data-dnd');
+          const turn = ui.item[0].getAttribute('data-dnd');
+
           console.log('URL params in hit: ' + JSON.stringify(urlParams));
-          this.logScore(gid, pid, station, e.target.getAttribute('data-dnd'), ui.item[0].getAttribute('data-dnd'));
+          this.logScore(gid, pid, station, remainingPids, hit, turn);
         });
 
-      (<any>$('.turn')) // explicit cast to empty to compensate the lack of a wrapper for the draggable plug-in
+      (<any>$('.turn')) // explicit cast to 'any' to compensate the lack of a wrapper for the draggable plug-in
         .draggable({ connectWith: '.turn' })
         .droppable({ accept: '.hit', activeClass: 'active', hoverClass: 'dropZone' })
         .on('droppable:drop', (e: any, ui: any) => {
+          const hit = ui.item[0].getAttribute('data-dnd');
+          const turn = e.target.getAttribute('data-dnd');
+
           console.log('URL params in turn: ' + JSON.stringify(urlParams));
-          this.logScore(gid, pid, station, ui.item[0].getAttribute('data-dnd'), e.target.getAttribute('data-dnd'));
+          this.logScore(gid, pid, station, remainingPids, hit, turn);
         });
 
       $('.miss-btn').on('click', e => {
         e.preventDefault();
-        this.logScore(gid, pid, station);
+        this.logScore(gid, pid, station, remainingPids);
       });
     }
 
@@ -76,33 +88,28 @@ namespace BowBuddy {
       M.Modal.getInstance(this.scoreModalElement).destroy();
     }
 
-    private navigateBack(gid: number, station: number): void {
+    private navigateNext(gid: number, station: number, remainingPids: Array<number>): void {
+      if (remainingPids.length > 0) {
+        this.navigateToNextPlayer(gid, station, remainingPids[0], remainingPids.slice(1));
+      } else {
+        this.navigateToPlayerSelection(gid, station);
+      }
+    }
+
+    private navigateToPlayerSelection(gid: number, station: number): void {
       window.location.href = `#station-select-player;gid=${gid};station=${station}`;
     }
 
-    private navigateToNextPlayer(gid: number, station: number, nextPid: number, remainingPids: Array<string>) {
-      const qaParam = remainingPids.length > 0 ? ';qa=' + remainingPids.join('+') : '';
-      window.location.href = `#gid=${gid};pid=${nextPid}${qaParam};station=${station}`;
-    }
-
-    private navigateNext(gid: number, pid: number, station: number, qa: string | number = undefined): void {
-      if (qa !== undefined) {
-        const qaPlayers = ('' + qa).split('+'); // if qa has only one entry left it becomes an integer
-
-        if (qaPlayers.length > 0) {
-          this.navigateToNextPlayer(gid, station, +qaPlayers[0], qaPlayers.slice(1));
-        } else {
-          throw new Error(`Invalid qa parameter '${qa}'`);
-        }
-      } else {
-        this.navigateBack(gid, station);
-      }
+    private navigateToNextPlayer(gid: number, station: number, nextPid: number, remainingPids: Array<number>): void {
+      const qaParam = remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
+      window.location.href = `#station-set-score;gid=${gid};pid=${nextPid}${qaParam};station=${station}`;
     }
 
     private logScore(
       gid: number,
       pid: number,
       station: number,
+      remainingPids: Array<number>,
       hit: string = undefined,
       turn: string = undefined
     ): void {
@@ -125,10 +132,10 @@ namespace BowBuddy {
           const timeDiff = Date.now() - before;
 
           if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
-            this.navigateNext(gid, pid, station);
+            this.navigateNext(gid, station, remainingPids);
           } else {
             window.setTimeout(
-              () => this.navigateNext(gid, pid, station),
+              () => this.navigateNext(gid, station, remainingPids),
               StationSetScoreView.NAVIGATION_DELAY - timeDiff
             );
           }
