@@ -51,22 +51,7 @@ namespace BowBuddy {
             (e: any) => (window.location.href = `#station-select-player;gid=${gid};station=${stations}`)
           );
 
-          for (let i = 1; i <= stations; i++) {
-            const station = i;
-
-            this.getStorage()
-              .getPlayersWithScore(gid, station)
-              .then((players: Array<PlayerWithScore>) => {
-                if (station === 1) {
-                  playerNames = players.map(p => p.name);
-                }
-                scores[station - 1] = players.map(p => p.score);
-
-                if (++scoreCount === stations) {
-                  this.generateScoreTable(playerNames, scores);
-                }
-              });
-          }
+          this.generateScoreTable(gid, stations);
         });
     }
 
@@ -74,33 +59,41 @@ namespace BowBuddy {
       // nothing to do
     }
 
-    // TODO really ugly algo to sum up values... -_-'
-    private generateScoreTable(playerNames: Array<string>, scores: Array<Array<string>>): void {
-      const $playerHeaderRow = $('#player-header-row');
-      const $playerScoreEntries = $('#player-score-entries');
+    private generateScoreTable(gid: number, stations: number): void {
+      this.getStorage()
+        .getTotalScoreForGame(gid)
+        .then(totalScore => {
+          totalScore.players.forEach(player => {
+            let output = player.name + ': ' + totalScore.scores.get(player.pid).join(', ');
+            console.log(output);
 
-      playerNames.forEach(playerName => $playerHeaderRow.append($('<th/>').text(playerName)));
-      scores.forEach((scoresForStation: Array<string>, index: number) => {
-        let $tr = $('<tr/>');
+            $('#player-header-row').append($('<th/>').text(player.name));
+          });
 
-        $tr.append(
-          $('<td/>')
-            .css('font-style', 'italic')
-            .text(index + 1 + '.')
-        );
-        scoresForStation.forEach((score: string) => $tr.append($('<td/>').text(Application.scoreToPoints(score))));
-        $playerScoreEntries.append($tr);
-      });
+          for (let station = 1; station <= stations; station++) {
+            const $playerScoreEntry = $('<tr/>');
 
-      // TODO improve this by already summing up all the points when iterating over scores for the first time!
-      let $sumRow = $('<tr/>')
-        .addClass('info')
-        .css('font-weight', 'bold');
-      $sumRow.append($('<td/>').html('&nbsp;')); // insert filler cell
-      scores[0].forEach((score: string, column: number) => {
-        $sumRow.append($('<td/>').text(scores.reduce((sum, row) => sum + Application.scoreToPoints(row[column]), 0)));
-      });
-      $playerScoreEntries.append($sumRow);
+            $playerScoreEntry.append(
+              $('<td/>')
+                .css('font-style', 'italic')
+                .text(`${station}.`)
+            );
+            totalScore.players.map(player => totalScore.scores.get(player.pid)).forEach(scores => {
+              $playerScoreEntry.append($('<td/>').text(Application.scoreToPoints(scores[station - 1])));
+            });
+            $('#player-score-entries').append($playerScoreEntry);
+          }
+
+          const $playerTotalScore = $('<tr/>')
+            .css('font-weight', 'bold')
+            .append($('<td/>').html('&nbsp;')); // insert filler cell
+
+          totalScore.players.map(player => totalScore.scores.get(player.pid)).forEach(scores => {
+            const totalScore = scores.map(score => Application.scoreToPoints(score)).reduce((a, b) => a + b);
+            $playerTotalScore.append($('<td/>').text(totalScore));
+          });
+          $('#player-score-entries').append($playerTotalScore);
+        });
     }
   }
 }

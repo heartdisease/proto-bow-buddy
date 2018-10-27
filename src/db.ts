@@ -179,42 +179,31 @@ namespace BowBuddy {
     }
 
     getPlayersWithScore(gid: number, station: number): Promise<Array<PlayerWithScore>> {
-      return this.db()
-        .transaction(['players', 'games'])
-        .then(objectStores => {
-          return this.fetchById(objectStores.games, 'gid', gid).then(game =>
-            this.fetchAll(
-              objectStores.players,
-              IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
-              player => game.pids.indexOf(player.pid) !== -1
-            )
-          );
-        })
-        .then(players => {
-          if (players.length === 0) {
-            return [];
-          } else {
-            return this.db()
-              .transaction('scores')
-              .then(scoreObjectStore => {
-                let playersWithScore: Array<any> = [];
+      return this.getPlayersForGame(gid).then(players => {
+        if (players.length === 0) {
+          return [];
+        } else {
+          return this.db()
+            .transaction('scores')
+            .then(scoreObjectStore => {
+              const playersWithScore: Array<PlayerWithScore> = [];
 
-                return new Promise<any>((resolve, reject) => {
-                  players.forEach(player => {
-                    this.fetchById(scoreObjectStore, 'sid', [gid, player.pid, station]).then(score => {
-                      playersWithScore.push(
-                        score && score.score ? (<any>Object).assign(player, { score: score.score }) : player
-                      );
+              return new Promise<any>((resolve, reject) => {
+                players.forEach(player => {
+                  this.fetchById(scoreObjectStore, 'sid', [gid, player.pid, station]).then(score => {
+                    playersWithScore.push(
+                      score && score.score ? (<any>Object).assign(player, { score: score.score }) : player
+                    );
 
-                      if (players.length === playersWithScore.length) {
-                        resolve(playersWithScore);
-                      }
-                    });
+                    if (players.length === playersWithScore.length) {
+                      resolve(playersWithScore);
+                    }
                   });
                 });
               });
-          }
-        });
+            });
+        }
+      });
     }
 
     addPlayer(name: string, email: string = ''): Promise<Player> {
@@ -330,6 +319,43 @@ namespace BowBuddy {
             request.onsuccess = (event: any) => resolve(scoreRecord);
             request.onerror = (event: any) => reject(event);
           });
+        });
+    }
+
+    getTotalScoreForGame(gid: number): Promise<TotalScoreForGame> {
+      return this.getPlayersForGame(gid).then((players: Array<Player>) => {
+        return this.db()
+          .transaction('scores')
+          .then(scoreObjectStore => {
+            return this.fetchAll(scoreObjectStore).then((scores: Array<Score>) => {
+              const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
+
+              scores
+                .filter(score => score.gid === gid)
+                .sort((scoreA, scoreB) => scoreA.station - scoreB.station)
+                .forEach(score => {
+                  if (!totalScore.scores.has(score.pid)) {
+                    totalScore.scores.set(score.pid, []);
+                  }
+                  totalScore.scores.get(score.pid).push(score.score || 'undefined-score');
+                });
+              return totalScore;
+            });
+          });
+      });
+    }
+
+    private getPlayersForGame(gid: number): Promise<Array<Player>> {
+      return this.db()
+        .transaction(['games', 'players'])
+        .then(objectStores => {
+          return this.fetchById(objectStores.games, 'gid', gid).then(game =>
+            this.fetchAll(
+              objectStores.players,
+              IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
+              player => game.pids.indexOf(player.pid) !== -1
+            )
+          );
         });
     }
 

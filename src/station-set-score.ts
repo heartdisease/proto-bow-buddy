@@ -23,7 +23,7 @@
 
 namespace BowBuddy {
   export class StationSetScoreView extends BaseView {
-    private static /*final*/ NAVIGATION_DELAY = 600;
+    private static readonly NAVIGATION_DELAY = 600;
 
     private scoreModalElement: HTMLElement;
 

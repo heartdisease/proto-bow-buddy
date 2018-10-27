@@ -59,8 +59,13 @@ namespace BowBuddy {
     score: string; // format: 'first-turn:body-hit' OR 'miss'
   }
 
+  export interface TotalScoreForGame {
+    readonly players: Array<Player>;
+    readonly scores: Map<number, Array<string>>;
+  }
+
   export class Application {
-    private static /*final*/ VERSION = '2.0.7';
+    private static readonly VERSION = '2.1.0';
     private static storage: DbAccess = null;
     private static currentView: BaseView = null;
 
@@ -162,7 +167,7 @@ namespace BowBuddy {
     }
 
     public static scoreToPoints(score: string): number {
-      if (score === 'miss') {
+      if (score === 'miss' || score === 'undefined-score') {
         return 0;
       }
 
