@@ -37,8 +37,8 @@ namespace BowBuddy {
           const duration = Application.getDuration(game.starttime, game.endtime);
           const from = new Date(game.starttime).toLocaleDateString('de-AT', {
             year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
             hour: 'numeric',
             minute: 'numeric',
             hour12: false
