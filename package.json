@@ -1,0 +1,26 @@
+{
+  "name": "proto-bow-buddy",
+  "version": "1.1.0",
+  "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heartdisease/proto-bow-buddy.git"
+  },
+  "author": "Christoph Matscheko",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/heartdisease/proto-bow-buddy/issues"
+  },
+  "homepage": "https://github.com/heartdisease/proto-bow-buddy#readme",
+  "dependencies": {
+    "@types/jquery": "^3.3.6",
+    "@types/materialize-css": "^1.0.4",
+    "jquery": "^3.3.1",
+    "materialize-css": "^1.0.0",
+    "touch-dnd": "^1.1.3"
+  }
+}

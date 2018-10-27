@@ -1,0 +1,37 @@
+/**
+ * This file is part of BowBuddy.
+ *
+ * BowBuddy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BowBuddy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * Copyright 2017-2018 Christoph Matscheko
+ */
+
+.app-logo {
+  margin-bottom: 45px;
+}
+
+.player-selection {
+  width: 100%;
+  margin-top: 22px;
+}
+
+#player-selection-list {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+#player-selection-list > a.collection-item > span.badge.new::after {
+  content: ""; /* hack to get rid of the 'new' label without losing the styling of the badge */
+}

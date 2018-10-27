@@ -1,0 +1,58 @@
+/**
+ * This file is part of BowBuddy.
+ *
+ * BowBuddy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BowBuddy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * Copyright 2017-2018 Christoph Matscheko
+ */
+ 
+ body {
+  padding-top: 10px;
+  padding-bottom: 20px;
+  font-family: "Roboto", sans-serif;
+}
+
+#main {
+  text-align: center;
+}
+
+.app-logo {
+  margin-bottom: 45px;
+}
+
+.main-menu > a {
+  display: block;
+  clear: both;
+  width: 250px;
+  margin-bottom: 15px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.main-menu > a > span.glyphicon {
+  top: 2px;
+  left: -4px;
+}
+
+#db-dump-modal textarea {
+  margin-top: 14px;
+  width: 100%;
+  height: auto;
+  font-family: monospace;
+}
+
+#db-dump-modal .btn-flat {
+  padding: 0 0.6rem;
+}

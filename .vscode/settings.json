@@ -1,0 +1,15 @@
+{
+  "files.autoSave": "onWindowChange",
+  "files.eol": "\n",
+  "editor.rulers": [120],
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.renderWhitespace": "all",
+  "html.format.extraLiners": "",
+  "html.format.indentInnerHtml": true,
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "prettier.singleQuote": true,
+  "prettier.printWidth": 120
+}

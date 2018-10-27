@@ -1,7 +1,12 @@
 *~
 .*
-.idea
-.git
-proto-bow-buddy.token
-*.dbdump
 
+/node_modules
+!/.vscode
+
+*.dbdump
+proto-bow-buddy.token
+
+/js/*.js
+/js/*.js.map
+/css/*.css.map
