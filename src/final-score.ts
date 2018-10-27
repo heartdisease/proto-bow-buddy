@@ -34,24 +34,31 @@ namespace BowBuddy {
       this.getStorage()
         .finishGame(gid)
         .then(game => {
-          $('#course-duration').text(Application.getDuration(game.starttime, game.endtime));
+          const duration = Application.getDuration(game.starttime, game.endtime);
+          const from = new Date(game.starttime).toLocaleDateString('de-AT', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false
+          });
+          const to = new Date(game.starttime).toLocaleTimeString('de-AT', {
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false
+          });
+
+          $('#course-duration').text(`${duration} (${from} - ${to})`);
         });
 
       this.getStorage()
         .getCourseForGame(gid)
         .then(course => {
-          let playerNames: Array<string>;
-          const stations = course.stations;
-          const scores: Array<Array<string>> = new Array(stations);
-          let scoreCount = 0;
-
-          $('#course-label').text((course.place ? course.place + ' ' : '') + course.name);
-          $('#back-btn').on(
-            'click',
-            (e: any) => (window.location.href = `#station-select-player;gid=${gid};station=${stations}`)
+          $('#course-label').text(
+            `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`
           );
-
-          this.generateScoreTable(gid, stations);
+          this.generateScoreTable(gid, course.stations);
         });
     }
 
@@ -64,9 +71,6 @@ namespace BowBuddy {
         .getTotalScoreForGame(gid)
         .then(totalScore => {
           totalScore.players.forEach(player => {
-            let output = player.name + ': ' + totalScore.scores.get(player.pid).join(', ');
-            console.log(output);
-
             $('#player-header-row').append($('<th/>').text(player.name));
           });
 
@@ -86,13 +90,43 @@ namespace BowBuddy {
 
           const $playerTotalScore = $('<tr/>')
             .css('font-weight', 'bold')
-            .append($('<td/>').html('&nbsp;')); // insert filler cell
+            .append($('<td/>').text('Total:'));
+          const $playerAverageScore = $('<tr/>')
+            .css('font-style', 'italic')
+            .append($('<td/>').text('Average: '));
+          const $playerMissCount = $('<tr/>')
+            .css('font-style', 'italic')
+            .append($('<td/>').text('Miss: '));
+          const $playerBodyHitCount = $('<tr/>')
+            .css('font-style', 'italic')
+            .append($('<td/>').text('Body: '));
+          const $playerKillHitCount = $('<tr/>')
+            .css('font-style', 'italic')
+            .append($('<td/>').text('Kill: '));
+          const $playerCenterKillHitCount = $('<tr/>')
+            .css('font-style', 'italic')
+            .append($('<td/>').text('Center Kill: '));
 
           totalScore.players.map(player => totalScore.scores.get(player.pid)).forEach(scores => {
             const totalScore = scores.map(score => Application.scoreToPoints(score)).reduce((a, b) => a + b);
+            const missCount = scores.filter(score => score === 'miss').length;
+            const bodyHitCount = scores.filter(score => score.endsWith('body-hit')).length;
+            const killHitCount = scores.filter(score => score.endsWith('kill-hit')).length;
+            const centerKillHitCount = scores.filter(score => score.endsWith('center-kill-hit')).length;
+
             $playerTotalScore.append($('<td/>').text(totalScore));
+            $playerAverageScore.append($('<td/>').text(Math.floor((totalScore / stations) * 10) / 10));
+            $playerMissCount.append($('<td/>').html(`${missCount}&times;`));
+            $playerBodyHitCount.append($('<td/>').html(`${bodyHitCount}&times;`));
+            $playerKillHitCount.append($('<td/>').html(`${killHitCount}&times;`));
+            $playerCenterKillHitCount.append($('<td/>').html(`${centerKillHitCount}&times;`));
           });
           $('#player-score-entries').append($playerTotalScore);
+          $('#player-score-entries').append($playerAverageScore);
+          $('#player-score-entries').append($playerMissCount);
+          $('#player-score-entries').append($playerBodyHitCount);
+          $('#player-score-entries').append($playerKillHitCount);
+          $('#player-score-entries').append($playerCenterKillHitCount);
         });
     }
   }
