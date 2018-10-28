@@ -65,7 +65,7 @@ namespace BowBuddy {
   }
 
   export class Application {
-    private static readonly VERSION = '2.1.1';
+    private static readonly VERSION = '2.1.2';
     private static storage: DbAccess = null;
     private static currentView: BaseView = null;
 
