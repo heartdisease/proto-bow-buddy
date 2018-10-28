@@ -40,7 +40,7 @@ namespace BowBuddy {
 
           if (station >= course.stations) {
             $('#next-station-btn')
-              .html('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Finish course')
+              .html('<i class="material-icons left">check</i> Show total score')
               .on('click', e => {
                 e.preventDefault();
                 window.location.href = `#final-score;gid=${gid}`;
@@ -127,7 +127,7 @@ namespace BowBuddy {
         const $scoreBadge = $('<span/>')
           .addClass('badge new blue')
           .css('font-weight', 'bold')
-          .html(`${scoreDisplayName}'&nbsp;&nbsp;&nbsp;(+${scorePoints})`);
+          .html(`${scoreDisplayName}&nbsp;&nbsp;&nbsp;(+${scorePoints})`);
 
         $playerEntry.append($scoreBadge);
       }

@@ -57,19 +57,19 @@ Copyright 2017-2018 Christoph Matscheko
 
       <div class="container-fluid main-menu">
         <a class="waves-effect waves-light btn-large green" href="#new-game" role="button">
-          <span class="glyphicon glyphicon-screenshot" aria-hidden="true"></span> New Game
+          <i class="material-icons left">games</i> New Game
         </a>
         <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
-          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Course Settings
+          <i class="material-icons left">settings</i> Course Settings
         </a>
         <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
-          <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Player Settings
+          <i class="material-icons left">face</i> Player Settings
         </a>
         <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
-          <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Hall Of Fame
+          <i class="material-icons left">trending_up</i> Hall Of Fame
         </a>
         <a class="waves-effect waves-light btn-large red" href="#" role="button" id="quit-btn">
-          <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Quit
+          <i class="material-icons left">settings_power</i> Quit
         </a>
       </div>
 
@@ -110,8 +110,7 @@ Copyright 2017-2018 Christoph Matscheko
       <ul class="collapsible">
         <li class="active">
           <div class="collapsible-header">
-            <i class="material-icons">person_pin</i>
-            Choose players
+            <i class="material-icons">person_pin</i> Choose players
           </div>
           <div class="collapsible-body">
             <!-- BEGIN PLAYER SELECTION -->
@@ -155,8 +154,7 @@ Copyright 2017-2018 Christoph Matscheko
         </li>
         <li>
           <div class="collapsible-header">
-            <i class="material-icons">place</i>
-            Choose course
+            <i class="material-icons">place</i> Choose course
           </div>
           <div class="collapsible-body">
             <!-- BEGIN COURSE SELECTION -->
@@ -199,7 +197,7 @@ Copyright 2017-2018 Christoph Matscheko
 
       <div>
         <a class="waves-effect waves-light btn disabled" href="#" id="start-game-btn">
-          <i class="material-icons">play_arrow</i> Start Game
+          <i class="material-icons left">play_arrow</i> Start Game
         </a>
       </div>
     </template>
@@ -211,7 +209,7 @@ Copyright 2017-2018 Christoph Matscheko
 
       <div>
         <a class="waves-effect waves-light btn-small" href="#" id="quick-assign-btn" disabled="disabled">
-          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span> Quick assign
+          <i class="material-icons left">add_to_photos</i> Quick assign
         </a>
       </div>
 
@@ -221,7 +219,7 @@ Copyright 2017-2018 Christoph Matscheko
 
       <div>
         <a class="waves-effect waves-light btn-small" href="#" id="next-station-btn" disabled="disabled">
-          <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Next station
+          <i class="material-icons left">keyboard_arrow_right</i> Next station
         </a>
       </div>
     </template>
@@ -315,9 +313,9 @@ Copyright 2017-2018 Christoph Matscheko
         </tbody>
       </table>
 
-      <div class="btn-group btn-group-justified" role="group">
-        <a class="btn btn-success btn-lg" href="index.html" role="button">
-          <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span> Finish course
+      <div style="margin-top: 15px;">
+        <a class="waves-effect waves-light btn" href="#main-menu">
+          <i class="material-icons left">check</i> Finish course
         </a>
       </div>
     </template>
