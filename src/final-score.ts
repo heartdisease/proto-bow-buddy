@@ -101,28 +101,28 @@ namespace BowBuddy {
             .append($('<td/>').text('Total:'));
           const $playerAverageScore = $('<tr/>')
             .css('font-style', 'italic')
-            .append($('<td/>').text('Average: '));
+            .append($('<td/>').text('Average:'));
           const $playerMissCount = $('<tr/>')
             .css('font-style', 'italic')
-            .append($('<td/>').text('Miss: '));
+            .append($('<td/>').text('Miss:'));
           const $playerBodyHitCount = $('<tr/>')
             .css('font-style', 'italic')
-            .append($('<td/>').text('Body: '));
+            .append($('<td/>').text('Body:'));
           const $playerKillHitCount = $('<tr/>')
             .css('font-style', 'italic')
-            .append($('<td/>').text('Kill: '));
+            .append($('<td/>').text('Kill:'));
           const $playerCenterKillHitCount = $('<tr/>')
             .css('font-style', 'italic')
-            .append($('<td/>').text('Center Kill: '));
+            .append($('<td/>').text('Center Kill:'));
 
           totalScoreForGame.players.forEach(player => {
             const scores = totalScoreForGame.scores.get(player.pid);
             const totalScore = scores.map(score => Application.scoreToPoints(score)).reduce((a, b) => a + b, 0);
             const averageScore = Math.floor(((totalScore / stations) * 10) / 10);
             const missCount = scores.filter(score => score === 'miss').length;
-            const bodyHitCount = scores.filter(score => score.endsWith('body-hit')).length;
-            const killHitCount = scores.filter(score => score.endsWith('kill-hit')).length;
-            const centerKillHitCount = scores.filter(score => score.endsWith('center-kill-hit')).length;
+            const bodyHitCount = scores.filter(score => score.endsWith(':body-hit')).length;
+            const killHitCount = scores.filter(score => score.endsWith(':kill-hit')).length;
+            const centerKillHitCount = scores.filter(score => score.endsWith(':center-kill-hit')).length;
 
             playerScores.push({ playerName: player.name, totalScore, averageScore, missCount });
 
