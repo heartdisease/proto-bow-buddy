@@ -330,13 +330,11 @@ namespace BowBuddy {
             return this.fetchAll(scoreObjectStore).then((scores: Array<Score>) => {
               const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
 
+              players.forEach(player => totalScore.scores.set(player.pid, []));
               scores
                 .filter(score => score.gid === gid)
                 .sort((scoreA, scoreB) => scoreA.station - scoreB.station)
                 .forEach(score => {
-                  if (!totalScore.scores.has(score.pid)) {
-                    totalScore.scores.set(score.pid, []);
-                  }
                   totalScore.scores.get(score.pid).push(score.score || 'undefined-score');
                 });
               return totalScore;

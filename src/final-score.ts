@@ -117,7 +117,7 @@ namespace BowBuddy {
 
           totalScoreForGame.players.forEach(player => {
             const scores = totalScoreForGame.scores.get(player.pid);
-            const totalScore = scores.map(score => Application.scoreToPoints(score)).reduce((a, b) => a + b);
+            const totalScore = scores.map(score => Application.scoreToPoints(score)).reduce((a, b) => a + b, 0);
             const averageScore = Math.floor(((totalScore / stations) * 10) / 10);
             const missCount = scores.filter(score => score === 'miss').length;
             const bodyHitCount = scores.filter(score => score.endsWith('body-hit')).length;
