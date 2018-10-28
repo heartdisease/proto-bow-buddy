@@ -116,12 +116,10 @@ namespace BowBuddy {
       totalScore: number,
       player: PlayerWithScore
     ): JQuery<JQuery.Node> {
-      console.log('Init button for player ' + player.name);
-
       const $playerEntry = $('<a/>')
         .addClass('collection-item')
         .attr('href', `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`)
-        .text(`${player.name} (${totalScore}) `);
+        .text(totalScore > 0 ? `${player.name} (${totalScore}) ` : player.name);
 
       if (player.score) {
         const scoreDisplayName = Application.scoreToDisplayName(player.score);

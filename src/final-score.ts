@@ -168,7 +168,7 @@ namespace BowBuddy {
       switch (place) {
         case 1:
           return $('<div/>')
-            .addClass('leaderboard-badge first-place yellow accent-4')
+            .addClass('leaderboard-badge first-place amber accent-3')
             .html('<span>1<sup>st</sup></span>');
         case 2:
           return $('<div/>')
@@ -176,11 +176,11 @@ namespace BowBuddy {
             .html('<span>2<sup>nd</sup></span>');
         case 3:
           return $('<div/>')
-            .addClass('leaderboard-badge third-place deep-orange darken-2')
+            .addClass('leaderboard-badge third-place deep-orange darken-3')
             .html('<span>3<sup>rd</sup></span>');
         default:
           return $('<div/>')
-            .addClass('leaderboard-badge grey darken-1')
+            .addClass('leaderboard-badge grey darken-4')
             .html(`<span>${place}<sup>th</sup></span>`);
       }
     }
