@@ -130,8 +130,8 @@ Copyright 2017-2018 Christoph Matscheko
                   <input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
                 </div>
                 <div class="col s2">
-                  <a class="btn btn-success" href="#" role="button" id="add-player-btn" disabled="disabled" class="col s2">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                  <a class="waves-effect waves-light btn-small disabled" href="#" id="add-player-btn">
+                    <i class="material-icons">add</i>
                   </a>
                 </div>
               </div>
@@ -172,8 +172,8 @@ Copyright 2017-2018 Christoph Matscheko
                 <input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
                 <input type="number" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
                 <span class="input-group-btn">
-                  <a class="btn btn-success" href="#" role="button" id="set-course-btn" disabled="disabled">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                  <a class="waves-effect waves-light btn-small disabled" href="#" id="set-course-btn">
+                    <i class="material-icons">add</i>
                   </a>
                 </span>
               </div>
@@ -197,9 +197,9 @@ Copyright 2017-2018 Christoph Matscheko
         </li>
       </ul>
 
-      <div class="btn-group btn-group-justified" role="group">
-        <a class="btn btn-success btn-lg" href="#" id="start-game-btn" role="button" disabled="disabled">
-          <span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span> Start Game
+      <div>
+        <a class="waves-effect waves-light btn disabled" href="#" id="start-game-btn">
+          <i class="material-icons">play_arrow</i> Start Game
         </a>
       </div>
     </template>
@@ -209,8 +209,8 @@ Copyright 2017-2018 Christoph Matscheko
     <template id="station-select-player-template">
       <h1>Station <span id="station-no">?</span>: Select player</h1>
 
-      <div class="btn-group btn-group-justified" role="group">
-        <a class="btn btn-primary btn-lg" href="#" id="quick-assign-btn" role="button" disabled="disabled">
+      <div>
+        <a class="waves-effect waves-light btn-small" href="#" id="quick-assign-btn" disabled="disabled">
           <span class="glyphicon glyphicon-forward" aria-hidden="true"></span> Quick assign
         </a>
       </div>
@@ -219,8 +219,8 @@ Copyright 2017-2018 Christoph Matscheko
         <!-- PLAYER BUTTONS -->
       </div>
 
-      <div class="btn-group btn-group-justified" role="group">
-        <a class="btn btn-success btn-lg" href="#" id="next-station-btn" role="button" disabled="disabled">
+      <div>
+        <a class="waves-effect waves-light btn-small" href="#" id="next-station-btn" disabled="disabled">
           <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Next station
         </a>
       </div>

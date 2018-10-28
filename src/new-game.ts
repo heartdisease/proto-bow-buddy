@@ -183,7 +183,7 @@ namespace BowBuddy {
         .on('click', e => {
           const playerName = <string>$('#new-player-name').val();
 
-          $('#add-player-btn').attr('disabled', 'disabled');
+          $('#add-player-btn').addClass('disabled');
           $('#new-player-name').val('');
 
           this.getStorage()
@@ -230,7 +230,7 @@ namespace BowBuddy {
           const courseName = <string>$('#new-course-name').val();
           const noOfStations = <number>$('#new-course-no-of-stations').val();
 
-          $('#set-course-btn').attr('disabled', 'disabled');
+          $('#set-course-btn').addClass('disabled');
           $('#new-course-name').val('');
           $('#new-course-no-of-stations').val('');
 
@@ -253,7 +253,7 @@ namespace BowBuddy {
         let cid;
         const pids: Array<number> = [];
 
-        $('#start-game-btn').attr('disabled', 'disabled'); // disable button while async db action is running
+        $('#start-game-btn').addClass('disabled'); // disable button while async db action is running
 
         cid = +$('#course-entries > tr[data-cid]').attr('data-cid');
         $('#player-entries > tr[data-pid]').each(function() {
@@ -286,7 +286,7 @@ namespace BowBuddy {
       this.configuredPlayers.push(player);
 
       if (this.isPlayerConfigured() && this.isCourseConfigured()) {
-        $('#start-game-btn').removeAttr('disabled');
+        $('#start-game-btn').removeClass('disabled');
       }
     }
 
@@ -306,7 +306,7 @@ namespace BowBuddy {
       this.configuredCourse = course;
 
       if (this.isPlayerConfigured() && this.isCourseConfigured()) {
-        $('#start-game-btn').removeAttr('disabled');
+        $('#start-game-btn').removeClass('disabled');
       }
     }
 
@@ -319,9 +319,9 @@ namespace BowBuddy {
         /\s+$/.test(playerName) ||
         this.existingPlayers.some(player => player.name === playerName)
       ) {
-        $('#add-player-btn').attr('disabled', 'disabled');
+        $('#add-player-btn').addClass('disabled');
       } else {
-        $('#add-player-btn').removeAttr('disabled');
+        $('#add-player-btn').removeClass('disabled');
       }
     }
 
@@ -340,9 +340,9 @@ namespace BowBuddy {
         this.existingCourses.some(course => course.name === courseName)
       ) {
         console.log('existingCourses: ' + this.existingCourses);
-        $('#set-course-btn').attr('disabled', 'disabled');
+        $('#set-course-btn').addClass('disabled');
       } else {
-        $('#set-course-btn').removeAttr('disabled');
+        $('#set-course-btn').removeClass('disabled');
       }
     }
   }
