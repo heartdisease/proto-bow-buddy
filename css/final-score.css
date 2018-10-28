@@ -17,15 +17,38 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
- 
 #course-label {
   font-style: italic;
 }
 
-#main {
-  padding-bottom: 15px;
+#leaderboard > .collection-item.avatar {
+  padding: 10px;
 }
 
-h2 {
-  font-size: 20px;
+.leaderboard-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  float: left;
+  margin-right: 10px;
+}
+
+.leaderboard-badge.first-place {
+  color: #fafafa;
+  font-size: 26px;
+}
+
+.leaderboard-badge.second-place {
+  color: #fafafa;
+  font-size: 22px;
+}
+
+.leaderboard-badge.third-place {
+  color: #fafafa;
+  font-size: 18px;
 }

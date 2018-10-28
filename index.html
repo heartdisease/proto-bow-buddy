@@ -44,7 +44,7 @@ Copyright 2017-2018 Christoph Matscheko
     <!-- TODO change Bootstrap-specific class names to Materialize CSS class names! -->
     <!-- TODO clean up old CSS -->
 
-    <div class="container" id="main">
+    <div id="main">
       <!-- VIEW CONTAINER -->
     </div>
 
@@ -210,6 +210,8 @@ Copyright 2017-2018 Christoph Matscheko
     <template id="station-select-player-template">
       <h1>Station <span id="station-no">?</span>: Select player</h1>
 
+      <!-- TODO show intermediate scores for all players -->
+
       <div class="btn-group btn-group-justified" role="group">
         <a class="btn btn-primary btn-lg" href="#" id="quick-assign-btn" role="button" disabled="disabled">
           <span class="glyphicon glyphicon-forward" aria-hidden="true"></span> Quick assign
@@ -301,9 +303,9 @@ Copyright 2017-2018 Christoph Matscheko
 
       <h2>Duration: <span id="course-duration"></span></h2>
 
-      <!-- TODO show leader board here to immediately display who has won + total scores -->
-      <!-- TODO show statistics for each player (how many misses, how many first tries, etc.) -->
-      <!-- TODO show average score for each player -->
+      <ul class="collection" id="leaderboard">
+        <!-- LEADERBOARD ITEMS -->
+      </ul>
 
       <table class="striped">
         <thead>

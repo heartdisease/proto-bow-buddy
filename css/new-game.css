@@ -17,21 +17,6 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
- 
- .main-menu > a {
-  display: block;
-  clear: both;
-  width: 250px;
-  margin-bottom: 15px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.main-menu > a > span.glyphicon {
-  top: 2px;
-  left: -4px;
-}
-
 .config-panel-heading {
   display: flex;
   align-items: center;

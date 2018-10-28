@@ -17,21 +17,6 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
- 
- body {
-  padding-top: 10px;
-  padding-bottom: 20px;
-  font-family: "Roboto", sans-serif;
-}
-
-#main {
-  text-align: center;
-}
-
-.app-logo {
-  margin-bottom: 45px;
-}
-
 .main-menu > a {
   display: block;
   clear: both;
