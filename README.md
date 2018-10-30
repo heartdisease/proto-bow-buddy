@@ -7,7 +7,8 @@ This is a web-based prototype for an Android app called BowBuddy.
 == Install all dependencies after a fresh checkout:
 ```mkdir ~/.npm-global
 npm config set prefix ~/.npm-global
-export PATH=$PATH:$HOME/.npm-global/bin
+echo "export PATH=\$PATH:\$HOME/.npm-global/bin" >> ~/.bashrc
+source ~/.bashrc
 npm install -g typescript node-sass
 npm install```
 
