@@ -20,21 +20,11 @@
 .config-panel-heading {
   display: flex;
   align-items: center;
-}
 
-.config-panel-heading > .header {
-  margin-right: 12px;
-  font-weight: bold;
-}
-
-.player-dropdown,
-.course-dropdown {
-  min-width: 228px;
-}
-
-.player-dropdown .form-control,
-.course-dropdown .form-control {
-  padding: 3px, 6px;
+  & > .header {
+    margin-right: 12px;
+    font-weight: bold;
+  }
 }
 
 #new-course-name {
@@ -43,9 +33,4 @@
 
 #new-course-no-of-stations {
   max-width: 36px;
-}
-
-.player-dropdown > .dropdown-menu > li:last-child,
-.course-dropdown > .dropdown-menu > li:last-child {
-  padding: 3px 20px;
 }
