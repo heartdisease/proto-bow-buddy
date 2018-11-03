@@ -22,19 +22,19 @@ This is a web-based prototype for an Android app called BowBuddy.
 
 ## Generate CSS files from SCSS
 
-`node-sass -o css --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles`
+`npm run build-sass`
 
 For development, just run `npm run watch-sass` instead.
 
 ## Generate JavaScript code from TypeScript
 
-`tsc`
+`npm run build-ts`
 
 For development, just run `npm run watch-ts` instead.
 
 ## Run web server locally for testing
 
-`npm run server`
+`npm run webpack-server`
 
 ## Build everything using webpack
 
