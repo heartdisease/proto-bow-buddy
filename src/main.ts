@@ -81,7 +81,7 @@ export class Application {
     Application.updateWindowTitle(Application.getVersion());
 
     // hack for loading touch-dnd plug-in
-    (<any>window)['jQuery'] = $;
+    (<any>window).jQuery = $;
     (<any>window).require(['./touch-dnd.js'], () => {
       window.addEventListener('hashchange', e => Application.onHashChange(window.location.hash.split(';')));
       Application.onHashChange(window.location.hash.split(';'));
