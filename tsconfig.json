@@ -1,21 +1,16 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "module": "none",
-    "target": "es6",
-    "outFile": "./js/main.js",
+    "module": "amd",
+    "target": "es5",
+    "outDir": "./dist/",
     "removeComments": true,
     "inlineSources": true,
     "noImplicitAny": true,
-    "lib": ["es2015.core", "es2015.collection", "es2015.promise", "es5", "dom"]
+    "strictNullChecks": false,
+    "lib": ["es2015.core", "es2015.collection", "es2015.promise", "es5", "dom"],
+    "types": ["jquery", "materialize-css"]
   },
-  "include": ["./src/*.ts"],
-  "exclude": ["./node_modules", "./**/*.spec.ts"],
-  "files": [
-    "./src/main.ts",
-    "./src/main-menu.ts",
-    "./src/station-select-player.ts",
-    "./src/station-set-score.ts",
-    "./src/final-score.ts"
-  ]
+  "include": ["./src/*.ts", "./src/*.d.ts", "./src/styles/*.scss"],
+  "exclude": ["./node_modules", "./**/*.spec.ts"]
 }

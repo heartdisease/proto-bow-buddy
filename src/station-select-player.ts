@@ -17,121 +17,120 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-/// <reference path ='../node_modules/@types/jquery/index.d.ts'/>
-/// <reference path='./base-view.ts' />
-/// <reference path='./main.ts' />
+import * as $ from 'jquery';
+// import 'materialize-css';
+import { BaseView } from './base-view';
+import { Player, PlayerWithScore, Course, Game, Score, TotalScoreForGame, Application } from './main';
 
-namespace BowBuddy {
-  export class StationSelectPlayerView extends BaseView {
-    getTemplateLocator(): string {
-      return '#station-select-player-template';
-    }
+export class StationSelectPlayerView extends BaseView {
+  getTemplateLocator(): string {
+    return '#station-select-player-template';
+  }
 
-    onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-      const gid = <number>urlParams.get('gid');
-      const station = <number>urlParams.get('station');
+  onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+    const gid = <number>urlParams.get('gid');
+    const station = <number>urlParams.get('station');
 
-      $('#station-no').text(station);
+    $('#station-no').text(station);
 
-      this.getStorage()
-        .getCourseForGame(gid)
-        .then(course => {
-          console.log('course: ' + course);
+    this.getStorage()
+      .getCourseForGame(gid)
+      .then(course => {
+        console.log('course: ' + course);
 
-          if (station >= course.stations) {
-            $('#next-station-btn')
-              .html('<i class="material-icons left">check</i> Show total score')
-              .on('click', e => {
-                e.preventDefault();
-                window.location.href = `#final-score;gid=${gid}`;
-              });
-          } else {
-            $('#next-station-btn').on('click', e => {
+        if (station >= course.stations) {
+          $('#next-station-btn')
+            .html('<i class="material-icons left">check</i> Show total score')
+            .on('click', e => {
               e.preventDefault();
-              window.location.href = `#station-select-player;gid=${gid};station=${station + 1}`;
+              window.location.href = `#final-score;gid=${gid}`;
             });
-          }
-
-          this.initPlayerButtons(gid, station);
-        })
-        .catch(e => console.error(e));
-    }
-
-    onHide(): void {
-      // nothing to do
-    }
-
-    private initPlayerButtons(gid: number, station: number): void {
-      console.log('initPlayerButtons: gid ' + gid + ', station ' + station);
-
-      Promise.all([
-        this.getStorage().getPlayersWithScore(gid, station),
-        this.getStorage().getTotalScoreForGame(gid)
-      ]).then((dataObjects: Array<Array<PlayerWithScore> | TotalScoreForGame>) => {
-        const players = <Array<PlayerWithScore>>dataObjects[0];
-        const totalScoreForGame = <TotalScoreForGame>dataObjects[1];
-
-        if (players.length === 0) {
-          throw new Error('Cannot load players!');
+        } else {
+          $('#next-station-btn').on('click', e => {
+            e.preventDefault();
+            window.location.href = `#station-select-player;gid=${gid};station=${station + 1}`;
+          });
         }
 
-        const $playerSelectionList = $('#player-selection-list');
-        const playersWithScore = players.filter(player => player.score !== undefined).length;
+        this.initPlayerButtons(gid, station);
+      })
+      .catch(e => console.error(e));
+  }
 
-        $('#quick-assign-btn').on('click', (e: any) => {
-          const qaParam =
-            players.length > 1
-              ? `;qa=${players
-                  .slice(1)
-                  .map((p: Player) => p.pid)
-                  .join('+')}`
-              : '';
+  onHide(): void {
+    // nothing to do
+  }
 
-          e.preventDefault();
-          window.location.href = `#station-set-score;gid=${gid};pid=${players[0].pid}${qaParam};station=${station}`;
-        });
+  private initPlayerButtons(gid: number, station: number): void {
+    console.log('initPlayerButtons: gid ' + gid + ', station ' + station);
 
-        players.forEach((player: PlayerWithScore) => {
-          const scores = totalScoreForGame.scores.get(player.pid);
-          const scorePoints = scores.map(score => Application.scoreToPoints(score));
-          const totalScore = scorePoints.reduce(
-            (a, b) => a + b,
-            scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1] // exclude score of current station
-          );
+    Promise.all([
+      this.getStorage().getPlayersWithScore(gid, station),
+      this.getStorage().getTotalScoreForGame(gid)
+    ]).then((dataObjects: Array<Array<PlayerWithScore> | TotalScoreForGame>) => {
+      const players = <Array<PlayerWithScore>>dataObjects[0];
+      const totalScoreForGame = <TotalScoreForGame>dataObjects[1];
 
-          $playerSelectionList.append(this.createPlayerButton(gid, station, totalScore, player));
-        });
-
-        if (playersWithScore === players.length) {
-          $('#next-station-btn').removeAttr('disabled');
-        } else if (playersWithScore === 0) {
-          $('#quick-assign-btn').removeAttr('disabled'); // enable quick-assign only when no player has a score yet
-        }
-      });
-    }
-
-    private createPlayerButton(
-      gid: number,
-      station: number,
-      totalScore: number,
-      player: PlayerWithScore
-    ): JQuery<JQuery.Node> {
-      const $playerEntry = $('<a/>')
-        .addClass('collection-item')
-        .attr('href', `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`)
-        .text(totalScore > 0 ? `${player.name} (${totalScore}) ` : player.name);
-
-      if (player.score) {
-        const scoreDisplayName = Application.scoreToDisplayName(player.score);
-        const scorePoints = Application.scoreToPoints(player.score);
-        const $scoreBadge = $('<span/>')
-          .addClass('badge new blue')
-          .css('font-weight', 'bold')
-          .html(`${scoreDisplayName}&nbsp;&nbsp;&nbsp;(+${scorePoints})`);
-
-        $playerEntry.append($scoreBadge);
+      if (players.length === 0) {
+        throw new Error('Cannot load players!');
       }
-      return $playerEntry;
+
+      const $playerSelectionList = $('#player-selection-list');
+      const playersWithScore = players.filter(player => player.score !== undefined).length;
+
+      $('#quick-assign-btn').on('click', (e: any) => {
+        const qaParam =
+          players.length > 1
+            ? `;qa=${players
+                .slice(1)
+                .map((p: Player) => p.pid)
+                .join('+')}`
+            : '';
+
+        e.preventDefault();
+        window.location.href = `#station-set-score;gid=${gid};pid=${players[0].pid}${qaParam};station=${station}`;
+      });
+
+      players.forEach((player: PlayerWithScore) => {
+        const scores = totalScoreForGame.scores.get(player.pid);
+        const scorePoints = scores.map(score => Application.scoreToPoints(score));
+        const totalScore = scorePoints.reduce(
+          (a, b) => a + b,
+          scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1] // exclude score of current station
+        );
+
+        $playerSelectionList.append(this.createPlayerButton(gid, station, totalScore, player));
+      });
+
+      if (playersWithScore === players.length) {
+        $('#next-station-btn').removeAttr('disabled');
+      } else if (playersWithScore === 0) {
+        $('#quick-assign-btn').removeAttr('disabled'); // enable quick-assign only when no player has a score yet
+      }
+    });
+  }
+
+  private createPlayerButton(
+    gid: number,
+    station: number,
+    totalScore: number,
+    player: PlayerWithScore
+  ): JQuery<JQuery.Node> {
+    const $playerEntry = $('<a/>')
+      .addClass('collection-item')
+      .attr('href', `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`)
+      .text(totalScore > 0 ? `${player.name} (${totalScore}) ` : player.name);
+
+    if (player.score) {
+      const scoreDisplayName = Application.scoreToDisplayName(player.score);
+      const scorePoints = Application.scoreToPoints(player.score);
+      const $scoreBadge = $('<span/>')
+        .addClass('badge new blue')
+        .css('font-weight', 'bold')
+        .html(`${scoreDisplayName}&nbsp;&nbsp;&nbsp;(+${scorePoints})`);
+
+      $playerEntry.append($scoreBadge);
     }
+    return $playerEntry;
   }
 }

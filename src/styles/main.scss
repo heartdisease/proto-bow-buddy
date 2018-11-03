@@ -17,6 +17,8 @@
  * 
  * Copyright 2017-2018 Christoph Matscheko
  */
+@import 'theme-colors';
+
 /* apply a natural box layout model to all elements, but allowing components to change */
 html {
   box-sizing: border-box;
@@ -35,7 +37,7 @@ html {
 
   h1 {
     font-size: 22pt;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid $grey-lighten-3;
     padding-bottom: 4px;
     margin-bottom: 8px;
     margin-top: 0;

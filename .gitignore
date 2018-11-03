@@ -9,3 +9,5 @@ proto-bow-buddy.token
 
 /js
 /css
+/dist
+!/dist/index.html

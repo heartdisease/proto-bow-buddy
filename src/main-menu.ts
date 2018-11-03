@@ -17,89 +17,100 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-/// <reference path ='../node_modules/@types/jquery/index.d.ts'/>
-/// <reference path='./base-view.ts' />
-/// <reference path='./main.ts' />
+import * as $ from 'jquery';
+import { BaseView } from './base-view';
+import { Application } from './main';
 
-namespace BowBuddy {
-  export class MainMenuView extends BaseView {
-    getTemplateLocator(): string {
-      return '#main-menu-template';
-    }
+export class MainMenuView extends BaseView {
+  private logoCounter = 0;
+  private quitCounter = 0;
+  private dbDumpModalElement: HTMLElement | null;
+  private deleteDbModalElement: HTMLElement | null;
 
-    onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-      $(this.getTemplateLocator() + ' select').formSelect(); // init materialize
+  getTemplateLocator(): string {
+    return '#main-menu-template';
+  }
 
-      $('.app-logo > h1').text(document.title);
+  onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+    const viewElement = document.querySelector('#main');
 
-      // jQuery Plugin Initialization
-      $(document).ready(() => $('.modal').modal());
+    this.dbDumpModalElement = viewElement.querySelector('#db-dump-modal');
+    this.deleteDbModalElement = viewElement.querySelector('#delete-db-modal');
 
-      let logoCounter = 0;
-      let quitCounter = 0;
+    $('.app-logo > h1').text(document.title);
+    this.initControls();
 
-      $('.app-logo')
-        // TODO save fullscreen-flag in sessionStorage so other views act accordingly!
-        .on('click', Application.switchToFullscreenFunc())
-        .on('click', e => {
-          if (++logoCounter % 2 === 0) {
-            Application.getStorage()
-              .dump()
-              .then(dbObject => {
-                const dbDump = JSON.stringify(dbObject);
-                const $textarea = $('#db-dump-modal textarea').val(dbDump);
+    console.info('MainMenuView.onReveal()');
+  }
 
-                $('#copy-json-btn').on('click', e => {
-                  $textarea.select();
+  onHide(): void {
+    M.Modal.getInstance(this.dbDumpModalElement).close();
+    M.Modal.getInstance(this.dbDumpModalElement).destroy();
 
-                  try {
-                    if (!document.execCommand('copy')) {
-                      throw new Error('execCommand copy could not be executed');
-                    }
-                  } catch (e) {
-                    console.error(e.message);
+    M.Modal.getInstance(this.deleteDbModalElement).close();
+    M.Modal.getInstance(this.deleteDbModalElement).destroy();
+
+    console.info('MainMenuView.onHide()');
+  }
+
+  private initControls(): void {
+    M.Modal.init(this.dbDumpModalElement, {});
+    M.Modal.init(this.deleteDbModalElement, {});
+
+    $('.app-logo')
+      // TODO save fullscreen-flag in sessionStorage so other views act accordingly!
+      .on('click', Application.switchToFullscreenFunc())
+      .on('click', e => {
+        if (++this.logoCounter % 2 === 0) {
+          this.getStorage()
+            .dump()
+            .then(dbObject => {
+              const dbDump = JSON.stringify(dbObject);
+              const $textarea = $('#db-dump-modal textarea').val(dbDump);
+
+              $('#copy-json-btn').on('click', e => {
+                $textarea.select();
+
+                try {
+                  if (!document.execCommand('copy')) {
+                    throw new Error('execCommand copy could not be executed');
                   }
-                });
-
-                $('#update-db-btn').on('click', e => {
-                  if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
-                    Application.getStorage()
-                      .importDb(JSON.parse(<string>$textarea.val()))
-                      .then(() => window.alert('Database successfully imported!'))
-                      .catch(error => console.error(error));
-                  }
-                });
-
-                console.log('BowBuddyDb dump:');
-                console.log(dbObject); // show db object in console for close inspection
-
-                $('#db-dump-modal').modal('open');
-                window.setTimeout(() => $textarea.select(), 500);
+                } catch (e) {
+                  console.error(e.message);
+                }
               });
-          }
-        });
-      $('#quit-btn').on('click', e => {
-        if (++quitCounter % 4 === 0 && window.confirm('Are you sure you want to erase the entire database?')) {
-          Application.getStorage()
-            .erase()
-            .then(e => {
-              $('#delete-db-modal .modal-msg').text('Database was successfully deleted!');
-            })
-            .catch(e => {
-              $('#delete-db-modal .modal-msg').text('Failed to delete database!');
-            })
-            .then(() => {
-              $('#delete-db-modal').modal('open');
+
+              $('#update-db-btn').on('click', e => {
+                if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
+                  this.getStorage()
+                    .importDb(JSON.parse(<string>$textarea.val()))
+                    .then(() => window.alert('Database successfully imported!'))
+                    .catch(error => console.error(error));
+                }
+              });
+
+              console.log('BowBuddyDb dump:');
+              console.log(dbObject); // show db object in console for close inspection
+
+              M.Modal.getInstance(this.dbDumpModalElement).open();
+              window.setTimeout(() => $textarea.select(), 500);
             });
         }
       });
-
-      console.info('MainMenuView.onReveal()');
-    }
-
-    onHide(): void {
-      // nothing to do
-      console.info('MainMenuView.onHide()');
-    }
+    $('#quit-btn').on('click', e => {
+      if (++this.quitCounter % 4 === 0 && window.confirm('Are you sure you want to erase the entire database?')) {
+        this.getStorage()
+          .erase()
+          .then(e => {
+            $('#delete-db-modal .modal-msg').text('Database was successfully deleted!');
+          })
+          .catch(e => {
+            $('#delete-db-modal .modal-msg').text('Failed to delete database!');
+          })
+          .then(() => {
+            M.Modal.getInstance(this.deleteDbModalElement).open();
+          });
+      }
+    });
   }
 }
