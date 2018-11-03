@@ -73,12 +73,14 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.1.10';
+  private static readonly VERSION = '2.1.11';
   private static storage: DbAccess = null;
   private static currentView: BaseView = null;
 
   public static initApplication(): void {
     Application.updateWindowTitle(Application.getVersion());
+
+    console.info('Application starting...');
 
     // hack for loading touch-dnd plug-in
     (<any>window).jQuery = $;
