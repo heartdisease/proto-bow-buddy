@@ -7,9 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack --mode development",
     "build": "webpack --mode production",
+    "build-ts": "tsc",
     "watch-ts": "tsc -w",
+    "build-sass": "node-sass -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
     "watch-sass": "node-sass -w -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
-    "server": "http-server ."
+    "server": "http-server dist"
   },
   "repository": {
     "type": "git",
