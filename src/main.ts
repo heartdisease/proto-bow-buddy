@@ -17,6 +17,7 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
+import 'requirejs';
 import { DbAccess } from './db';
 import { BaseView } from './base-view';
 import { MainMenuView } from './main-menu';
@@ -77,10 +78,14 @@ export class Application {
   private static currentView: BaseView = null;
 
   public static initApplication(): void {
-    window.addEventListener('hashchange', e => Application.onHashChange(window.location.hash.split(';')));
-
     Application.updateWindowTitle(Application.getVersion());
-    Application.onHashChange(window.location.hash.split(';'));
+
+    // hack for loading touch-dnd plug-in
+    (<any>window)['jQuery'] = $;
+    require(['./touch-dnd.js'], () => {
+      window.addEventListener('hashchange', e => Application.onHashChange(window.location.hash.split(';')));
+      Application.onHashChange(window.location.hash.split(';'));
+    });
   }
 
   private static onHashChange(params: string[]): void {

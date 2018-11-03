@@ -18,8 +18,7 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import * as $ from 'jquery';
-// import 'materialize-css';
-// import 'touch-dnd';
+import 'materialize-css';
 import { BaseView } from './base-view';
 import { Application } from './main';
 
@@ -56,7 +55,7 @@ export class StationSetScoreView extends BaseView {
     // TODO think about replacing touch-dnd with interact.js (https://github.com/taye/interact.js)
     // TODO check if draggable and droppable are correctly reset in reset()
 
-    (<any>$('.hit')) // explicit cast to 'any' to compensate the lack of a wrapper for the draggable plug-in
+    $('.hit')
       .draggable({ connectWith: '.turn' })
       .droppable({ accept: '.turn', activeClass: 'active', hoverClass: 'dropZone' })
       .on('droppable:drop', (e: any, ui: any) => {
@@ -67,7 +66,7 @@ export class StationSetScoreView extends BaseView {
         this.logScore(gid, pid, station, remainingPids, hit, turn);
       });
 
-    (<any>$('.turn')) // explicit cast to 'any' to compensate the lack of a wrapper for the draggable plug-in
+    $('.turn')
       .draggable({ connectWith: '.turn' })
       .droppable({ accept: '.hit', activeClass: 'active', hoverClass: 'dropZone' })
       .on('droppable:drop', (e: any, ui: any) => {

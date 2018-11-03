@@ -11,6 +11,14 @@
     "lib": ["es2015.core", "es2015.collection", "es2015.promise", "es5", "dom"],
     "types": ["jquery", "materialize-css"]
   },
-  "include": ["./src/*.ts", "./src/*.d.ts", "./src/styles/*.scss"],
+  "include": [
+    "./src/*.ts",
+    "./src/*.d.ts",
+    "./src/styles/*.scss",
+    "./node_modules/requirejs/require.js",
+    "./node_modules/jquery/dist/jquery.slim.min.js",
+    "./node_modules/touch-dnd/touch-dnd.js",
+    "./node_modules/materialize-css/dist/js/materialize.min.js"
+  ],
   "exclude": ["./node_modules", "./**/*.spec.ts"]
 }

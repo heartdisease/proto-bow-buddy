@@ -33,6 +33,7 @@
   "dependencies": {
     "@types/jquery": "^3.3.6",
     "@types/materialize-css": "^1.0.4",
+    "@types/requirejs": "^2.1.31",
     "jquery": "^3.3.1",
     "materialize-css": "^1.0.0",
     "requirejs": "^2.3.6",
