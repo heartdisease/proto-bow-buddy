@@ -9,7 +9,13 @@
     "noImplicitAny": true,
     "strictNullChecks": false,
     "lib": ["es2015.core", "es2015.collection", "es2015.promise", "es5", "dom"],
-    "types": ["jquery", "materialize-css"]
+    "baseUrl": ".",
+    "paths": {
+      "require": ["node_modules/requirejs/require"],
+      "jquery": ["node_modules/jquery/dist/jquery"],
+      "touch-dnd": ["node_modules/touch-dnd/touch-dnd"],
+      "materialize-css": ["node_modules/materialize-css/dist/js/materialize"]
+    }
   },
   "include": [
     "./src/*.ts",
