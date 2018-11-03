@@ -32,7 +32,7 @@ export abstract class BaseView {
   }
 
   private unloadTemplate(): void {
-    $('#main').empty(); // we use jQuery here so all jQuery-specific stuff is properly deregistered
+    $('#main').empty();
     console.log('Un-loaded template ' + this.getTemplateLocator() + '.');
   }
 
