@@ -263,7 +263,7 @@ export class DbAccess {
       .then(gameObjectStore => this.fetchById(gameObjectStore, 'gid', gid));
   }
 
-  addGame(cid: number, pids: Array<number>, starttime: string = undefined, endtime: string = undefined): Promise<Game> {
+  addGame(cid: number, pids: Array<number>, starttime?: string, endtime?: string): Promise<Game> {
     return this.db()
       .transaction('games', true)
       .then(gameObjectStore => {
@@ -331,7 +331,7 @@ export class DbAccess {
               .filter(score => score.gid === gid)
               .sort((scoreA, scoreB) => scoreA.station - scoreB.station)
               .forEach(score => {
-                totalScore.scores.get(score.pid).push(score.score || 'undefined-score');
+                totalScore.scores.get(score.pid)!.push(score.score || 'undefined-score');
               });
             return totalScore;
           });
@@ -428,15 +428,11 @@ export class DbAccess {
     return this.db().erase();
   }
 
-  private fetchAll(
-    objectStore: IDBObjectStore,
-    keyRange: IDBKeyRange = undefined,
-    filter: (o: any) => boolean = undefined
-  ): Promise<Array<any>> {
+  private fetchAll(objectStore: IDBObjectStore, keyRange?: IDBKeyRange, filter?: (o: any) => boolean): Promise<any[]> {
     if (filter !== undefined && keyRange !== undefined) {
-      return new Promise<any>((resolve, reject) => {
+      return new Promise<any[]>((resolve, reject) => {
         const cursorRequest = objectStore.openCursor(keyRange);
-        const filteredDataObjects: Array<any> = [];
+        const filteredDataObjects: any[] = [];
 
         cursorRequest.onsuccess = (event: any) => {
           const cursor = cursorRequest.result;

@@ -34,21 +34,19 @@
   }
 }
 
-.hit,
-.turn {
+a.hit,
+a.turn {
   margin-left: auto !important;
   margin-right: auto !important;
-}
 
-a.hit.active,
-a.turn.active {
-  z-index: 2;
-}
+  &.active {
+    z-index: 2;
+  }
 
-a.hit.dropZone,
-a.turn.dropZone {
-  outline: 2px dashed #666;
-  z-index: 1;
+  &.dropZone {
+    outline: 2px dashed #666;
+    z-index: 1;
+  }
 }
 
 .alert.usage-info {

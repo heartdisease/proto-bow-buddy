@@ -25,14 +25,13 @@ import { Application } from './main';
 export class StationSetScoreView extends BaseView {
   private static readonly NAVIGATION_DELAY = 600;
 
-  private scoreModalElement: HTMLElement | null;
+  private scoreModalElement?: Element;
 
   getTemplateLocator(): string {
     return '#station-set-score-template';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-    const viewElement = document.querySelector('#main');
     const gid = <number>urlParams.get('gid');
     const pid = <number>urlParams.get('pid');
     const remainingPids: Array<number> = urlParams.has('qa')
@@ -42,7 +41,7 @@ export class StationSetScoreView extends BaseView {
       : [];
     const station = <number>urlParams.get('station');
 
-    this.scoreModalElement = viewElement.querySelector('#score-modal');
+    this.scoreModalElement = this.getViewContainer().querySelector('#score-modal')!;
 
     M.Modal.init(this.scoreModalElement, {});
 
@@ -52,30 +51,73 @@ export class StationSetScoreView extends BaseView {
       .getPlayer(pid)
       .then(player => $('span.player-name').text(player.name));
 
-    // TODO think about replacing touch-dnd with interact.js (https://github.com/taye/interact.js)
-    // TODO check if draggable and droppable are correctly reset in reset()
+    import('interactjs').then(interact => {
+      this.initButtons(interact, gid, pid, remainingPids, station);
+    });
+  }
 
-    $('.hit')
-      .draggable({ connectWith: '.turn' })
-      .droppable({ accept: '.turn', activeClass: 'active', hoverClass: 'dropZone' })
-      .on('droppable:drop', (e: any, ui: any) => {
-        const hit = e.target.getAttribute('data-dnd');
-        const turn = ui.item[0].getAttribute('data-dnd');
+  onHide(): void {
+    M.Modal.getInstance(this.scoreModalElement!).close();
+    M.Modal.getInstance(this.scoreModalElement!).destroy();
+  }
 
-        console.log('URL params in hit: ' + JSON.stringify(urlParams));
-        this.logScore(gid, pid, station, remainingPids, hit, turn);
-      });
+  private initButtons(interact: any, gid: number, pid: number, remainingPids: Array<number>, station: number): void {
+    console.log('Start button setup ....');
 
-    $('.turn')
-      .draggable({ connectWith: '.turn' })
-      .droppable({ accept: '.hit', activeClass: 'active', hoverClass: 'dropZone' })
-      .on('droppable:drop', (e: any, ui: any) => {
-        const hit = ui.item[0].getAttribute('data-dnd');
-        const turn = e.target.getAttribute('data-dnd');
+    interact('a.hit')
+      .dropzone({
+        accept: 'a.turn',
+        overlap: 0.75,
+        ondropactivate: (event: any) => {
+          console.log('start drag');
+          event.target.classList.add('active');
+        },
+        ondragenter: (event: any) => {
+          event.target.classList.add('dropZone');
+        },
+        ondragleave: (event: any) => {
+          event.target.classList.remove('active');
+          event.target.classList.remove('dropZone');
+        },
+        ondrop: (event: any) => {
+          console.log('drop the turn bomb');
 
-        console.log('URL params in turn: ' + JSON.stringify(urlParams));
-        this.logScore(gid, pid, station, remainingPids, hit, turn);
-      });
+          const dropzoneElement = event.target;
+          const draggableElement = event.relatedTarget;
+          const hit = dropzoneElement.getAttribute('data-dnd');
+          const turn = draggableElement.getAttribute('data-dnd');
+
+          this.logScore(gid, pid, station, remainingPids, hit, turn);
+        }
+      })
+      .draggable({ inertia: true, onmove: this.dragMoveListener });
+
+    interact('a.turn')
+      .dropzone({
+        accept: 'a.hit',
+        overlap: 0.75,
+        ondropactivate: (event: any) => {
+          event.target.classList.add('active');
+        },
+        ondragenter: (event: any) => {
+          event.target.classList.add('dropZone');
+        },
+        ondragleave: (event: any) => {
+          event.target.classList.remove('active');
+          event.target.classList.remove('dropZone');
+        },
+        ondrop: (event: any) => {
+          console.log('drop the hit bomb');
+
+          const dropzoneElement = event.relatedTarget;
+          const draggableElement = event.target;
+          const hit = dropzoneElement.getAttribute('data-dnd');
+          const turn = draggableElement.getAttribute('data-dnd');
+
+          this.logScore(gid, pid, station, remainingPids, hit, turn);
+        }
+      })
+      .draggable({ inertia: true, onmove: this.dragMoveListener });
 
     $('.miss-btn').on('click', e => {
       e.preventDefault();
@@ -83,9 +125,16 @@ export class StationSetScoreView extends BaseView {
     });
   }
 
-  onHide(): void {
-    M.Modal.getInstance(this.scoreModalElement).close();
-    M.Modal.getInstance(this.scoreModalElement).destroy();
+  private dragMoveListener(event: any): void {
+    const draggedElement = event.target;
+    // keep the dragged position in the data-x/data-y attributes
+    const x = (parseFloat(draggedElement.getAttribute('data-x')) || 0) + event.dx;
+    const y = (parseFloat(draggedElement.getAttribute('data-y')) || 0) + event.dy;
+
+    draggedElement.style.transform = `translate(${x}px, ${y}px)`;
+
+    draggedElement.setAttribute('data-x', x);
+    draggedElement.setAttribute('data-y', y);
   }
 
   private navigateNext(gid: number, station: number, remainingPids: Array<number>): void {
@@ -109,9 +158,9 @@ export class StationSetScoreView extends BaseView {
     gid: number,
     pid: number,
     station: number,
-    remainingPids: Array<number>,
-    hit: string = undefined,
-    turn: string = undefined
+    remainingPids: number[],
+    hit?: string,
+    turn?: string
   ): void {
     const before = Date.now();
     const miss = hit === undefined || turn === undefined;
@@ -120,11 +169,11 @@ export class StationSetScoreView extends BaseView {
     if (miss) {
       $('#modal-hit-score').html('<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>');
     } else {
-      $('#modal-hit-score').html(this.getHitButton(hit));
-      $('#modal-turn-score').html(this.getTurnButton(turn));
+      $('#modal-hit-score').html(this.getHitButton(hit!));
+      $('#modal-turn-score').html(this.getTurnButton(turn!));
     }
 
-    M.Modal.getInstance(this.scoreModalElement).open();
+    M.Modal.getInstance(this.scoreModalElement!).open();
 
     Application.getStorage()
       .setScore(gid, pid, station, score)

@@ -89,9 +89,11 @@ export class FinalScoreView extends BaseView {
               .css('font-style', 'italic')
               .text(`${station}.`)
           );
-          totalScoreForGame.players.map(player => totalScoreForGame.scores.get(player.pid)).forEach(scores => {
-            $playerScoreEntry.append($('<td/>').text(Application.scoreToPoints(scores[station - 1])));
-          });
+          totalScoreForGame.players
+            .map(player => totalScoreForGame.scores.get(player.pid)!)
+            .forEach(scores => {
+              $playerScoreEntry.append($('<td/>').text(Application.scoreToPoints(scores[station - 1])));
+            });
           $('#player-score-entries').append($playerScoreEntry);
         }
 
@@ -116,7 +118,7 @@ export class FinalScoreView extends BaseView {
           .append($('<td/>').text('Center Kill:'));
 
         totalScoreForGame.players.forEach(player => {
-          const scores = totalScoreForGame.scores.get(player.pid);
+          const scores = totalScoreForGame.scores.get(player.pid)!;
           const totalScore = scores.map(score => Application.scoreToPoints(score)).reduce((a, b) => a + b, 0);
           const averageScore = Math.floor(((totalScore / stations) * 10) / 10);
           const missCount = scores.filter(score => score === 'miss').length;
@@ -134,20 +136,24 @@ export class FinalScoreView extends BaseView {
           $playerCenterKillHitCount.append($('<td/>').html(`${centerKillHitCount}&times;`));
         });
 
-        playerScores.sort((a, b) => b.totalScore - a.totalScore).forEach((playerScore, index) => {
-          $('#leaderboard').append(
-            $('<li/>')
-              .addClass('collection-item avatar')
-              .append(
-                this.createLeaderBoardBadge(index + 1),
-                $('<span/>')
-                  .addClass('title')
-                  .text(playerScore.playerName),
-                $('<p/>').html(`<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`),
-                $('<p/>').html(`<b>Miss</b>: ${playerScore.missCount}&times;`)
-              )
-          );
-        });
+        playerScores
+          .sort((a, b) => b.totalScore - a.totalScore)
+          .forEach((playerScore, index) => {
+            $('#leaderboard').append(
+              $('<li/>')
+                .addClass('collection-item avatar')
+                .append(
+                  this.createLeaderBoardBadge(index + 1),
+                  $('<span/>')
+                    .addClass('title')
+                    .text(playerScore.playerName),
+                  $('<p/>').html(
+                    `<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`
+                  ),
+                  $('<p/>').html(`<b>Miss</b>: ${playerScore.missCount}&times;`)
+                )
+            );
+          });
 
         $('#player-score-entries').append($playerTotalScore);
         $('#player-score-entries').append($playerAverageScore);

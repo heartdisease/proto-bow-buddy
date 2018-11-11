@@ -1,43 +1,44 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const SRC_ROOT = path.resolve(__dirname, 'src');
+const DESTINATION = path.resolve(__dirname, 'dist');
+
+const devMode = process.env.NODE_ENV !== 'production';
+
 module.exports = {
-  entry: './src/main.ts',
-  devtool: 'source-map',
+  context: SRC_ROOT,
+  entry: {
+    main: './main.ts'
+  },
   output: {
-    filename: 'main.js',
-    path: path.resolve(__dirname, 'dist')
+    filename: '[name].bundle.js',
+    path: DESTINATION
+    //publicPath: 'dist'
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.scss', '.css']
+    extensions: ['.d.ts', '.ts', '.js', '.scss', '.css'],
+    modules: [SRC_ROOT, SRC_ROOT + '/styles', 'node_modules']
   },
   module: {
     rules: [
       {
-        // https://webpack.js.org/guides/typescript/
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
+        test: /\.ts$/,
+        exclude: [/node_modules/],
+        use: 'ts-loader'
       },
       {
-        // from https://medium.com/a-beginners-guide-for-webpack-2/using-sass-9f52e447c5ae
         test: /\.scss$/,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader
-          },
-          'css-loader',
-          'sass-loader'
-        ]
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
       }
     ]
   },
   plugins: [
     new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: '[name].css',
-      chunkFilename: '[id].css'
+      filename: devMode ? '[name].css' : '[name].[hash].css',
+      chunkFilename: devMode ? '[id].css' : '[id].[hash].css'
     })
-  ]
+  ],
+  devtool: 'source-map',
+  devServer: {}
 };

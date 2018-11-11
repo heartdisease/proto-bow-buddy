@@ -22,12 +22,15 @@ import { DbAccess } from './db';
 import { Application } from './main';
 
 export abstract class BaseView {
+  private viewContainer?: Element;
+
   private loadTemplate(): void {
-    const viewContainer = document.querySelector('#main');
     const template = <HTMLTemplateElement>document.querySelector(this.getTemplateLocator());
     const clone = document.importNode(template.content, true);
 
-    viewContainer.appendChild(clone);
+    this.viewContainer = this.viewContainer || document.querySelector('#main')!;
+    this.viewContainer.appendChild(clone);
+
     console.log('Loaded template ' + this.getTemplateLocator() + '.');
   }
 
@@ -39,7 +42,7 @@ export abstract class BaseView {
   /**
    * Never override this method!
    */
-  /*final*/ initView(): void {
+  public /*final*/ initView(): void {
     this.loadTemplate();
     this.onReveal(Application.getUrlParams());
   }
@@ -47,7 +50,7 @@ export abstract class BaseView {
   /**
    * Never override this method!
    */
-  /*final*/ destroyView(): void {
+  public /*final*/ destroyView(): void {
     this.onHide();
     this.unloadTemplate();
   }
@@ -55,8 +58,15 @@ export abstract class BaseView {
   /**
    * Never override this method!
    */
-  /*final*/ getStorage(): DbAccess {
+  protected /*final*/ getStorage(): DbAccess {
     return Application.getStorage();
+  }
+
+  /**
+   * Never override this method!
+   */
+  protected /*final*/ getViewContainer(): Element {
+    return this.viewContainer!;
   }
 
   protected abstract onReveal(urlParams: Readonly<Map<string, string | number>>): void;

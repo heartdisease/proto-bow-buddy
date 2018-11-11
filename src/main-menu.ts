@@ -24,18 +24,16 @@ import { Application } from './main';
 export class MainMenuView extends BaseView {
   private logoCounter = 0;
   private quitCounter = 0;
-  private dbDumpModalElement: HTMLElement | null;
-  private deleteDbModalElement: HTMLElement | null;
+  private dbDumpModalElement?: Element;
+  private deleteDbModalElement?: Element;
 
   getTemplateLocator(): string {
     return '#main-menu-template';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-    const viewElement = document.querySelector('#main');
-
-    this.dbDumpModalElement = viewElement.querySelector('#db-dump-modal');
-    this.deleteDbModalElement = viewElement.querySelector('#delete-db-modal');
+    this.dbDumpModalElement = this.getViewContainer().querySelector('#db-dump-modal')!;
+    this.deleteDbModalElement = this.getViewContainer().querySelector('#delete-db-modal')!;
 
     $('.app-logo > h1').text(document.title);
     this.initControls();
@@ -44,18 +42,18 @@ export class MainMenuView extends BaseView {
   }
 
   onHide(): void {
-    M.Modal.getInstance(this.dbDumpModalElement).close();
-    M.Modal.getInstance(this.dbDumpModalElement).destroy();
+    M.Modal.getInstance(this.dbDumpModalElement!).close();
+    M.Modal.getInstance(this.dbDumpModalElement!).destroy();
 
-    M.Modal.getInstance(this.deleteDbModalElement).close();
-    M.Modal.getInstance(this.deleteDbModalElement).destroy();
+    M.Modal.getInstance(this.deleteDbModalElement!).close();
+    M.Modal.getInstance(this.deleteDbModalElement!).destroy();
 
     console.info('MainMenuView.onHide()');
   }
 
   private initControls(): void {
-    M.Modal.init(this.dbDumpModalElement, {});
-    M.Modal.init(this.deleteDbModalElement, {});
+    M.Modal.init(this.dbDumpModalElement!, {});
+    M.Modal.init(this.deleteDbModalElement!, {});
 
     $('.app-logo')
       // TODO save fullscreen-flag in sessionStorage so other views act accordingly!
@@ -92,7 +90,7 @@ export class MainMenuView extends BaseView {
               console.log('BowBuddyDb dump:');
               console.log(dbObject); // show db object in console for close inspection
 
-              M.Modal.getInstance(this.dbDumpModalElement).open();
+              M.Modal.getInstance(this.dbDumpModalElement!).open();
               window.setTimeout(() => $textarea.select(), 500);
             });
         }
@@ -108,7 +106,7 @@ export class MainMenuView extends BaseView {
             $('#delete-db-modal .modal-msg').text('Failed to delete database!');
           })
           .then(() => {
-            M.Modal.getInstance(this.deleteDbModalElement).open();
+            M.Modal.getInstance(this.deleteDbModalElement!).open();
           });
       }
     });

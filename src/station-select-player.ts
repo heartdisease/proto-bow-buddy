@@ -18,9 +18,8 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import * as $ from 'jquery';
-// import 'materialize-css';
 import { BaseView } from './base-view';
-import { Player, PlayerWithScore, Course, Game, Score, TotalScoreForGame, Application } from './main';
+import { Player, PlayerWithScore, TotalScoreForGame, Application } from './main';
 
 export class StationSelectPlayerView extends BaseView {
   getTemplateLocator(): string {
@@ -93,7 +92,7 @@ export class StationSelectPlayerView extends BaseView {
 
       players.forEach((player: PlayerWithScore) => {
         const scores = totalScoreForGame.scores.get(player.pid);
-        const scorePoints = scores.map(score => Application.scoreToPoints(score));
+        const scorePoints = scores ? scores.map(score => Application.scoreToPoints(score)) : [];
         const totalScore = scorePoints.reduce(
           (a, b) => a + b,
           scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1] // exclude score of current station

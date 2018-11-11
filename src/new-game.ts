@@ -18,29 +18,26 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import * as $ from 'jquery';
-// import 'materialize-css';
 import { BaseView } from './base-view';
-import { Player, PlayerWithScore, Course, Game, Score, TotalScoreForGame } from './main';
+import { Player, Course } from './main';
 
 export class NewGameView extends BaseView {
-  private existingPlayers: Array<Player> = [];
-  private existingCourses: Array<Course> = [];
-  private configuredPlayers: Array<Player> = [];
+  private existingPlayers: Player[] = [];
+  private existingCourses: Course[] = [];
+  private configuredPlayers: Player[] = [];
   private configuredCourse: Course;
-  private collapsibleElement: HTMLElement | null;
-  private playerSelectElement: HTMLElement | null;
-  private courseSelectElement: HTMLElement | null;
+  private collapsibleElement?: Element;
+  private playerSelectElement?: Element;
+  private courseSelectElement?: Element;
 
   getTemplateLocator(): string {
     return '#new-game-template';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-    const viewElement = document.querySelector('#main');
-
-    this.collapsibleElement = viewElement.querySelector('.collapsible');
-    this.playerSelectElement = viewElement.querySelector('select#player-select');
-    this.courseSelectElement = viewElement.querySelector('select#course-select');
+    this.collapsibleElement = this.getViewContainer().querySelector('.collapsible')!;
+    this.playerSelectElement = this.getViewContainer().querySelector('select#player-select')!;
+    this.courseSelectElement = this.getViewContainer().querySelector('select#course-select')!;
 
     this.initControls();
 
@@ -48,17 +45,17 @@ export class NewGameView extends BaseView {
   }
 
   onHide(): void {
-    M.Collapsible.getInstance(this.collapsibleElement).destroy();
-    M.FormSelect.getInstance(this.playerSelectElement).destroy();
-    M.FormSelect.getInstance(this.courseSelectElement).destroy();
+    M.Collapsible.getInstance(this.collapsibleElement!).destroy();
+    M.FormSelect.getInstance(this.playerSelectElement!).destroy();
+    M.FormSelect.getInstance(this.courseSelectElement!).destroy();
 
     console.info('NewGameView.onHide()');
   }
 
   private initControls(): void {
-    M.Collapsible.init(this.collapsibleElement, {});
-    M.FormSelect.init(this.playerSelectElement, {});
-    M.FormSelect.init(this.courseSelectElement, {});
+    M.Collapsible.init(this.collapsibleElement!, {});
+    M.FormSelect.init(this.playerSelectElement!, {});
+    M.FormSelect.init(this.courseSelectElement!, {});
 
     this.updatePlayerSelectionMenu();
     this.updateCourseSelectionMenu();
@@ -66,10 +63,10 @@ export class NewGameView extends BaseView {
   }
 
   private updatePlayerSelectionMenu(): Promise<void> {
-    const $playerSelect = $(this.playerSelectElement);
+    const $playerSelect = $(this.playerSelectElement!);
 
     $playerSelect.off('change'); // deregister handler first, because invalid option is default selection
-    M.FormSelect.getInstance(this.playerSelectElement).destroy();
+    M.FormSelect.getInstance(this.playerSelectElement!).destroy();
 
     return this.getStorage()
       .getPlayers()
@@ -101,7 +98,7 @@ export class NewGameView extends BaseView {
           $defaultOption.attr('selected', 'selected').attr('disabled', 'disabled'); // TODO cannot we set this right away?
 
           // re-init widget
-          M.FormSelect.init(this.playerSelectElement, {});
+          M.FormSelect.init(this.playerSelectElement!, {});
 
           this.registerPlayerSelectEventHandlers();
 
@@ -112,10 +109,10 @@ export class NewGameView extends BaseView {
   }
 
   private updateCourseSelectionMenu(): Promise<void> {
-    const $courseSelect = $(this.courseSelectElement);
+    const $courseSelect = $(this.courseSelectElement!);
 
     $courseSelect.off('change'); // deregister handler first, because invalid option is default selection
-    M.FormSelect.getInstance(this.courseSelectElement).destroy();
+    M.FormSelect.getInstance(this.courseSelectElement!).destroy();
 
     return this.getStorage()
       .getCourses()
@@ -147,7 +144,7 @@ export class NewGameView extends BaseView {
           $defaultOption.attr('selected', 'selected').attr('disabled', 'disabled'); // TODO cannot we set this right away?
 
           // re-init widget
-          M.FormSelect.init(this.courseSelectElement, {});
+          M.FormSelect.init(this.courseSelectElement!, {});
 
           this.registerCourseSelectEventHandlers();
 
@@ -158,7 +155,7 @@ export class NewGameView extends BaseView {
   }
 
   private registerPlayerSelectEventHandlers(): void {
-    const $playerSelect = $(this.playerSelectElement);
+    const $playerSelect = $(this.playerSelectElement!);
 
     $playerSelect.off('change').on('change', e => {
       const pid = (<HTMLSelectElement>e.target).value;
@@ -201,7 +198,7 @@ export class NewGameView extends BaseView {
   }
 
   private registerCourseSelectEventHandlers(): void {
-    const $courseSelect = $(this.courseSelectElement);
+    const $courseSelect = $(this.courseSelectElement!);
 
     $courseSelect.off('change').on('change', e => {
       const cid = (<HTMLSelectElement>e.target).value;
@@ -250,14 +247,12 @@ export class NewGameView extends BaseView {
 
   private registerStartButtonEventHandler(): void {
     $('#start-game-btn').on('click', e => {
-      let cid;
-      const pids: Array<number> = [];
+      const cid = +$('#course-entries > tr[data-cid]').attr('data-cid')!;
+      const pids: number[] = [];
 
       $('#start-game-btn').addClass('disabled'); // disable button while async db action is running
-
-      cid = +$('#course-entries > tr[data-cid]').attr('data-cid');
       $('#player-entries > tr[data-pid]').each(function() {
-        pids.push(+$(this).attr('data-pid'));
+        pids.push(+$(this).attr('data-pid')!);
       });
 
       this.getStorage()

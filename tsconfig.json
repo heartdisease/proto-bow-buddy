@@ -7,23 +7,21 @@
     "removeComments": true,
     "inlineSources": true,
     "noImplicitAny": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "lib": ["es2015.core", "es2015.collection", "es2015.promise", "es5", "dom"],
     "baseUrl": ".",
     "paths": {
-      "require": ["node_modules/requirejs/require"],
       "jquery": ["node_modules/jquery/dist/jquery"],
-      "touch-dnd": ["node_modules/touch-dnd/touch-dnd"],
+      "interactjs": ["node_modules/interactjs/dist/interact"],
       "materialize-css": ["node_modules/materialize-css/dist/js/materialize"]
     }
   },
   "include": [
     "./src/*.ts",
-    "./src/*.d.ts",
     "./src/styles/*.scss",
-    "./node_modules/requirejs/require.js",
     "./node_modules/jquery/dist/jquery.slim.min.js",
-    "./node_modules/touch-dnd/touch-dnd.js",
+    "./node_modules/interactjs/dist/interact.min.js",
+    "./node_modules/interactjs/index.d.ts",
     "./node_modules/materialize-css/dist/js/materialize.min.js"
   ],
   "exclude": ["./node_modules", "./**/*.spec.ts"]

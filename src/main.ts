@@ -17,7 +17,6 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-import * as $ from 'jquery';
 import { DbAccess } from './db';
 import { BaseView } from './base-view';
 import { MainMenuView } from './main-menu';
@@ -73,21 +72,18 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.1.11';
-  private static storage: DbAccess = null;
-  private static currentView: BaseView = null;
+  private static readonly VERSION = '2.2.0';
+
+  private static storage?: DbAccess;
+  private static currentView?: BaseView;
 
   public static initApplication(): void {
     Application.updateWindowTitle(Application.getVersion());
 
     console.info('Application starting...');
 
-    // hack for loading touch-dnd plug-in
-    (<any>window).jQuery = $;
-    (<any>window).require(['./touch-dnd.js'], () => {
-      window.addEventListener('hashchange', e => Application.onHashChange(window.location.hash.split(';')));
-      Application.onHashChange(window.location.hash.split(';'));
-    });
+    window.addEventListener('hashchange', e => Application.onHashChange(window.location.hash.split(';')));
+    Application.onHashChange(window.location.hash.split(';'));
   }
 
   private static onHashChange(params: string[]): void {
@@ -116,7 +112,7 @@ export class Application {
         return;
     }
 
-    if (this.currentView !== null) {
+    if (this.currentView) {
       this.currentView.destroyView();
     }
     this.currentView = view;
@@ -124,7 +120,7 @@ export class Application {
   }
 
   public static getStorage(): DbAccess {
-    if (Application.storage === null) {
+    if (!Application.storage) {
       Application.storage = new DbAccess();
     }
     return Application.storage;

@@ -1,21 +1,21 @@
 <!--
-This file is part of BowBuddy.
+  This file is part of BowBuddy.
 
-BowBuddy is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+  BowBuddy is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-BowBuddy is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  BowBuddy is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License
+  along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
 
 
-Copyright 2017-2018 Christoph Matscheko
+  Copyright 2017-2018 Christoph Matscheko
 -->
 <!DOCTYPE html>
 <html class="no-js" lang="en">
@@ -32,27 +32,25 @@ Copyright 2017-2018 Christoph Matscheko
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="materialize.min.css" />
-    <!-- <link rel="stylesheet" type="text/css" href="main.css" />
-    <link rel="stylesheet" type="text/css" href="main-menu.css" />
-    <link rel="stylesheet" type="text/css" href="new-game.css" />
-    <link rel="stylesheet" type="text/css" href="station-select-player.css" />
-    <link rel="stylesheet" type="text/css" href="station-set-score.css" />
-    <link rel="stylesheet" type="text/css" href="final-score.css" /> -->
+    <link rel="stylesheet" type="text/css" href="../node_modules/materialize-css/dist/css/materialize.min.css" />
+    <link rel="stylesheet" type="text/css" href="main.css" />
+    <!--
+      <link rel="stylesheet" type="text/css" href="main-menu.css" />
+      <link rel="stylesheet" type="text/css" href="new-game.css" />
+      <link rel="stylesheet" type="text/css" href="station-select-player.css" />
+      <link rel="stylesheet" type="text/css" href="station-set-score.css" />
+      <link rel="stylesheet" type="text/css" href="final-score.css" />
+    -->
   </head>
   <body>
     <!-- TODO change Bootstrap-specific class names to Materialize CSS class names! -->
 
-    <div id="main">
-      <!-- VIEW CONTAINER -->
-    </div>
+    <div id="main"><!-- VIEW CONTAINER --></div>
 
     <!-- [BEGIN TEMPLATE] MAIN MENU -->
     <template id="main-menu-template">
       <div class="app-logo">
-        <h1>
-          <!-- APP TITLE -->
-        </h1>
+        <h1><!-- APP TITLE --></h1>
       </div>
 
       <div class="container-fluid main-menu">
@@ -74,18 +72,16 @@ Copyright 2017-2018 Christoph Matscheko
       </div>
 
       <div class="modal" id="delete-db-modal">
-        <div class="modal-content">
-          <span class="modal-msg"></span>
-        </div>
+        <div class="modal-content"><span class="modal-msg"></span></div>
         <div class="modal-footer">
-          <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">Close</a>
+          <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal"
+            >Close</a
+          >
         </div>
       </div>
 
       <div class="modal modal-fixed-footer" id="db-dump-modal">
-        <div class="modal-content">
-          <textarea rows="16" cols="35"></textarea>
-        </div>
+        <div class="modal-content"><textarea rows="16" cols="35"></textarea></div>
         <div class="modal-footer">
           <div class="btn-group btn-group-justified">
             <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
@@ -109,9 +105,7 @@ Copyright 2017-2018 Christoph Matscheko
 
       <ul class="collapsible">
         <li class="active">
-          <div class="collapsible-header">
-            <i class="material-icons">person_pin</i> Choose players
-          </div>
+          <div class="collapsible-header"><i class="material-icons">person_pin</i> Choose players</div>
           <div class="collapsible-body">
             <!-- BEGIN PLAYER SELECTION -->
 
@@ -126,7 +120,13 @@ Copyright 2017-2018 Christoph Matscheko
               </div>
               <div id="add-player-container" class="row" style="display: none;">
                 <div class="col s10">
-                  <input type="text" placeholder="Add new player" id="new-player-name" class="form-control" aria-label="Add new player">
+                  <input
+                    type="text"
+                    placeholder="Add new player"
+                    id="new-player-name"
+                    class="form-control"
+                    aria-label="Add new player"
+                  />
                 </div>
                 <div class="col s2">
                   <a class="waves-effect waves-light btn-small disabled" href="#" id="add-player-btn">
@@ -153,9 +153,7 @@ Copyright 2017-2018 Christoph Matscheko
           </div>
         </li>
         <li>
-          <div class="collapsible-header">
-            <i class="material-icons">place</i> Choose course
-          </div>
+          <div class="collapsible-header"><i class="material-icons">place</i> Choose course</div>
           <div class="collapsible-body">
             <!-- BEGIN COURSE SELECTION -->
 
@@ -167,8 +165,20 @@ Copyright 2017-2018 Christoph Matscheko
                 <label>Choose course</label>
               </div>
               <div id="add-course-container" style="display: none;">
-                <input type="text" placeholder="Add new course" id="new-course-name" class="form-control" aria-label="Add new course">
-                <input type="number" placeholder="#" id="new-course-no-of-stations" class="form-control" aria-label="No. of stations">
+                <input
+                  type="text"
+                  placeholder="Add new course"
+                  id="new-course-name"
+                  class="form-control"
+                  aria-label="Add new course"
+                />
+                <input
+                  type="number"
+                  placeholder="#"
+                  id="new-course-no-of-stations"
+                  class="form-control"
+                  aria-label="No. of stations"
+                />
                 <span class="input-group-btn">
                   <a class="waves-effect waves-light btn-small disabled" href="#" id="set-course-btn">
                     <i class="material-icons">add</i>
@@ -213,9 +223,7 @@ Copyright 2017-2018 Christoph Matscheko
         </a>
       </div>
 
-      <div class="collection" id="player-selection-list">
-        <!-- PLAYER BUTTONS -->
-      </div>
+      <div class="collection" id="player-selection-list"><!-- PLAYER BUTTONS --></div>
 
       <div>
         <a class="waves-effect waves-light btn-small" href="#" id="next-station-btn" disabled="disabled">
@@ -236,36 +244,36 @@ Copyright 2017-2018 Christoph Matscheko
       <div class="container" style="margin-top: 20px;">
         <div class="row">
           <div class="col s6 hit-draggable-container">
-            <a class="btn-floating btn-large light-blue accent-4 hit" draggable="true" data-dnd="body-hit">
+            <a class="btn-floating btn-large light-blue accent-4 hit" data-dnd="body-hit">
               <span class="draggable-text-block">Body</span>
             </a>
           </div>
           <div class="col s6 turn-draggable-container">
-            <a class="btn-floating btn-large grey darken-4 turn" draggable="true" data-dnd="first-turn">
+            <a class="btn-floating btn-large grey darken-4 turn" data-dnd="first-turn">
               <span class="draggable-text-block">1<sup>st</sup></span>
             </a>
           </div>
         </div>
         <div class="row">
           <div class="col s6 hit-draggable-container">
-            <a class="btn-floating btn-large amber darken-4 hit" draggable="true" data-dnd="kill-hit">
+            <a class="btn-floating btn-large amber darken-4 hit" data-dnd="kill-hit">
               <span class="draggable-text-block">Kill</span>
             </a>
           </div>
           <div class="col s6 turn-draggable-container">
-            <a class="btn-floating btn-large grey darken-1 turn" draggable="true" data-dnd="second-turn">
+            <a class="btn-floating btn-large grey darken-1 turn" data-dnd="second-turn">
               <span class="draggable-text-block">2<sup>nd</sup></span>
             </a>
           </div>
         </div>
         <div class="row">
           <div class="col s6 hit-draggable-container">
-            <a class="btn-floating btn-large red darken-4 hit" draggable="true" data-dnd="center-kill-hit">
+            <a class="btn-floating btn-large red darken-4 hit" data-dnd="center-kill-hit">
               <span class="draggable-text-block">Center Kill</span>
             </a>
           </div>
           <div class="col s6 turn-draggable-container">
-            <a class="btn-floating btn-large grey turn" draggable="true" data-dnd="third-turn">
+            <a class="btn-floating btn-large grey turn" data-dnd="third-turn">
               <span class="draggable-text-block">3<sup>rd</sup></span>
             </a>
           </div>
@@ -279,12 +287,8 @@ Copyright 2017-2018 Christoph Matscheko
           <h4><span class="player-name">...</span> scored:</h4>
           <div class="container">
             <div class="row">
-              <div class="col s6" id="modal-hit-score">
-                <!-- SCORE: HIT -->
-              </div>
-              <div class="col s6" id="modal-turn-score">
-                <!-- SCORE: TURN -->
-              </div>
+              <div class="col s6" id="modal-hit-score"><!-- SCORE: HIT --></div>
+              <div class="col s6" id="modal-turn-score"><!-- SCORE: TURN --></div>
             </div>
           </div>
         </div>
@@ -323,6 +327,7 @@ Copyright 2017-2018 Christoph Matscheko
     </template>
     <!-- [END TEMPLATE] FINAL SCORE -->
 
-    <script data-main="main" src="requirejs.js" type="text/javascript"></script>
+    <!-- <script data-main="main.bundle" src="requirejs.js" type="text/javascript"></script> -->
+    <script src="main.bundle.js" type="text/javascript"></script>
   </body>
 </html>
