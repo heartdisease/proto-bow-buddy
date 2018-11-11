@@ -22,6 +22,8 @@ import 'materialize-css';
 import { BaseView } from './base-view';
 import { Application } from './main';
 
+import './styles/station-set-score.scss';
+
 export class StationSetScoreView extends BaseView {
   private static readonly NAVIGATION_DELAY = 600;
 
@@ -51,7 +53,7 @@ export class StationSetScoreView extends BaseView {
       .getPlayer(pid)
       .then(player => $('span.player-name').text(player.name));
 
-    import('interactjs').then(interact => {
+    import('interactjs').then((interact: any) => {
       this.initButtons(interact, gid, pid, remainingPids, station);
     });
   }

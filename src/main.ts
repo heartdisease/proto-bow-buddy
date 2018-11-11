@@ -26,11 +26,7 @@ import { StationSetScoreView } from './station-set-score';
 import { FinalScoreView } from './final-score';
 
 import './styles/main.scss';
-import './styles/main-menu.scss';
-import './styles/new-game.scss';
-import './styles/station-select-player.scss';
-import './styles/station-set-score.scss';
-import './styles/final-score.scss';
+import '../node_modules/materialize-css/dist/css/materialize.min.css';
 
 export interface Player {
   readonly pid: number;
@@ -72,7 +68,7 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.2.0';
+  private static readonly VERSION = '2.2.1';
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;

@@ -1,6 +1,6 @@
 {
   "name": "proto-bow-buddy",
-  "version": "2.1.10",
+  "version": "2.2.1",
   "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
   "main": "index.html",
   "scripts": {
@@ -31,7 +31,6 @@
     "http-server": "^0.11.1",
     "mini-css-extract-plugin": "^0.4.4",
     "node-sass": "^4.9.4",
-    "postcss-loader": "^3.0.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "ts-loader": "^5.3.0",

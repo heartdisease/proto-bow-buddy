@@ -21,6 +21,8 @@ import * as $ from 'jquery';
 import { BaseView } from './base-view';
 import { Application } from './main';
 
+import './styles/main-menu.scss';
+
 export class MainMenuView extends BaseView {
   private logoCounter = 0;
   private quitCounter = 0;

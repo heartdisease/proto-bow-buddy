@@ -18,9 +18,10 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import * as $ from 'jquery';
-// import 'materialize-css';
 import { BaseView } from './base-view';
 import { Game, Application } from './main';
+
+import './styles/final-score.scss';
 
 interface PlayerScore {
   playerName: string;
