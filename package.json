@@ -1,6 +1,6 @@
 {
   "name": "proto-bow-buddy",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
   "main": "index.html",
   "scripts": {
@@ -11,7 +11,8 @@
     "watch-ts": "tsc -w",
     "build-sass": "node-sass -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
     "watch-sass": "node-sass -w -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
-    "server": "http-server .",
+    "clean": "for f in $(ls dist); do if [ $f != 'index.html' ]; then rm -v dist/$f; fi; done",
+    "server": "http-server -c-1 dist",
     "webpack-server": "webpack-dev-server --progress --mode development --content-base ."
   },
   "repository": {
@@ -42,6 +43,7 @@
   "dependencies": {
     "interactjs": "^1.3.4",
     "jquery": "^3.3.1",
-    "materialize-css": "^1.0.0"
+    "materialize-css": "^1.0.0",
+    "touch-dnd": "^1.1.3"
   }
 }

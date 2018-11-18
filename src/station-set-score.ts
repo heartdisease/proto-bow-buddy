@@ -18,6 +18,7 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import * as $ from 'jquery';
+import 'touch-dnd';
 import 'materialize-css';
 import { BaseView } from './base-view';
 import { Application } from './main';
@@ -53,9 +54,7 @@ export class StationSetScoreView extends BaseView {
       .getPlayer(pid)
       .then(player => $('span.player-name').text(player.name));
 
-    import('interactjs').then((interact: any) => {
-      this.initButtons(interact, gid, pid, remainingPids, station);
-    });
+    this.initButtons(gid, pid, remainingPids, station);
   }
 
   onHide(): void {
@@ -63,80 +62,33 @@ export class StationSetScoreView extends BaseView {
     M.Modal.getInstance(this.scoreModalElement!).destroy();
   }
 
-  private initButtons(interact: any, gid: number, pid: number, remainingPids: Array<number>, station: number): void {
+  private initButtons(gid: number, pid: number, remainingPids: Array<number>, station: number): void {
     console.log('Start button setup ....');
 
-    interact('a.hit')
-      .dropzone({
-        accept: 'a.turn',
-        overlap: 0.75,
-        ondropactivate: (event: any) => {
-          console.log('start drag');
-          event.target.classList.add('active');
-        },
-        ondragenter: (event: any) => {
-          event.target.classList.add('dropZone');
-        },
-        ondragleave: (event: any) => {
-          event.target.classList.remove('active');
-          event.target.classList.remove('dropZone');
-        },
-        ondrop: (event: any) => {
-          console.log('drop the turn bomb');
+    $('.hit')
+      .draggable({ connectWith: '.turn' })
+      .droppable({ accept: '.turn', activeClass: 'active', hoverClass: 'dropZone' })
+      .on('droppable:drop', (e: any, ui: any) => {
+        const hit = e.target.getAttribute('data-dnd');
+        const turn = ui.item[0].getAttribute('data-dnd');
 
-          const dropzoneElement = event.target;
-          const draggableElement = event.relatedTarget;
-          const hit = dropzoneElement.getAttribute('data-dnd');
-          const turn = draggableElement.getAttribute('data-dnd');
+        this.logScore(gid, pid, station, remainingPids, hit, turn);
+      });
 
-          this.logScore(gid, pid, station, remainingPids, hit, turn);
-        }
-      })
-      .draggable({ inertia: true, onmove: this.dragMoveListener });
+    $('.turn')
+      .draggable({ connectWith: '.turn' })
+      .droppable({ accept: '.hit', activeClass: 'active', hoverClass: 'dropZone' })
+      .on('droppable:drop', (e: any, ui: any) => {
+        const hit = ui.item[0].getAttribute('data-dnd');
+        const turn = e.target.getAttribute('data-dnd');
 
-    interact('a.turn')
-      .dropzone({
-        accept: 'a.hit',
-        overlap: 0.75,
-        ondropactivate: (event: any) => {
-          event.target.classList.add('active');
-        },
-        ondragenter: (event: any) => {
-          event.target.classList.add('dropZone');
-        },
-        ondragleave: (event: any) => {
-          event.target.classList.remove('active');
-          event.target.classList.remove('dropZone');
-        },
-        ondrop: (event: any) => {
-          console.log('drop the hit bomb');
-
-          const dropzoneElement = event.relatedTarget;
-          const draggableElement = event.target;
-          const hit = dropzoneElement.getAttribute('data-dnd');
-          const turn = draggableElement.getAttribute('data-dnd');
-
-          this.logScore(gid, pid, station, remainingPids, hit, turn);
-        }
-      })
-      .draggable({ inertia: true, onmove: this.dragMoveListener });
+        this.logScore(gid, pid, station, remainingPids, hit, turn);
+      });
 
     $('.miss-btn').on('click', e => {
       e.preventDefault();
       this.logScore(gid, pid, station, remainingPids);
     });
-  }
-
-  private dragMoveListener(event: any): void {
-    const draggedElement = event.target;
-    // keep the dragged position in the data-x/data-y attributes
-    const x = (parseFloat(draggedElement.getAttribute('data-x')) || 0) + event.dx;
-    const y = (parseFloat(draggedElement.getAttribute('data-y')) || 0) + event.dy;
-
-    draggedElement.style.transform = `translate(${x}px, ${y}px)`;
-
-    draggedElement.setAttribute('data-x', x);
-    draggedElement.setAttribute('data-y', y);
   }
 
   private navigateNext(gid: number, station: number, remainingPids: Array<number>): void {

@@ -17,7 +17,7 @@ module.exports = {
     //publicPath: 'dist'
   },
   resolve: {
-    extensions: ['.d.ts', '.ts', '.js', '.scss', '.css'],
+    extensions: ['.ts', '.js', '.scss', '.css'],
     modules: [SRC_ROOT, SRC_ROOT + '/styles', 'node_modules']
   },
   module: {

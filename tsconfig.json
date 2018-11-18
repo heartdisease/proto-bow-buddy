@@ -12,7 +12,6 @@
     "baseUrl": ".",
     "paths": {
       "jquery": ["node_modules/jquery/dist/jquery"],
-      "interactjs": ["node_modules/interactjs/dist/interact"],
       "materialize-css": ["node_modules/materialize-css/dist/js/materialize"]
     }
   },
@@ -20,9 +19,6 @@
     "./src/*.ts",
     "./src/styles/*.scss",
     "node_modules/jquery/dist/jquery.slim.min.js",
-    "node_modules/interactjs/dist/interact.min.js",
-    "node_modules/interactjs/dist/interact.d.ts",
-    "node_modules/interactjs/index.d.ts",
     "node_modules/materialize-css/dist/js/materialize.min.js",
     "node_modules/materialize-css/dist/css/materialize.min.css"
   ],
