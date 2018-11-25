@@ -28,8 +28,12 @@ export class MainMenuView extends BaseView {
   private dbDumpModalElement?: Element;
   private deleteDbModalElement?: Element;
 
-  getTemplateLocator(): string {
+  protected getTemplateLocator(): string {
     return '#main-menu-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'main-menu-view';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {

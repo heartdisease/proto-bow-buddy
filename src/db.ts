@@ -26,24 +26,23 @@ export class DbWrapper {
   private dbConnected: boolean = false;
   private dbPromise: Promise<any> | null = null;
 
-  transaction(objectStores: string | Array<string>, writeAccess: boolean = false): Promise<any> {
-    return this.requestDb().then(db => {
-      const transaction = db.transaction(objectStores, writeAccess ? 'readwrite' : 'readonly');
+  async transaction(objectStores: string | string[], writeAccess: boolean = false) {
+    const db = await this.requestDb();
+    const transaction = db.transaction(objectStores, writeAccess ? 'readwrite' : 'readonly');
 
-      return Array.isArray(objectStores)
-        ? objectStores.reduce((map: any, objectStore: string) => {
-            map[objectStore] = transaction.objectStore(objectStore);
-            return map;
-          }, {})
-        : transaction.objectStore(objectStores);
-    });
+    return Array.isArray(objectStores)
+      ? objectStores.reduce((map: any, objectStore: string) => {
+          map[objectStore] = transaction.objectStore(objectStore);
+          return map;
+        }, {})
+      : transaction.objectStore(objectStores);
   }
 
-  objectStoreNames(): Promise<any> {
+  async objectStoreNames() {
     return this.requestDb().then(db => Array.prototype.slice.call(db.objectStoreNames));
   }
 
-  erase(): Promise<any> {
+  async erase() {
     return this.close().then(() => {
       return new Promise<any>((resolve, reject) => {
         (function tryDeleteDb() {
@@ -67,7 +66,7 @@ export class DbWrapper {
     });
   }
 
-  close(): Promise<any> {
+  async close() {
     // TODO check if db is even open before calling requestDb()
     return this.requestDb().then(db => {
       // reset db handle promise
@@ -167,19 +166,19 @@ export class DbWrapper {
 export class DbAccess {
   private dbWrapper: DbWrapper | null = null;
 
-  getPlayers(): Promise<Array<Player>> {
+  async getPlayers(): Promise<Player[]> {
     return this.db()
       .transaction('players')
       .then(playerObjectStore => this.fetchAll(playerObjectStore));
   }
 
-  getPlayer(pid: number): Promise<Player> {
+  async getPlayer(pid: number): Promise<Player> {
     return this.db()
       .transaction('players')
       .then(playerObjectStore => this.fetchById(playerObjectStore, 'pid', pid));
   }
 
-  getPlayersWithScore(gid: number, station: number): Promise<Array<PlayerWithScore>> {
+  async getPlayersWithScore(gid: number, station: number): Promise<PlayerWithScore[]> {
     return this.getPlayersForGame(gid).then(players => {
       if (players.length === 0) {
         return [];
@@ -207,7 +206,7 @@ export class DbAccess {
     });
   }
 
-  addPlayer(name: string, email: string = ''): Promise<Player> {
+  async addPlayer(name: string, email: string = ''): Promise<Player> {
     return this.db()
       .transaction('players', true)
       .then(playerObjectStore => {
@@ -221,13 +220,13 @@ export class DbAccess {
       });
   }
 
-  getCourses(): Promise<Array<Course>> {
+  async getCourses(): Promise<Course[]> {
     return this.db()
       .transaction('courses')
       .then(courseObjectStore => this.fetchAll(courseObjectStore));
   }
 
-  getCourseForGame(gid: number): Promise<any> {
+  async getCourseForGame(gid: number) {
     return this.db()
       .transaction(['courses', 'games'])
       .then(objectStores =>
@@ -237,7 +236,7 @@ export class DbAccess {
       );
   }
 
-  addCourse(name: string, place: string, geolocation: string, stations: number): Promise<any> {
+  async addCourse(name: string, place: string, geolocation: string, stations: number) {
     return this.db()
       .transaction('courses', true)
       .then(courseObjectStore => {
@@ -251,19 +250,19 @@ export class DbAccess {
       });
   }
 
-  getGames(): Promise<Array<Game>> {
+  async getGames(): Promise<Game[]> {
     return this.db()
       .transaction('games')
       .then(gameObjectStore => this.fetchAll(gameObjectStore));
   }
 
-  getGame(gid: number): Promise<Game> {
+  async getGame(gid: number): Promise<Game> {
     return this.db()
       .transaction('games')
       .then(gameObjectStore => this.fetchById(gameObjectStore, 'gid', gid));
   }
 
-  addGame(cid: number, pids: Array<number>, starttime?: string, endtime?: string): Promise<Game> {
+  async addGame(cid: number, pids: Array<number>, starttime?: string, endtime?: string): Promise<Game> {
     return this.db()
       .transaction('games', true)
       .then(gameObjectStore => {
@@ -289,7 +288,7 @@ export class DbAccess {
   }
 
   // returns promise with updated game record
-  finishGame(gid: number): Promise<any> {
+  async finishGame(gid: number) {
     return this.db()
       .transaction('games', true)
       .then(gameObjectStore => {
@@ -304,7 +303,7 @@ export class DbAccess {
       });
   }
 
-  setScore(gid: number, pid: number, station: number, score: string): Promise<Score> {
+  async setScore(gid: number, pid: number, station: number, score: string): Promise<Score> {
     return this.db()
       .transaction('scores', true)
       .then(scoreObjectStore => {
@@ -318,12 +317,12 @@ export class DbAccess {
       });
   }
 
-  getTotalScoreForGame(gid: number): Promise<TotalScoreForGame> {
-    return this.getPlayersForGame(gid).then((players: Array<Player>) => {
+  async getTotalScoreForGame(gid: number): Promise<TotalScoreForGame> {
+    return this.getPlayersForGame(gid).then((players: Player[]) => {
       return this.db()
         .transaction('scores')
         .then(scoreObjectStore => {
-          return this.fetchAll(scoreObjectStore).then((scores: Array<Score>) => {
+          return this.fetchAll(scoreObjectStore).then((scores: Score[]) => {
             const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
 
             players.forEach(player => totalScore.scores.set(player.pid, []));
@@ -339,7 +338,7 @@ export class DbAccess {
     });
   }
 
-  private getPlayersForGame(gid: number): Promise<Array<Player>> {
+  private async getPlayersForGame(gid: number): Promise<Player[]> {
     return this.db()
       .transaction(['games', 'players'])
       .then(objectStores => {
@@ -353,7 +352,7 @@ export class DbAccess {
       });
   }
 
-  dump(): Promise<any> {
+  async dump(): Promise<any> {
     const dbRef = this.db();
     let dbObject: any = {};
 
@@ -375,7 +374,7 @@ export class DbAccess {
     });
   }
 
-  importDb(dbObject: any): Promise<any> {
+  async importDb(dbObject: any): Promise<any> {
     console.log('>> Step 1: Delete old database');
 
     return this.db()

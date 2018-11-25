@@ -36,7 +36,7 @@ export interface Player {
 }
 
 export interface PlayerWithScore extends Player {
-  readonly score: string | undefined;
+  readonly score?: string;
 }
 
 export interface Course {
@@ -64,8 +64,8 @@ export interface Score {
 }
 
 export interface TotalScoreForGame {
-  readonly players: Array<Player>;
-  readonly scores: Map<number, Array<string>>;
+  readonly players: Player[];
+  readonly scores: Map<number, string[]>;
 }
 
 export class Application {

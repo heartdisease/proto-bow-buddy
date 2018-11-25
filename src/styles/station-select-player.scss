@@ -17,16 +17,18 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-.player-selection {
-  width: 100%;
-  margin-top: 22px;
-}
+#main.station-select-player-view {
+  .player-selection {
+    width: 100%;
+    margin-top: 22px;
+  }
 
-#player-selection-list {
-  margin-top: 12px;
-  margin-bottom: 12px;
+  #player-selection-list {
+    margin-top: 12px;
+    margin-bottom: 12px;
 
-  & > a.collection-item > span.badge.new::after {
-    content: ''; /* hack to get rid of the 'new' label without losing the styling of the badge */
+    & > a.collection-item > span.badge.new::after {
+      content: ''; /* hack to get rid of the 'new' label without losing the styling of the badge */
+    }
   }
 }

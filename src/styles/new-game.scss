@@ -17,20 +17,22 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-.config-panel-heading {
-  display: flex;
-  align-items: center;
+#main.new-game-view {
+  .config-panel-heading {
+    display: flex;
+    align-items: center;
 
-  & > .header {
-    margin-right: 12px;
-    font-weight: bold;
+    & > .header {
+      margin-right: 12px;
+      font-weight: bold;
+    }
   }
-}
 
-#new-course-name {
-  max-width: 110px;
-}
+  #new-course-name {
+    max-width: 110px;
+  }
 
-#new-course-no-of-stations {
-  max-width: 36px;
+  #new-course-no-of-stations {
+    max-width: 36px;
+  }
 }

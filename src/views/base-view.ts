@@ -29,13 +29,16 @@ export abstract class BaseView {
     const clone = document.importNode(template.content, true);
 
     this.viewContainer = this.viewContainer || document.querySelector('#main')!;
+    $(this.viewContainer).addClass(this.getViewClassName());
     this.viewContainer.appendChild(clone);
 
     console.log('Loaded template ' + this.getTemplateLocator() + '.');
   }
 
   private unloadTemplate(): void {
-    $('#main').empty();
+    $('#main')
+      .removeClass(this.getViewClassName())
+      .empty();
     console.log('Un-loaded template ' + this.getTemplateLocator() + '.');
   }
 
@@ -74,4 +77,6 @@ export abstract class BaseView {
   protected abstract onHide(): void;
 
   protected abstract getTemplateLocator(): string;
+
+  protected abstract getViewClassName(): string;
 }

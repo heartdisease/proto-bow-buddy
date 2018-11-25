@@ -30,8 +30,12 @@ export class StationSetScoreView extends BaseView {
 
   private scoreModalElement?: Element;
 
-  getTemplateLocator(): string {
+  protected getTemplateLocator(): string {
     return '#station-set-score-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'station-set-score-view';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {

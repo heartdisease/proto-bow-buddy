@@ -17,49 +17,51 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-#course-label {
-  font-style: italic;
-}
-
-#leaderboard > .collection-item.avatar {
-  padding: 10px;
-  text-align: left;
-}
-
-.leaderboard-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: bold;
-  width: 46px;
-  height: 46px;
-  border-radius: 28px;
-  float: left;
-  margin-right: 10px;
-  color: #bdbdbd;
-
-  &.first-place {
-    color: #fafafa;
-    font-size: 26px;
-    width: 60px;
-    height: 60px;
-    border-radius: 30px;
+#main.final-score-view {
+  #course-label {
+    font-style: italic;
   }
 
-  &.second-place {
-    color: #fafafa;
-    font-size: 22px;
-    width: 56px;
-    height: 56px;
-    border-radius: 228px;
+  #leaderboard > .collection-item.avatar {
+    padding: 10px;
+    text-align: left;
   }
 
-  &.third-place {
-    color: #fafafa;
-    font-size: 18px;
-    width: 50px;
-    height: 50px;
-    border-radius: 25px;
+  .leaderboard-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    width: 46px;
+    height: 46px;
+    border-radius: 28px;
+    float: left;
+    margin-right: 10px;
+    color: #bdbdbd;
+
+    &.first-place {
+      color: #fafafa;
+      font-size: 26px;
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+    }
+
+    &.second-place {
+      color: #fafafa;
+      font-size: 22px;
+      width: 56px;
+      height: 56px;
+      border-radius: 228px;
+    }
+
+    &.third-place {
+      color: #fafafa;
+      font-size: 18px;
+      width: 50px;
+      height: 50px;
+      border-radius: 25px;
+    }
   }
 }

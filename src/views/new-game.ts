@@ -32,8 +32,12 @@ export class NewGameView extends BaseView {
   private playerSelectElement?: Element;
   private courseSelectElement?: Element;
 
-  getTemplateLocator(): string {
+  protected getTemplateLocator(): string {
     return '#new-game-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'new-game-view';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
@@ -64,96 +68,80 @@ export class NewGameView extends BaseView {
     this.registerStartButtonEventHandler();
   }
 
-  private updatePlayerSelectionMenu(): Promise<void> {
+  private async updatePlayerSelectionMenu() {
     const $playerSelect = $(this.playerSelectElement!);
 
     $playerSelect.off('change'); // deregister handler first, because invalid option is default selection
     M.FormSelect.getInstance(this.playerSelectElement!).destroy();
 
-    return this.getStorage()
-      .getPlayers()
-      .then(players => {
-        window.setTimeout(() => {
-          const $defaultOption = $('<option/>').text('Choose player');
-
-          $playerSelect.empty();
-
-          this.existingPlayers = players;
-
-          $playerSelect.append($defaultOption).append(
-            $('<option/>')
-              .val('new')
-              .text('New player...')
-          );
-
-          players
-            .filter(player => this.configuredPlayers.every(configuredPlayer => configuredPlayer.pid !== player.pid))
-            .forEach(player => {
-              $playerSelect.append(
-                $('<option/>')
-                  .attr('value', player.pid)
-                  .data('player', player)
-                  .text(player.name)
-              );
-            });
-
-          $defaultOption.attr('selected', 'selected').attr('disabled', 'disabled'); // TODO cannot we set this right away?
-
-          // re-init widget
-          M.FormSelect.init(this.playerSelectElement!, {});
-
-          this.registerPlayerSelectEventHandlers();
-
-          console.log('Rebuilt player selection menu.');
-        }, 0); // TODO is this delay even necessary?
-      })
-      .catch(e => console.error(e));
+    try {
+      const players = await this.getStorage().getPlayers();
+      window.setTimeout(() => {
+        const $defaultOption = $('<option/>').text('Choose player');
+        $playerSelect.empty();
+        this.existingPlayers = players;
+        $playerSelect.append($defaultOption).append(
+          $('<option/>')
+            .val('new')
+            .text('New player...')
+        );
+        players
+          .filter(player => this.configuredPlayers.every(configuredPlayer => configuredPlayer.pid !== player.pid))
+          .forEach(player => {
+            $playerSelect.append(
+              $('<option/>')
+                .attr('value', player.pid)
+                .data('player', player)
+                .text(player.name)
+            );
+          });
+        $defaultOption.attr('selected', 'selected').attr('disabled', 'disabled'); // TODO cannot we set this right away?
+        // re-init widget
+        M.FormSelect.init(this.playerSelectElement!, {});
+        this.registerPlayerSelectEventHandlers();
+        console.log('Rebuilt player selection menu.');
+      }, 0); // TODO is this delay even necessary?
+    } catch (e) {
+      return console.error(e);
+    }
   }
 
-  private updateCourseSelectionMenu(): Promise<void> {
+  private async updateCourseSelectionMenu() {
     const $courseSelect = $(this.courseSelectElement!);
 
     $courseSelect.off('change'); // deregister handler first, because invalid option is default selection
     M.FormSelect.getInstance(this.courseSelectElement!).destroy();
 
-    return this.getStorage()
-      .getCourses()
-      .then(courses => {
-        window.setTimeout(() => {
-          const $defaultOption = $('<option/>').text('Choose course');
-
-          $courseSelect.empty();
-
-          this.existingCourses = courses;
-
-          $courseSelect.append($defaultOption).append(
-            $('<option/>')
-              .val('new')
-              .text('New course...')
-          );
-
-          courses
-            .filter(course => this.configuredCourse === undefined || this.configuredCourse.cid !== course.cid)
-            .forEach(course => {
-              $courseSelect.append(
-                $('<option/>')
-                  .attr('value', course.cid)
-                  .data('course', course)
-                  .text(course.name + ' (' + course.stations + ')')
-              );
-            });
-
-          $defaultOption.attr('selected', 'selected').attr('disabled', 'disabled'); // TODO cannot we set this right away?
-
-          // re-init widget
-          M.FormSelect.init(this.courseSelectElement!, {});
-
-          this.registerCourseSelectEventHandlers();
-
-          console.log('Rebuilt course selection menu.');
-        }, 0); // TODO is this delay even necessary?
-      })
-      .catch(e => console.error(e));
+    try {
+      const courses = await this.getStorage().getCourses();
+      window.setTimeout(() => {
+        const $defaultOption = $('<option/>').text('Choose course');
+        $courseSelect.empty();
+        this.existingCourses = courses;
+        $courseSelect.append($defaultOption).append(
+          $('<option/>')
+            .val('new')
+            .text('New course...')
+        );
+        courses
+          .filter(course => this.configuredCourse === undefined || this.configuredCourse.cid !== course.cid)
+          .forEach(course => {
+            $courseSelect.append(
+              $('<option/>')
+                .attr('value', course.cid)
+                .data('course', course)
+                .text(course.name + ' (' + course.stations + ')')
+            );
+          });
+        $defaultOption.attr('selected', 'selected').attr('disabled', 'disabled'); // TODO cannot we set this right away?
+        // re-init widget
+        M.FormSelect.init(this.courseSelectElement!, {});
+        this.registerCourseSelectEventHandlers();
+        console.log('Rebuilt course selection menu.');
+      }, 0); // TODO is this delay even necessary?
+    } catch (e) {
+      return console.error(e);
+    }
   }
 
   private registerPlayerSelectEventHandlers(): void {

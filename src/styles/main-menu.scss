@@ -17,26 +17,28 @@
  *
  * Copyright 2017-2018 Christoph Matscheko
  */
-.main-menu {
-  & > a {
-    display: block;
-    clear: both;
-    width: 250px;
-    margin-bottom: 15px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-#db-dump-modal {
-  textarea {
-    margin-top: 14px;
-    width: 100%;
-    height: auto;
-    font-family: monospace;
+#main.main-menu-view {
+  .main-menu {
+    & > a {
+      display: block;
+      clear: both;
+      width: 250px;
+      margin-bottom: 15px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
-  .btn-flat {
-    padding: 0 0.6rem;
+  #db-dump-modal {
+    textarea {
+      margin-top: 14px;
+      width: 100%;
+      height: auto;
+      font-family: monospace;
+    }
+
+    .btn-flat {
+      padding: 0 0.6rem;
+    }
   }
 }

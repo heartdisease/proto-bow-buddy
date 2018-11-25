@@ -31,8 +31,12 @@ interface PlayerScore {
 }
 
 export class HallOfFameView extends BaseView {
-  getTemplateLocator(): string {
+  protected getTemplateLocator(): string {
     return '#hall-of-fame-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'hall-of-fame-view';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {

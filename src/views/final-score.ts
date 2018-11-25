@@ -31,8 +31,12 @@ interface PlayerScore {
 }
 
 export class FinalScoreView extends BaseView {
-  getTemplateLocator(): string {
+  protected getTemplateLocator(): string {
     return '#final-score-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'final-score-view';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {

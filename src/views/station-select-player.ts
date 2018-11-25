@@ -24,8 +24,12 @@ import { Player, PlayerWithScore, TotalScoreForGame, Application } from '../main
 import '../styles/station-select-player.scss';
 
 export class StationSelectPlayerView extends BaseView {
-  getTemplateLocator(): string {
+  protected getTemplateLocator(): string {
     return '#station-select-player-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'station-select-player-view';
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
