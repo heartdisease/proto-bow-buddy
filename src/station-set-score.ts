@@ -18,7 +18,7 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import * as $ from 'jquery';
-import 'touch-dnd';
+import 'vendor/touch-dnd';
 import 'materialize-css';
 import { BaseView } from './base-view';
 import { Application } from './main';
