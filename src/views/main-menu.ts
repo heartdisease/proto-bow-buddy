@@ -19,9 +19,8 @@
  */
 import * as $ from 'jquery';
 import { BaseView } from './base-view';
-import { Application } from './main';
 
-import './styles/main-menu.scss';
+import '../styles/main-menu.scss';
 
 export class MainMenuView extends BaseView {
   private logoCounter = 0;
@@ -57,46 +56,43 @@ export class MainMenuView extends BaseView {
     M.Modal.init(this.dbDumpModalElement!, {});
     M.Modal.init(this.deleteDbModalElement!, {});
 
-    $('.app-logo')
-      // TODO save fullscreen-flag in sessionStorage so other views act accordingly!
-      .on('click', Application.switchToFullscreenFunc())
-      .on('click', e => {
-        if (++this.logoCounter % 2 === 0) {
-          this.getStorage()
-            .dump()
-            .then(dbObject => {
-              const dbDump = JSON.stringify(dbObject);
-              const $textarea = $('#db-dump-modal textarea').val(dbDump);
+    $('.app-logo').on('click', e => {
+      if (++this.logoCounter % 2 === 0) {
+        this.getStorage()
+          .dump()
+          .then(dbObject => {
+            const dbDump = JSON.stringify(dbObject);
+            const $textarea = $('#db-dump-modal textarea').val(dbDump);
 
-              $('#copy-json-btn').on('click', e => {
-                $textarea.select();
+            $('#copy-json-btn').on('click', e => {
+              $textarea.select();
 
-                try {
-                  if (!document.execCommand('copy')) {
-                    throw new Error('execCommand copy could not be executed');
-                  }
-                } catch (e) {
-                  console.error(e.message);
+              try {
+                if (!document.execCommand('copy')) {
+                  throw new Error('execCommand copy could not be executed');
                 }
-              });
-
-              $('#update-db-btn').on('click', e => {
-                if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
-                  this.getStorage()
-                    .importDb(JSON.parse(<string>$textarea.val()))
-                    .then(() => window.alert('Database successfully imported!'))
-                    .catch(error => console.error(error));
-                }
-              });
-
-              console.log('BowBuddyDb dump:');
-              console.log(dbObject); // show db object in console for close inspection
-
-              M.Modal.getInstance(this.dbDumpModalElement!).open();
-              window.setTimeout(() => $textarea.select(), 500);
+              } catch (e) {
+                console.error(e.message);
+              }
             });
-        }
-      });
+
+            $('#update-db-btn').on('click', e => {
+              if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
+                this.getStorage()
+                  .importDb(JSON.parse(<string>$textarea.val()))
+                  .then(() => window.alert('Database successfully imported!'))
+                  .catch(error => console.error(error));
+              }
+            });
+
+            console.log('BowBuddyDb dump:');
+            console.log(dbObject); // show db object in console for close inspection
+
+            M.Modal.getInstance(this.dbDumpModalElement!).open();
+            window.setTimeout(() => $textarea.select(), 500);
+          });
+      }
+    });
     $('#quit-btn').on('click', e => {
       if (++this.quitCounter % 4 === 0 && window.confirm('Are you sure you want to erase the entire database?')) {
         this.getStorage()

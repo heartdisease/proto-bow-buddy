@@ -21,9 +21,9 @@ import * as $ from 'jquery';
 import 'vendor/touch-dnd';
 import 'materialize-css';
 import { BaseView } from './base-view';
-import { Application } from './main';
+import { Application } from '../main';
 
-import './styles/station-set-score.scss';
+import '../styles/station-set-score.scss';
 
 export class StationSetScoreView extends BaseView {
   private static readonly NAVIGATION_DELAY = 600;

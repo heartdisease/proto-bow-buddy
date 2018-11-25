@@ -18,8 +18,8 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import * as $ from 'jquery';
-import { DbAccess } from './db';
-import { Application } from './main';
+import { DbAccess } from '../db';
+import { Application } from '../main';
 
 export abstract class BaseView {
   private viewContainer?: Element;

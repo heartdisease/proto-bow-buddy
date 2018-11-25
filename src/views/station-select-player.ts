@@ -19,9 +19,9 @@
  */
 import * as $ from 'jquery';
 import { BaseView } from './base-view';
-import { Player, PlayerWithScore, TotalScoreForGame, Application } from './main';
+import { Player, PlayerWithScore, TotalScoreForGame, Application } from '../main';
 
-import './styles/station-select-player.scss';
+import '../styles/station-select-player.scss';
 
 export class StationSelectPlayerView extends BaseView {
   getTemplateLocator(): string {

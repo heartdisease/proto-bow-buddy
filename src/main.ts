@@ -18,12 +18,13 @@
  * Copyright 2017-2018 Christoph Matscheko
  */
 import { DbAccess } from './db';
-import { BaseView } from './base-view';
-import { MainMenuView } from './main-menu';
-import { NewGameView } from './new-game';
-import { StationSelectPlayerView } from './station-select-player';
-import { StationSetScoreView } from './station-set-score';
-import { FinalScoreView } from './final-score';
+import { BaseView } from './views/base-view';
+import { MainMenuView } from './views/main-menu';
+import { NewGameView } from './views/new-game';
+import { StationSelectPlayerView } from './views/station-select-player';
+import { StationSetScoreView } from './views/station-set-score';
+import { FinalScoreView } from './views/final-score';
+import { HallOfFameView } from './views/hall-of-fame';
 
 import './styles/main.scss';
 import '../node_modules/materialize-css/dist/css/materialize.min.css';
@@ -68,12 +69,12 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.2.2';
+  private static readonly VERSION = '2.2.3';
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;
 
-  public static initApplication(): void {
+  static initApplication(): void {
     Application.updateWindowTitle(Application.getVersion());
 
     console.info('Application starting...');
@@ -82,55 +83,22 @@ export class Application {
     Application.onHashChange(window.location.hash.split(';'));
   }
 
-  private static onHashChange(params: string[]): void {
-    const viewToken = params[0];
-    let view;
-
-    switch (viewToken) {
-      case '':
-      case '#main-menu':
-        view = new MainMenuView();
-        break;
-      case '#new-game':
-        view = new NewGameView();
-        break;
-      case '#station-select-player':
-        view = new StationSelectPlayerView();
-        break;
-      case '#station-set-score':
-        view = new StationSetScoreView();
-        break;
-      case '#final-score':
-        view = new FinalScoreView();
-        break;
-      default:
-        console.log('Unknown place: ' + view);
-        return;
-    }
-
-    if (this.currentView) {
-      this.currentView.destroyView();
-    }
-    this.currentView = view;
-    view.initView();
-  }
-
-  public static getStorage(): DbAccess {
+  static getStorage(): DbAccess {
     if (!Application.storage) {
       Application.storage = new DbAccess();
     }
     return Application.storage;
   }
 
-  public static getVersion(): string {
+  static getVersion(): string {
     return Application.VERSION;
   }
 
-  public static updateWindowTitle(version: string): void {
+  static updateWindowTitle(version: string): void {
     document.title = document.title.replace(/\{\$version\}/g, version);
   }
 
-  public static getUrlParams(): Readonly<Map<string, string | number>> {
+  static getUrlParams(): Readonly<Map<string, string | number>> {
     if (!window.location.hash) {
       console.log('getUrlParams(): {}');
       return Object.freeze(new Map<string, string | number>());
@@ -154,25 +122,7 @@ export class Application {
     return urlParams;
   }
 
-  public static switchToFullscreenFunc(): (e: any) => void {
-    let clickCounter = 0;
-
-    return clickEvent => {
-      clickEvent.preventDefault();
-
-      if (++clickCounter % 3 === 0 && !(<any>document).fullscreenElement) {
-        console.log('Init fullscreen...');
-
-        if ((<any>document).documentElement.requestFullscreen) {
-          (<any>document).documentElement.requestFullscreen();
-        } else if ((<any>document).documentElement.webkitRequestFullscreen) {
-          (<any>document).documentElement.webkitRequestFullscreen();
-        }
-      }
-    };
-  }
-
-  public static scoreToPoints(score: string): number {
+  static scoreToPoints(score: string): number {
     if (score === 'miss' || score === 'undefined-score') {
       return 0;
     }
@@ -205,7 +155,7 @@ export class Application {
     }
   }
 
-  public static scoreToDisplayName(score: string): string {
+  static scoreToDisplayName(score: string): string {
     if (score === 'miss') {
       return 'Miss';
     }
@@ -244,7 +194,7 @@ export class Application {
     return scoreLabel;
   }
 
-  public static getDuration(starttime: string, endtime: string): string {
+  static getDuration(starttime: string, endtime: string): string {
     const startDate = new Date(starttime);
     const endDate = new Date(endtime);
     const diffInMs = endDate.getTime() - startDate.getTime();
@@ -261,6 +211,38 @@ export class Application {
     }
     duration += diffInMinutes - diffInHours * 60 + 'm';
     return duration;
+  }
+
+  private static onHashChange(params: string[]): void {
+    const viewToken = params[0];
+    const view = Application.createViewForToken(viewToken);
+
+    if (this.currentView) {
+      this.currentView.destroyView();
+    }
+    this.currentView = view;
+    view.initView();
+  }
+
+  private static createViewForToken(viewToken: string): BaseView {
+    switch (viewToken) {
+      case '':
+      case '#main-menu':
+        return new MainMenuView();
+      case '#new-game':
+        return new NewGameView();
+      case '#station-select-player':
+        return new StationSelectPlayerView();
+      case '#station-set-score':
+        return new StationSetScoreView();
+      case '#final-score':
+        return new FinalScoreView();
+      case '#hall-of-fame':
+        return new HallOfFameView();
+      default:
+        console.log('Unknown place: ' + viewToken);
+        return new MainMenuView();
+    }
   }
 }
 

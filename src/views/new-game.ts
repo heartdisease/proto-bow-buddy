@@ -19,9 +19,9 @@
  */
 import * as $ from 'jquery';
 import { BaseView } from './base-view';
-import { Player, Course } from './main';
+import { Player, Course } from '../main';
 
-import './styles/new-game.scss';
+import '../styles/new-game.scss';
 
 export class NewGameView extends BaseView {
   private existingPlayers: Player[] = [];

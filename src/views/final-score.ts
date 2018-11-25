@@ -19,9 +19,9 @@
  */
 import * as $ from 'jquery';
 import { BaseView } from './base-view';
-import { Game, Application } from './main';
+import { Game, Application } from '../main';
 
-import './styles/final-score.scss';
+import '../styles/final-score.scss';
 
 interface PlayerScore {
   playerName: string;

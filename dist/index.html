@@ -54,7 +54,7 @@
         <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
           <i class="material-icons left">face</i> Player Settings
         </a>
-        <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
+        <a class="waves-effect waves-light btn-large" href="#hall-of-fame" role="button">
           <i class="material-icons left">trending_up</i> Hall Of Fame
         </a>
         <a class="waves-effect waves-light btn-large red" href="#" role="button" id="quit-btn">
@@ -226,11 +226,7 @@
 
     <!-- [BEGIN TEMPLATE] SET SCORE -->
     <template id="station-set-score-template">
-      <div class="row">
-        <div class="col-md-12">
-          <h1>Set score:<br />Station <span id="station-no">?</span> - <span class="player-name">???</span></h1>
-        </div>
-      </div>
+      <h1>Set score:<br />Station <span id="station-no">?</span> - <span class="player-name">???</span></h1>
 
       <div class="container" style="margin-top: 20px;">
         <div class="row">
@@ -317,6 +313,31 @@
       </div>
     </template>
     <!-- [END TEMPLATE] FINAL SCORE -->
+
+    <!-- [BEGIN TEMPLATE] HALL OF FAME -->
+    <template id="hall-of-fame-template">
+      <h1>Hall of Fame</h1>
+
+      <h2>Best scores</h2>
+
+      <table class="striped">
+        <thead>
+          <tr id="player-header-row">
+            <th>#</th>
+          </tr>
+        </thead>
+        <tbody id="player-score-entries">
+          <!-- SCORE ENTRIES -->
+        </tbody>
+      </table>
+
+      <div style="margin-top: 15px;">
+        <a class="waves-effect waves-light btn" href="#main-menu">
+          Back to main menu
+        </a>
+      </div>
+    </template>
+    <!-- [END TEMPLATE] HALL OF FAME -->
 
     <script src="main.bundle.js" type="text/javascript"></script>
   </body>
