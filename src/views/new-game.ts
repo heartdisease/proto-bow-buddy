@@ -32,6 +32,10 @@ export class NewGameView extends BaseView {
   private playerSelectElement?: Element;
   private courseSelectElement?: Element;
 
+  getTitle(): string {
+    return 'New Game';
+  }
+
   protected getTemplateLocator(): string {
     return '#new-game-template';
   }

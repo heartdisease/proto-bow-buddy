@@ -30,6 +30,10 @@ export class StationSetScoreView extends BaseView {
 
   private scoreModalElement?: Element;
 
+  getTitle(): string {
+    return 'Assign Score';
+  }
+
   protected getTemplateLocator(): string {
     return '#station-set-score-template';
   }
@@ -41,7 +45,7 @@ export class StationSetScoreView extends BaseView {
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
     const gid = <number>urlParams.get('gid');
     const pid = <number>urlParams.get('pid');
-    const remainingPids: Array<number> = urlParams.has('qa')
+    const remainingPids: number[] = urlParams.has('qa')
       ? String(urlParams.get('qa'))
           .split('+')
           .map((s: string) => +s)

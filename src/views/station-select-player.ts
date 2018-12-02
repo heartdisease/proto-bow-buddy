@@ -19,11 +19,16 @@
  */
 import * as $ from 'jquery';
 import { BaseView } from './base-view';
-import { Player, PlayerWithScore, TotalScoreForGame, Application } from '../main';
+import { Player, PlayerWithScore, TotalScoreForGame } from '../main';
+import { ScoreUtils } from '../score-utils';
 
 import '../styles/station-select-player.scss';
 
 export class StationSelectPlayerView extends BaseView {
+  getTitle(): string {
+    return 'Choose Player';
+  }
+
   protected getTemplateLocator(): string {
     return '#station-select-player-template';
   }
@@ -98,7 +103,7 @@ export class StationSelectPlayerView extends BaseView {
 
       players.forEach((player: PlayerWithScore) => {
         const scores = totalScoreForGame.scores.get(player.pid);
-        const scorePoints = scores ? scores.map(score => Application.scoreToPoints(score)) : [];
+        const scorePoints = scores ? scores.map(score => ScoreUtils.scoreToPoints(score)) : [];
         const totalScore = scorePoints.reduce(
           (a, b) => a + b,
           scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1] // exclude score of current station
@@ -127,8 +132,8 @@ export class StationSelectPlayerView extends BaseView {
       .text(totalScore > 0 ? `${player.name} (${totalScore}) ` : player.name);
 
     if (player.score) {
-      const scoreDisplayName = Application.scoreToDisplayName(player.score);
-      const scorePoints = Application.scoreToPoints(player.score);
+      const scoreDisplayName = ScoreUtils.scoreToDisplayName(player.score);
+      const scorePoints = ScoreUtils.scoreToPoints(player.score);
       const $scoreBadge = $('<span/>')
         .addClass('badge new blue')
         .css('font-weight', 'bold')

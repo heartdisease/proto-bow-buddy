@@ -28,6 +28,10 @@ export class MainMenuView extends BaseView {
   private dbDumpModalElement?: Element;
   private deleteDbModalElement?: Element;
 
+  getTitle(): string {
+    return '';
+  }
+
   protected getTemplateLocator(): string {
     return '#main-menu-template';
   }

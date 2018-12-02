@@ -69,13 +69,13 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.2.3';
+  private static readonly VERSION = '2.2.4';
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;
 
   static initApplication(): void {
-    Application.updateWindowTitle(Application.getVersion());
+    Application.updateWindowTitle('');
 
     console.info('Application starting...');
 
@@ -94,8 +94,8 @@ export class Application {
     return Application.VERSION;
   }
 
-  static updateWindowTitle(version: string): void {
-    document.title = document.title.replace(/\{\$version\}/g, version);
+  static updateWindowTitle(viewTitle: string): void {
+    document.title = `BowBuddy ${Application.VERSION}${viewTitle ? ' - ' + viewTitle : ''}`;
   }
 
   static getUrlParams(): Readonly<Map<string, string | number>> {
@@ -120,78 +120,6 @@ export class Application {
 
     console.log('getUrlParams(): ' + JSON.stringify(urlParams));
     return urlParams;
-  }
-
-  static scoreToPoints(score: string): number {
-    if (score === 'miss' || score === 'undefined-score') {
-      return 0;
-    }
-
-    const scoreParts = score.split(':');
-    let penalty;
-
-    switch (scoreParts[0]) {
-      case 'first-turn':
-        penalty = 0;
-        break;
-      case 'second-turn':
-        penalty = 1;
-        break;
-      case 'third-turn':
-        penalty = 2;
-        break;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
-    switch (scoreParts[1]) {
-      case 'body-hit':
-        return 16 - penalty * 6;
-      case 'kill-hit':
-        return 18 - penalty * 6;
-      case 'center-kill-hit':
-        return 20 - penalty * 6;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
-  }
-
-  static scoreToDisplayName(score: string): string {
-    if (score === 'miss') {
-      return 'Miss';
-    }
-
-    const scoreParts = score.split(':');
-    let scoreLabel;
-
-    switch (scoreParts[0]) {
-      case 'first-turn':
-        scoreLabel = '1<sup>st</sup>';
-        break;
-      case 'second-turn':
-        scoreLabel = '2<sup>nd</sup>';
-        break;
-      case 'third-turn':
-        scoreLabel = '3<sup>rd</sup>';
-        break;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
-    scoreLabel += ' - ';
-    switch (scoreParts[1]) {
-      case 'body-hit':
-        scoreLabel += 'Body';
-        break;
-      case 'kill-hit':
-        scoreLabel += 'Kill';
-        break;
-      case 'center-kill-hit':
-        scoreLabel += 'Center Kill';
-        break;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
-
-    return scoreLabel;
   }
 
   static getDuration(starttime: string, endtime: string): string {
@@ -221,6 +149,8 @@ export class Application {
       this.currentView.destroyView();
     }
     this.currentView = view;
+
+    Application.updateWindowTitle(view.getTitle());
     view.initView();
   }
 

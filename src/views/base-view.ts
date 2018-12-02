@@ -72,6 +72,8 @@ export abstract class BaseView {
     return this.viewContainer!;
   }
 
+  abstract getTitle(): string;
+
   protected abstract onReveal(urlParams: Readonly<Map<string, string | number>>): void;
 
   protected abstract onHide(): void;

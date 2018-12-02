@@ -23,14 +23,11 @@ import { Game, Application, Player, Course } from '../main';
 
 import '../styles/hall-of-fame.scss';
 
-interface PlayerScore {
-  playerName: string;
-  totalScore: number;
-  averageScore: number;
-  missCount: number;
-}
-
 export class HallOfFameView extends BaseView {
+  getTitle(): string {
+    return 'Hall of Fame';
+  }
+
   protected getTemplateLocator(): string {
     return '#hall-of-fame-template';
   }
@@ -79,74 +76,6 @@ export class HallOfFameView extends BaseView {
   }
 
   private generateScoreTable(gid: number, stations: number): void {
-    this.getStorage()
-      .getTotalScoreForGame(gid)
-      .then(totalScoreForGame => {
-        totalScoreForGame.players.forEach((player: Player) => {
-          $('#player-header-row').append($('<th/>').text(player.name));
-        });
-
-        for (let station = 1; station <= stations; station++) {
-          const $playerScoreEntry = $('<tr/>');
-
-          $playerScoreEntry.append(
-            $('<td/>')
-              .css('font-style', 'italic')
-              .text(`${station}.`)
-          );
-          totalScoreForGame.players
-            .map(player => totalScoreForGame.scores.get(player.pid)!)
-            .forEach(scores => {
-              $playerScoreEntry.append($('<td/>').text(Application.scoreToPoints(scores[station - 1])));
-            });
-          $('#player-score-entries').append($playerScoreEntry);
-        }
-
-        const playerScores: Array<PlayerScore> = [];
-        const $playerTotalScore = $('<tr/>')
-          .css('font-weight', 'bold')
-          .append($('<td/>').text('Total:'));
-        const $playerAverageScore = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Average:'));
-        const $playerMissCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Miss:'));
-        const $playerBodyHitCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Body:'));
-        const $playerKillHitCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Kill:'));
-        const $playerCenterKillHitCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Center Kill:'));
-
-        totalScoreForGame.players.forEach((player: Player) => {
-          const scores = totalScoreForGame.scores.get(player.pid)!;
-          const totalScore = scores.map((score: string) => Application.scoreToPoints(score)).reduce((a, b) => a + b, 0);
-          const averageScore = Math.floor(((totalScore / stations) * 10) / 10);
-          const missCount = scores.filter((score: string) => score === 'miss').length;
-          const bodyHitCount = scores.filter((score: string) => score.endsWith(':body-hit')).length;
-          const killHitCount = scores.filter((score: string) => score.endsWith(':kill-hit')).length;
-          const centerKillHitCount = scores.filter((score: string) => score.endsWith(':center-kill-hit')).length;
-
-          playerScores.push({ playerName: player.name, totalScore, averageScore, missCount });
-
-          $playerTotalScore.append($('<td/>').text(totalScore));
-          $playerAverageScore.append($('<td/>').text(averageScore));
-          $playerMissCount.append($('<td/>').html(`${missCount}&times;`));
-          $playerBodyHitCount.append($('<td/>').html(`${bodyHitCount}&times;`));
-          $playerKillHitCount.append($('<td/>').html(`${killHitCount}&times;`));
-          $playerCenterKillHitCount.append($('<td/>').html(`${centerKillHitCount}&times;`));
-        });
-
-        $('#player-score-entries').append($playerTotalScore);
-        $('#player-score-entries').append($playerAverageScore);
-        $('#player-score-entries').append($playerMissCount);
-        $('#player-score-entries').append($playerBodyHitCount);
-        $('#player-score-entries').append($playerKillHitCount);
-        $('#player-score-entries').append($playerCenterKillHitCount);
-      });
+    // TODO implement
   }
 }

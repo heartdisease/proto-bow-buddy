@@ -19,18 +19,16 @@
  */
 import * as $ from 'jquery';
 import { BaseView } from './base-view';
-import { Game, Application } from '../main';
+import { Game, Application, Player } from '../main';
+import { ScoreUtils, TotalScore, PlayerScore } from '../score-utils';
 
 import '../styles/final-score.scss';
 
-interface PlayerScore {
-  playerName: string;
-  totalScore: number;
-  averageScore: number;
-  missCount: number;
-}
-
 export class FinalScoreView extends BaseView {
+  getTitle(): string {
+    return 'Final Score';
+  }
+
   protected getTemplateLocator(): string {
     return '#final-score-template';
   }
@@ -79,93 +77,90 @@ export class FinalScoreView extends BaseView {
   }
 
   private generateScoreTable(gid: number, stations: number): void {
-    this.getStorage()
-      .getTotalScoreForGame(gid)
-      .then(totalScoreForGame => {
-        totalScoreForGame.players.forEach(player => {
-          $('#player-header-row').append($('<th/>').text(player.name));
-        });
+    ScoreUtils.generateScoreTable(gid, stations).then((totalScore: TotalScore) => {
+      const players = totalScore.totalScoreForGame.players;
+      const scores = totalScore.totalScoreForGame.scores;
+      const playerScores = totalScore.playerScores;
 
-        for (let station = 1; station <= stations; station++) {
-          const $playerScoreEntry = $('<tr/>');
+      players.forEach((player: Player) => {
+        $('#player-header-row').append($('<th/>').text(player.name));
+      });
 
-          $playerScoreEntry.append(
-            $('<td/>')
-              .css('font-style', 'italic')
-              .text(`${station}.`)
-          );
-          totalScoreForGame.players
-            .map(player => totalScoreForGame.scores.get(player.pid)!)
-            .forEach(scores => {
-              $playerScoreEntry.append($('<td/>').text(Application.scoreToPoints(scores[station - 1])));
-            });
-          $('#player-score-entries').append($playerScoreEntry);
-        }
+      for (let station = 1; station <= stations; station++) {
+        const $playerScoreEntry = $('<tr/>');
 
-        const playerScores: Array<PlayerScore> = [];
-        const $playerTotalScore = $('<tr/>')
-          .css('font-weight', 'bold')
-          .append($('<td/>').text('Total:'));
-        const $playerAverageScore = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Average:'));
-        const $playerMissCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Miss:'));
-        const $playerBodyHitCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Body:'));
-        const $playerKillHitCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Kill:'));
-        const $playerCenterKillHitCount = $('<tr/>')
-          .css('font-style', 'italic')
-          .append($('<td/>').text('Center Kill:'));
-
-        totalScoreForGame.players.forEach(player => {
-          const scores = totalScoreForGame.scores.get(player.pid)!;
-          const totalScore = scores.map(score => Application.scoreToPoints(score)).reduce((a, b) => a + b, 0);
-          const averageScore = Math.floor(((totalScore / stations) * 10) / 10);
-          const missCount = scores.filter(score => score === 'miss').length;
-          const bodyHitCount = scores.filter(score => score.endsWith(':body-hit')).length;
-          const killHitCount = scores.filter(score => score.endsWith(':kill-hit')).length;
-          const centerKillHitCount = scores.filter(score => score.endsWith(':center-kill-hit')).length;
-
-          playerScores.push({ playerName: player.name, totalScore, averageScore, missCount });
-
-          $playerTotalScore.append($('<td/>').text(totalScore));
-          $playerAverageScore.append($('<td/>').text(averageScore));
-          $playerMissCount.append($('<td/>').html(`${missCount}&times;`));
-          $playerBodyHitCount.append($('<td/>').html(`${bodyHitCount}&times;`));
-          $playerKillHitCount.append($('<td/>').html(`${killHitCount}&times;`));
-          $playerCenterKillHitCount.append($('<td/>').html(`${centerKillHitCount}&times;`));
-        });
-
-        playerScores
-          .sort((a, b) => b.totalScore - a.totalScore)
-          .forEach((playerScore, index) => {
-            $('#leaderboard').append(
-              $('<li/>')
-                .addClass('collection-item avatar')
-                .append(
-                  this.createLeaderBoardBadge(index + 1),
-                  $('<span/>')
-                    .addClass('title')
-                    .text(playerScore.playerName),
-                  $('<p/>').html(
-                    `<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`
-                  ),
-                  $('<p/>').html(`<b>Miss</b>: ${playerScore.missCount}&times;`)
-                )
-            );
+        $playerScoreEntry.append(
+          $('<td/>')
+            .css('font-style', 'italic')
+            .text(`${station}.`)
+        );
+        players
+          .map(player => scores.get(player.pid)!)
+          .forEach(scores => {
+            $playerScoreEntry.append($('<td/>').text(ScoreUtils.scoreToPoints(scores[station - 1])));
           });
+        $('#player-score-entries').append($playerScoreEntry);
+      }
 
-        $('#player-score-entries').append($playerTotalScore);
-        $('#player-score-entries').append($playerAverageScore);
-        $('#player-score-entries').append($playerMissCount);
-        $('#player-score-entries').append($playerBodyHitCount);
-        $('#player-score-entries').append($playerKillHitCount);
-        $('#player-score-entries').append($playerCenterKillHitCount);
+      this.sumUpScore($('#player-score-entries'), playerScores);
+      this.generateLeaderBoard(playerScores);
+    });
+  }
+
+  private sumUpScore($playerScoreEntires: JQuery<JQuery.Node>, playerScores: PlayerScore[]): void {
+    const $playerTotalScore = $('<tr/>')
+      .css('font-weight', 'bold')
+      .append($('<td/>').text('Total:'));
+    const $playerAverageScore = $('<tr/>')
+      .css('font-style', 'italic')
+      .append($('<td/>').text('Average:'));
+    const $playerMissCount = $('<tr/>')
+      .css('font-style', 'italic')
+      .append($('<td/>').text('Miss:'));
+    const $playerBodyHitCount = $('<tr/>')
+      .css('font-style', 'italic')
+      .append($('<td/>').text('Body:'));
+    const $playerKillHitCount = $('<tr/>')
+      .css('font-style', 'italic')
+      .append($('<td/>').text('Kill:'));
+    const $playerCenterKillHitCount = $('<tr/>')
+      .css('font-style', 'italic')
+      .append($('<td/>').text('Center Kill:'));
+
+    playerScores.forEach((playerScore: PlayerScore) => {
+      $playerTotalScore.append($('<td/>').text(playerScore.totalScore));
+      $playerAverageScore.append($('<td/>').text(playerScore.averageScore));
+      $playerMissCount.append($('<td/>').html(`${playerScore.missCount}&times;`));
+      $playerBodyHitCount.append($('<td/>').html(`${playerScore.bodyHitCount}&times;`));
+      $playerKillHitCount.append($('<td/>').html(`${playerScore.killHitCount}&times;`));
+      $playerCenterKillHitCount.append($('<td/>').html(`${playerScore.centerKillHitCount}&times;`));
+    });
+
+    $playerScoreEntires.append($playerTotalScore);
+    $playerScoreEntires.append($playerAverageScore);
+    $playerScoreEntires.append($playerMissCount);
+    $playerScoreEntires.append($playerBodyHitCount);
+    $playerScoreEntires.append($playerKillHitCount);
+    $playerScoreEntires.append($playerCenterKillHitCount);
+  }
+
+  private generateLeaderBoard(playerScores: PlayerScore[]): void {
+    playerScores
+      .sort((a, b) => b.totalScore - a.totalScore)
+      .forEach((playerScore, index) => {
+        // TODO replace all ID selectors with classes
+        $('#leaderboard').append(
+          $('<li/>')
+            .addClass('collection-item avatar')
+            .append(
+              this.createLeaderBoardBadge(index + 1),
+              $('<span/>')
+                .addClass('title')
+                .text(playerScore.playerName),
+              $('<p/>').html(`<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`),
+              $('<p/>').html(`<b>Miss</b>: ${playerScore.missCount}&times;`)
+            )
+        );
       });
   }
 
