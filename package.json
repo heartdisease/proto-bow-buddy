@@ -1,6 +1,6 @@
 {
   "name": "proto-bow-buddy",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
   "main": "index.html",
   "scripts": {
@@ -11,7 +11,7 @@
     "watch-ts": "tsc -w",
     "build-sass": "node-sass -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
     "watch-sass": "node-sass -w -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
-    "clean": "for f in $(ls dist); do if [ $f != 'index.html' ]; then rm -v dist/$f; fi; done",
+    "clean": "for f in $(ls dist); do if [ $f != 'index.html' ]; then rm -rfv dist/$f; fi; done",
     "server": "http-server -c-1 dist",
     "webpack-server": "webpack-dev-server --progress --mode development --content-base dist"
   },
@@ -26,22 +26,23 @@
   },
   "homepage": "https://github.com/heartdisease/proto-bow-buddy#readme",
   "devDependencies": {
-    "@types/jquery": "^3.3.6",
-    "@types/materialize-css": "^1.0.4",
+    "@types/jquery": "^3.3.29",
+    "@types/materialize-css": "^1.0.6",
     "css-loader": "^1.0.1",
     "http-server": "^0.11.1",
-    "mini-css-extract-plugin": "^0.4.4",
-    "node-sass": "^4.9.4",
+    "mini-css-extract-plugin": "^0.4.5",
+    "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
-    "ts-loader": "^5.3.0",
-    "typescript": "^3.1.6",
-    "webpack": "^4.23.1",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.10"
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.2.2",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
     "jquery": "^3.3.1",
-    "materialize-css": "^1.0.0"
+    "materialize-css": "^1.0.0",
+    "touch-dnd": "^1.2.1"
   }
 }

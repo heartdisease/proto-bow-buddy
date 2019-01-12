@@ -17,8 +17,10 @@
   },
   "include": [
     "./src/*.ts",
+    "./src/*.d.ts",
     "./src/styles/*.scss",
     "node_modules/jquery/dist/jquery.slim.min.js",
+    "node_modules/touch-dnd/touch-dnd.min.js",
     "node_modules/materialize-css/dist/js/materialize.min.js",
     "node_modules/materialize-css/dist/css/materialize.min.css"
   ],
