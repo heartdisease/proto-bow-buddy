@@ -4,8 +4,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const SRC_ROOT = path.resolve(__dirname, 'src');
 const DESTINATION = path.resolve(__dirname, 'dist');
 
-const devMode = process.env.NODE_ENV !== 'production';
-
 module.exports = {
   context: SRC_ROOT,
   entry: {
@@ -38,10 +36,8 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: devMode ? '[name].css' : '[name].[hash].css',
-      chunkFilename: devMode ? '[id].css' : '[id].[hash].css'
+      filename: '[name].css',
+      chunkFilename: '[id].css'
     })
-  ],
-  devtool: 'source-map',
-  devServer: {}
+  ]
 };

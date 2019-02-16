@@ -10,5 +10,6 @@ proto-bow-buddy.token
 dist/**
 !dist/favicon.ico
 !dist/icon.png
+!dist/icon-large.png
 !dist/site.webmanifest
 !dist/index.html

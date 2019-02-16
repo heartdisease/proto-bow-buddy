@@ -1,12 +1,21 @@
 {
-  "short_name": "proto-bow-buddy",
-  "name": "bow-buddy",
-  "icons": [{
-    "src": "icon.png",
-    "type": "image/png",
-    "sizes": "192x192"
-  }],
+  "short_name": "BowBuddy",
+  "name": "proto-bow-buddy",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-large.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
   "start_url": "/",
-  "background_color": "#fafafa",
-  "theme_color": "#fafafa"
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#222222",
+  "theme_color": "#222222"
 }

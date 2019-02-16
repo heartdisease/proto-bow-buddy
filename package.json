@@ -1,19 +1,15 @@
 {
   "name": "proto-bow-buddy",
-  "version": "2.2.5",
+  "version": "2.5.0",
   "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack --mode development",
-    "build": "webpack --mode production",
-    "build-ts": "tsc",
-    "watch-ts": "tsc -w",
-    "build-sass": "node-sass -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
-    "watch-sass": "node-sass -w -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
-    "clean": "for f in $(ls dist); do if [ $f != 'index.html' ] && [ $f != 'sw.js' ] && [ $f != 'site.webmanifest' ] && [ $f != 'icon.png' ] && [ $f != 'favicon.ico' ]; then rm -rfv dist/$f; fi; done",
+    "dev": "webpack --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "webpack-server": "webpack-dev-server --config webpack.dev.js --progress --content-base dist",
     "server": "http-server -c-1 dist",
-    "webpack-server": "webpack-dev-server --progress --mode development --content-base dist"
+    "clean": "for f in $(ls dist); do if [ $f != 'index.html' ] && [ $f != 'sw.js' ] && [ $f != 'site.webmanifest' ] && [ $f != 'icon.png' ] && [ $f != 'icon-large.png' ] && [ $f != 'favicon.ico' ]; then rm -rfv dist/$f; fi; done"
   },
   "repository": {
     "type": "git",
@@ -32,13 +28,16 @@
     "http-server": "^0.11.1",
     "mini-css-extract-plugin": "^0.4.5",
     "node-sass": "^4.11.0",
+    "optimize-css-assets-webpack-plugin": "^5.0.1",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "ts-loader": "^5.3.3",
     "typescript": "^3.2.2",
+    "uglifyjs-webpack-plugin": "^2.1.1",
     "webpack": "^4.28.4",
     "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14"
+    "webpack-dev-server": "^3.1.14",
+    "webpack-merge": "^4.2.1"
   },
   "dependencies": {
     "jquery": "^3.3.1",
