@@ -2,12 +2,13 @@
 .*
 
 /node_modules
-!/.vscode
+!.vscode
 
 *.dbdump
 proto-bow-buddy.token
 
-/js
-/css
-/dist
-!/dist/index.html
+dist/**
+!dist/favicon.ico
+!dist/icon.png
+!dist/site.webmanifest
+!dist/index.html

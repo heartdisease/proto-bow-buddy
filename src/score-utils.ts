@@ -15,7 +15,7 @@
  * along with BowBuddy.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * Copyright 2017-2018 Christoph Matscheko
+ * Copyright 2017-2019 Christoph Matscheko
  */
 import { Application, Player, TotalScoreForGame } from './main';
 

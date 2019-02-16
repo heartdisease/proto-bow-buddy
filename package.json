@@ -11,7 +11,7 @@
     "watch-ts": "tsc -w",
     "build-sass": "node-sass -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
     "watch-sass": "node-sass -w -o dist --source-map true --output-style expanded --indent-type space --indent-width 2 src/styles",
-    "clean": "for f in $(ls dist); do if [ $f != 'index.html' ]; then rm -rfv dist/$f; fi; done",
+    "clean": "for f in $(ls dist); do if [ $f != 'index.html' ] && [ $f != 'sw.js' ] && [ $f != 'site.webmanifest' ] && [ $f != 'icon.png' ] && [ $f != 'favicon.ico' ]; then rm -rfv dist/$f; fi; done",
     "server": "http-server -c-1 dist",
     "webpack-server": "webpack-dev-server --progress --mode development --content-base dist"
   },
