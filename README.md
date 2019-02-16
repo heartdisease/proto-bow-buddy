@@ -26,13 +26,14 @@ This is a web-based prototype for an Android app called BowBuddy.
 
 ## Build everything using webpack
 
-For development (better use webpack-dev-server instead): `npm run dev`
+For development: `npm run dev` (better use `npm run webpack-server` instead)
+
 For production: `npm run build`
 
-## Clean dist directory from generated files
+## Clean `/dist` directory from generated files
 
 `npm run clean`
 
-## Run local HTTP server for serving files in dist
+## Run local HTTP server for serving files in `/dist`
 
 `npm run server`
