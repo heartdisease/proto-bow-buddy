@@ -15,7 +15,13 @@ module.exports = merge(common, {
         parallel: true,
         sourceMap: true
       }),
-      new OptimizeCSSAssetsPlugin({})
+      new OptimizeCSSAssetsPlugin({
+        cssProcessorOptions: {
+          map: {
+            inline: false // generates CSS source maps
+          }
+        }
+      })
     ]
   }
 });

@@ -20,23 +20,19 @@ This is a web-based prototype for an Android app called BowBuddy.
 
 `npm install`
 
-## Generate CSS files from SCSS
-
-`npm run build-sass`
-
-For development, just run `npm run watch-sass` instead.
-
-## Generate JavaScript code from TypeScript
-
-`npm run build-ts`
-
-For development, just run `npm run watch-ts` instead.
-
 ## Run web server locally for testing
 
 `npm run webpack-server`
 
 ## Build everything using webpack
 
+For development (better use webpack-dev-server instead): `npm run dev`
 For production: `npm run build`
-For development: `npm run dev`
+
+## Clean dist directory from generated files
+
+`npm run clean`
+
+## Run local HTTP server for serving files in dist
+
+`npm run server`
