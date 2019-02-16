@@ -1,6 +1,6 @@
 {
+  "name": "BowBuddy",
   "short_name": "BowBuddy",
-  "name": "proto-bow-buddy",
   "icons": [
     {
       "src": "icon.png",
@@ -13,7 +13,8 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": "/",
+  "prefer_related_applications": true,
+  "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#222222",

@@ -33,9 +33,23 @@
 
     <script type="text/javascript">
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').then(() => {
-          console.log('Registered service worker.');
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then(() => console.log('Successfully registered service worker.'))
+          .catch(() => console.error('Failed to registered service worker.'));
+
+        window.addEventListener('beforeinstallprompt', event => {
+          event.prompt(); // showing the prompt directly to the user is actually an anti-pattern
+          event.userChoice.then(choice => {
+            if (choice.outcome === 'accepted') {
+              console.log('User accepted the A2HS prompt');
+            } else {
+              console.log('User dismissed the A2HS prompt');
+            }
+          });
         });
+      } else {
+        console.error('Service workers are not supported.');
       }
     </script>
 

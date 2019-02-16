@@ -69,7 +69,7 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.5.0';
+  private static readonly VERSION = '2.5.1';
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;

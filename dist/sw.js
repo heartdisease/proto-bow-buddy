@@ -13,7 +13,8 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open('proto-bow-buddy').then(cache => {
       return cache.addAll([
-        '/', // = '/index.html'
+        '/',
+        '/index.html',
         '/main.bundle.js',
         '/main.css',
         '/site.webmanifest',
