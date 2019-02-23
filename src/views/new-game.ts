@@ -28,9 +28,9 @@ export class NewGameView extends BaseView {
   private existingCourses: Course[] = [];
   private configuredPlayers: Player[] = [];
   private configuredCourse: Course;
-  private collapsibleElement?: Element;
-  private playerSelectElement?: Element;
-  private courseSelectElement?: Element;
+  private collapsibleElement?: HTMLElement;
+  private playerSelectElement?: HTMLElement;
+  private courseSelectElement?: HTMLElement;
 
   getTitle(): string {
     return 'New Game';
@@ -45,9 +45,9 @@ export class NewGameView extends BaseView {
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-    this.collapsibleElement = this.getViewContainer().querySelector('.collapsible')!;
-    this.playerSelectElement = this.getViewContainer().querySelector('select#player-select')!;
-    this.courseSelectElement = this.getViewContainer().querySelector('select#course-select')!;
+    this.collapsibleElement = this.queryElement('.collapsible');
+    this.playerSelectElement = this.queryElement('select.player-select');
+    this.courseSelectElement = this.queryElement('select.course-select');
 
     this.initControls();
 
@@ -158,32 +158,32 @@ export class NewGameView extends BaseView {
       console.log('pid change: ' + pid);
 
       if (pid === 'new') {
-        $('#select-player-container').hide();
-        $('#add-player-container').show();
-        $('#new-player-name').focus();
+        $('.select-player-container').hide();
+        $('.add-player-container').show();
+        $('.new-player-name').focus();
       } else {
         this.addPlayerToTable($playerOption.data('player'));
         this.updatePlayerSelectionMenu();
       }
     });
-    $('#new-player-name')
+    $('.new-player-name')
       .off('keyup')
       .on('keyup', e => this.verifyPlayerInput());
-    $('#add-player-btn')
+    $('.add-player-btn')
       .off('click')
       .on('click', e => {
-        const playerName = <string>$('#new-player-name').val();
+        const playerName = <string>$('.new-player-name').val();
 
-        $('#add-player-btn').addClass('disabled');
-        $('#new-player-name').val('');
+        $('.add-player-btn').addClass('disabled');
+        $('.new-player-name').val('');
 
         this.getStorage()
           .addPlayer(playerName, '')
           .then(player => {
             this.addPlayerToTable(player);
             this.updatePlayerSelectionMenu().then(nil => {
-              $('#add-player-container').hide();
-              $('#select-player-container').show();
+              $('.add-player-container').hide();
+              $('.select-player-container').show();
             });
           });
 
@@ -201,37 +201,37 @@ export class NewGameView extends BaseView {
       console.log('cid change: ' + cid);
 
       if (cid === 'new') {
-        $('#select-course-container').hide();
-        $('#add-course-container').show();
-        $('#new-course-name').focus();
+        $('.select-course-container').hide();
+        $('.add-course-container').show();
+        $('.new-course-name').focus();
       } else {
         this.addCourseToTable($courseOption.data('course'));
         this.updatePlayerSelectionMenu();
       }
     });
-    $('#new-course-name')
+    $('.new-course-name')
       .off('keyup')
       .on('keyup', e => this.verifyCourseInput());
-    $('#new-course-no-of-stations')
+    $('.new-course-no-of-stations')
       .off('keyup')
       .on('keyup', e => this.verifyCourseInput());
-    $('#set-course-btn')
+    $('.set-course-btn')
       .off('click')
       .on('click', e => {
-        const courseName = <string>$('#new-course-name').val();
-        const noOfStations = <number>$('#new-course-no-of-stations').val();
+        const courseName = <string>$('.new-course-name').val();
+        const noOfStations = <number>$('.new-course-no-of-stations').val();
 
-        $('#set-course-btn').addClass('disabled');
-        $('#new-course-name').val('');
-        $('#new-course-no-of-stations').val('');
+        $('.set-course-btn').addClass('disabled');
+        $('.new-course-name').val('');
+        $('.new-course-no-of-stations').val('');
 
         this.getStorage()
           .addCourse(courseName, '', '', noOfStations)
           .then(course => {
             this.addCourseToTable(course);
             this.updateCourseSelectionMenu().then(nil => {
-              $('#add-course-container').hide();
-              $('#select-course-container').show();
+              $('.add-course-container').hide();
+              $('.select-course-container').show();
             });
           });
 
@@ -240,12 +240,12 @@ export class NewGameView extends BaseView {
   }
 
   private registerStartButtonEventHandler(): void {
-    $('#start-game-btn').on('click', e => {
-      const cid = +$('#course-entries > tr[data-cid]').attr('data-cid')!;
+    $('.start-game-btn').on('click', e => {
+      const cid = +$('.course-entries > tr[data-cid]').attr('data-cid')!;
       const pids: number[] = [];
 
-      $('#start-game-btn').addClass('disabled'); // disable button while async db action is running
-      $('#player-entries > tr[data-pid]').each(function() {
+      $('.start-game-btn').addClass('disabled'); // disable button while async db action is running
+      $('.player-entries > tr[data-pid]').each(function() {
         pids.push(+$(this).attr('data-pid')!);
       });
 
@@ -266,7 +266,7 @@ export class NewGameView extends BaseView {
   }
 
   private addPlayerToTable(player: Player): void {
-    $('#player-entries').append(
+    $('.player-entries').append(
       $('<tr/>')
         .attr('data-pid', player.pid)
         .append($('<td/>').text(player.name), $('<td/>').text(player.email || '-'), $('<td/>').text('-'))
@@ -275,12 +275,12 @@ export class NewGameView extends BaseView {
     this.configuredPlayers.push(player);
 
     if (this.isPlayerConfigured() && this.isCourseConfigured()) {
-      $('#start-game-btn').removeClass('disabled');
+      $('.start-game-btn').removeClass('disabled');
     }
   }
 
   private addCourseToTable(course: Course): void {
-    $('#course-entries')
+    $('.course-entries')
       .empty()
       .append(
         $('<tr/>')
@@ -291,12 +291,12 @@ export class NewGameView extends BaseView {
     this.configuredCourse = course;
 
     if (this.isPlayerConfigured() && this.isCourseConfigured()) {
-      $('#start-game-btn').removeClass('disabled');
+      $('.start-game-btn').removeClass('disabled');
     }
   }
 
   private verifyPlayerInput(): void {
-    const playerName = <string>$('#new-player-name').val();
+    const playerName = <string>$('.new-player-name').val();
 
     if (
       !playerName ||
@@ -304,15 +304,15 @@ export class NewGameView extends BaseView {
       /\s+$/.test(playerName) ||
       this.existingPlayers.some(player => player.name === playerName)
     ) {
-      $('#add-player-btn').addClass('disabled');
+      $('.add-player-btn').addClass('disabled');
     } else {
-      $('#add-player-btn').removeClass('disabled');
+      $('.add-player-btn').removeClass('disabled');
     }
   }
 
   private verifyCourseInput(): void {
-    const courseName = <string>$('#new-course-name').val();
-    const noOfStations = <string>$('#new-course-no-of-stations').val();
+    const courseName = <string>$('.new-course-name').val();
+    const noOfStations = <string>$('.new-course-no-of-stations').val();
 
     console.log('verifyCourseInput: ' + courseName + ', ' + noOfStations);
 
@@ -325,9 +325,9 @@ export class NewGameView extends BaseView {
       this.existingCourses.some(course => course.name === courseName)
     ) {
       console.log('existingCourses: ' + this.existingCourses);
-      $('#set-course-btn').addClass('disabled');
+      $('.set-course-btn').addClass('disabled');
     } else {
-      $('#set-course-btn').removeClass('disabled');
+      $('.set-course-btn').removeClass('disabled');
     }
   }
 }

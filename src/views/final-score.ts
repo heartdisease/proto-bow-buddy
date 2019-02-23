@@ -17,7 +17,6 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import * as $ from 'jquery';
 import { BaseView } from './base-view';
 import { Game, Application, Player } from '../main';
 import { ScoreUtils, TotalScore, PlayerScore } from '../score-utils';
@@ -59,15 +58,15 @@ export class FinalScoreView extends BaseView {
           hour12: false
         });
 
-        $('#course-duration').html(`${duration}<br/>(${from} - ${to})`);
+        this.queryElement('.course-duration').innerHTML = `${duration}<br/>(${from} - ${to})`;
       });
 
     this.getStorage()
       .getCourseForGame(gid)
       .then(course => {
-        $('#course-label').text(
-          `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`
-        );
+        const courseLabel = `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`;
+
+        this.queryElement('.course-label').innerText = courseLabel;
         this.generateScoreTable(gid, course.stations);
       });
   }
@@ -81,111 +80,130 @@ export class FinalScoreView extends BaseView {
       const players = totalScore.totalScoreForGame.players;
       const scores = totalScore.totalScoreForGame.scores;
       const playerScores = totalScore.playerScores;
+      const playerScoreEntries = this.queryElement('.player-score-entries');
+      const playerHeaderRow = this.queryElement('.player-header-row');
 
-      players.forEach((player: Player) => {
-        $('#player-header-row').append($('<th/>').text(player.name));
-      });
+      players.forEach(player => playerHeaderRow.appendChild(this.createElement('th', player.name)));
 
       for (let station = 1; station <= stations; station++) {
-        const $playerScoreEntry = $('<tr/>');
+        const playerScoreEntry = document.createElement('tr');
+        const stationColumn = this.createElement('td', `${station}.`);
 
-        $playerScoreEntry.append(
-          $('<td/>')
-            .css('font-style', 'italic')
-            .text(`${station}.`)
-        );
+        stationColumn.style.fontStyle = 'italic';
+        playerScoreEntry.appendChild(stationColumn);
         players
           .map(player => scores.get(player.pid)!)
           .forEach(scores => {
-            $playerScoreEntry.append($('<td/>').text(ScoreUtils.scoreToPoints(scores[station - 1])));
+            const scoreColumn = this.createElement('td', '' + ScoreUtils.scoreToPoints(scores[station - 1]));
+
+            playerScoreEntry.appendChild(scoreColumn);
           });
-        $('#player-score-entries').append($playerScoreEntry);
+        playerScoreEntries.appendChild(playerScoreEntry);
       }
 
-      this.sumUpScore($('#player-score-entries'), playerScores);
+      this.sumUpScore(playerScoreEntries, playerScores);
       this.generateLeaderBoard(playerScores);
     });
   }
 
-  private sumUpScore($playerScoreEntires: JQuery<JQuery.Node>, playerScores: PlayerScore[]): void {
-    const $playerTotalScore = $('<tr/>')
-      .css('font-weight', 'bold')
-      .append($('<td/>').text('Total:'));
-    const $playerAverageScore = $('<tr/>')
-      .css('font-style', 'italic')
-      .append($('<td/>').text('Average:'));
-    const $playerMissCount = $('<tr/>')
-      .css('font-style', 'italic')
-      .append($('<td/>').text('Miss:'));
-    const $playerBodyHitCount = $('<tr/>')
-      .css('font-style', 'italic')
-      .append($('<td/>').text('Body:'));
-    const $playerKillHitCount = $('<tr/>')
-      .css('font-style', 'italic')
-      .append($('<td/>').text('Kill:'));
-    const $playerCenterKillHitCount = $('<tr/>')
-      .css('font-style', 'italic')
-      .append($('<td/>').text('Center Kill:'));
+  private sumUpScore(playerScoreEntries: HTMLElement, playerScores: PlayerScore[]): void {
+    const playerTotalScore = document.createElement('tr');
+    const playerAverageScore = document.createElement('tr');
+    const playerMissCount = document.createElement('tr');
+    const playerBodyHitCount = document.createElement('tr');
+    const playerKillHitCount = document.createElement('tr');
+    const playerCenterKillHitCount = document.createElement('tr');
 
-    playerScores.forEach((playerScore: PlayerScore) => {
-      $playerTotalScore.append($('<td/>').text(playerScore.totalScore));
-      $playerAverageScore.append($('<td/>').text(playerScore.averageScore));
-      $playerMissCount.append($('<td/>').html(`${playerScore.missCount}&times;`));
-      $playerBodyHitCount.append($('<td/>').html(`${playerScore.bodyHitCount}&times;`));
-      $playerKillHitCount.append($('<td/>').html(`${playerScore.killHitCount}&times;`));
-      $playerCenterKillHitCount.append($('<td/>').html(`${playerScore.centerKillHitCount}&times;`));
+    playerTotalScore.style.fontWeight = 'bold';
+    playerTotalScore.appendChild(this.createElement('td', 'Total:'));
+
+    playerAverageScore.style.fontStyle = 'italic';
+    playerAverageScore.appendChild(this.createElement('td', 'Average:'));
+
+    playerMissCount.style.fontStyle = 'italic';
+    playerMissCount.appendChild(this.createElement('td', 'Miss:'));
+
+    playerBodyHitCount.style.fontStyle = 'italic';
+    playerBodyHitCount.appendChild(this.createElement('td', 'Body:'));
+
+    playerKillHitCount.style.fontStyle = 'italic';
+    playerKillHitCount.appendChild(this.createElement('td', 'Kill:'));
+
+    playerCenterKillHitCount.style.fontStyle = 'italic';
+    playerCenterKillHitCount.appendChild(this.createElement('td', 'Center Kill:'));
+
+    playerScores.forEach(playerScore => {
+      playerTotalScore.appendChild(this.createElement('td', '' + playerScore.totalScore));
+      playerAverageScore.appendChild(this.createElement('td', '' + playerScore.averageScore));
+      playerMissCount.appendChild(this.createElement('td', `${playerScore.missCount}&times;`, true));
+      playerBodyHitCount.appendChild(this.createElement('td', `${playerScore.bodyHitCount}&times;`, true));
+      playerKillHitCount.appendChild(this.createElement('td', `${playerScore.killHitCount}&times;`, true));
+      playerCenterKillHitCount.appendChild(this.createElement('td', `${playerScore.centerKillHitCount}&times;`, true));
     });
 
-    $playerScoreEntires.append($playerTotalScore);
-    $playerScoreEntires.append($playerAverageScore);
-    $playerScoreEntires.append($playerMissCount);
-    $playerScoreEntires.append($playerBodyHitCount);
-    $playerScoreEntires.append($playerKillHitCount);
-    $playerScoreEntires.append($playerCenterKillHitCount);
+    playerScoreEntries.appendChild(playerTotalScore);
+    playerScoreEntries.appendChild(playerAverageScore);
+    playerScoreEntries.appendChild(playerMissCount);
+    playerScoreEntries.appendChild(playerBodyHitCount);
+    playerScoreEntries.appendChild(playerKillHitCount);
+    playerScoreEntries.appendChild(playerCenterKillHitCount);
   }
 
   private generateLeaderBoard(playerScores: PlayerScore[]): void {
+    const leaderboard = this.queryElement('.leaderboard');
+
     playerScores
       .sort((a, b) => b.totalScore - a.totalScore)
-      .forEach((playerScore, index) => {
-        // TODO replace all ID selectors with classes
-        $('#leaderboard').append(
-          $('<li/>')
-            .addClass('collection-item avatar')
-            .append(
-              this.createLeaderBoardBadge(index + 1),
-              $('<span/>')
-                .addClass('title')
-                .text(playerScore.playerName),
-              $('<p/>').html(`<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`),
-              $('<p/>').html(`<b>Miss</b>: ${playerScore.missCount}&times;`)
-            )
-        );
-      });
+      .forEach((playerScore, index) => leaderboard.appendChild(this.createLeaderBoardEntry(playerScore, index + 1)));
   }
 
-  private createLeaderBoardBadge(place: number): JQuery<JQuery.Node> {
+  private createLeaderBoardEntry(playerScore: PlayerScore, place: number): HTMLElement {
+    const entry = this.createElement('li', null, false, 'collection-item avatar');
+    const playerName = this.createElement('span', playerScore.playerName, false, 'title');
+    const totalScore = this.createElement(
+      'p',
+      `<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`,
+      true
+    );
+    const missCount = this.createElement('p', `<b>Miss</b>: ${playerScore.missCount}&times;`, true);
+
+    entry.appendChild(this.createLeaderBoardBadge(place));
+    entry.appendChild(playerName);
+    entry.appendChild(totalScore);
+    entry.appendChild(missCount);
+
+    return entry;
+  }
+
+  private createLeaderBoardBadge(place: number): HTMLElement {
     if (place < 1) {
       throw new Error('Invalid place: ' + place);
     }
 
     switch (place) {
       case 1:
-        return $('<div/>')
-          .addClass('leaderboard-badge first-place amber accent-3')
-          .html('<span>1<sup>st</sup></span>');
+        return this.createElement(
+          'div',
+          '<span>1<sup>st</sup></span>',
+          true,
+          'leaderboard-badge first-place amber accent-3'
+        );
       case 2:
-        return $('<div/>')
-          .addClass('leaderboard-badge second-place blue-grey lighten-3')
-          .html('<span>2<sup>nd</sup></span>');
+        return this.createElement(
+          'div',
+          '<span>2<sup>nd</sup></span>',
+          true,
+          'leaderboard-badge second-place blue-grey lighten-3'
+        );
       case 3:
-        return $('<div/>')
-          .addClass('leaderboard-badge third-place deep-orange darken-3')
-          .html('<span>3<sup>rd</sup></span>');
+        return this.createElement(
+          'div',
+          '<span>3<sup>rd</sup></span>',
+          true,
+          'leaderboard-badge third-place deep-orange darken-3'
+        );
       default:
-        return $('<div/>')
-          .addClass('leaderboard-badge grey darken-4')
-          .html(`<span>${place}<sup>th</sup></span>`);
+        return this.createElement('div', `<span>${place}<sup>th</sup></span>`, true, 'leaderboard-badge grey darken-4');
     }
   }
 }

@@ -17,7 +17,6 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import * as $ from 'jquery';
 import { BaseView } from './base-view';
 import { Player, PlayerWithScore, TotalScoreForGame } from '../main';
 import { ScoreUtils } from '../score-utils';
@@ -41,22 +40,21 @@ export class StationSelectPlayerView extends BaseView {
     const gid = <number>urlParams.get('gid');
     const station = <number>urlParams.get('station');
 
-    $('#station-no').text(station);
+    this.queryElement('.station-no').innerText = '' + station;
 
     this.getStorage()
       .getCourseForGame(gid)
       .then(course => {
-        console.log('course: ' + course);
+        const nextStationBtn = this.queryElement('.next-station-btn');
 
         if (station >= course.stations) {
-          $('#next-station-btn')
-            .html('<i class="material-icons left">check</i> Show total score')
-            .on('click', e => {
-              e.preventDefault();
-              window.location.href = `#final-score;gid=${gid}`;
-            });
+          nextStationBtn.innerHTML = '<i class="material-icons left">check</i> Show total score';
+          nextStationBtn.addEventListener('click', e => {
+            e.preventDefault();
+            window.location.href = `#final-score;gid=${gid}`;
+          });
         } else {
-          $('#next-station-btn').on('click', e => {
+          nextStationBtn.addEventListener('click', e => {
             e.preventDefault();
             window.location.href = `#station-select-player;gid=${gid};station=${station + 1}`;
           });
@@ -77,18 +75,18 @@ export class StationSelectPlayerView extends BaseView {
     Promise.all([
       this.getStorage().getPlayersWithScore(gid, station),
       this.getStorage().getTotalScoreForGame(gid)
-    ]).then((dataObjects: Array<Array<PlayerWithScore> | TotalScoreForGame>) => {
-      const players = <Array<PlayerWithScore>>dataObjects[0];
+    ]).then((dataObjects: Array<PlayerWithScore[] | TotalScoreForGame>) => {
+      const players = <PlayerWithScore[]>dataObjects[0];
       const totalScoreForGame = <TotalScoreForGame>dataObjects[1];
 
       if (players.length === 0) {
         throw new Error('Cannot load players!');
       }
 
-      const $playerSelectionList = $('#player-selection-list');
+      const playerSelectionList = this.queryElement('.player-selection-list');
       const playersWithScore = players.filter(player => player.score !== undefined).length;
 
-      $('#quick-assign-btn').on('click', (e: any) => {
+      this.queryElement('.quick-assign-btn').addEventListener('click', e => {
         const qaParam =
           players.length > 1
             ? `;qa=${players
@@ -109,38 +107,39 @@ export class StationSelectPlayerView extends BaseView {
           scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1] // exclude score of current station
         );
 
-        $playerSelectionList.append(this.createPlayerButton(gid, station, totalScore, player));
+        playerSelectionList.appendChild(this.createPlayerButton(gid, station, totalScore, player));
       });
 
       if (playersWithScore === players.length) {
-        $('#next-station-btn').removeAttr('disabled');
+        this.queryElement('.next-station-btn').removeAttribute('disabled');
       } else if (playersWithScore === 0) {
-        $('#quick-assign-btn').removeAttr('disabled'); // enable quick-assign only when no player has a score yet
+        this.queryElement('.quick-assign-btn').removeAttribute('disabled'); // enable quick-assign only when no player has a score yet
       }
     });
   }
 
-  private createPlayerButton(
-    gid: number,
-    station: number,
-    totalScore: number,
-    player: PlayerWithScore
-  ): JQuery<JQuery.Node> {
-    const $playerEntry = $('<a/>')
-      .addClass('collection-item')
-      .attr('href', `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`)
-      .text(totalScore > 0 ? `${player.name} (${totalScore}) ` : player.name);
+  private createPlayerButton(gid: number, station: number, totalScore: number, player: PlayerWithScore): HTMLElement {
+    const playerEntry = this.createElement(
+      'a',
+      totalScore > 0 ? `${player.name} (${totalScore}) ` : player.name,
+      false,
+      'collection-item'
+    );
+    playerEntry.setAttribute('href', `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`);
 
     if (player.score) {
       const scoreDisplayName = ScoreUtils.scoreToDisplayName(player.score);
       const scorePoints = ScoreUtils.scoreToPoints(player.score);
-      const $scoreBadge = $('<span/>')
-        .addClass('badge new blue')
-        .css('font-weight', 'bold')
-        .html(`${scoreDisplayName}&nbsp;&nbsp;&nbsp;(+${scorePoints})`);
+      const scoreBadge = this.createElement(
+        'span',
+        `${scoreDisplayName}&nbsp;&nbsp;&nbsp;(+${scorePoints})`,
+        true,
+        'badge new blue'
+      );
 
-      $playerEntry.append($scoreBadge);
+      scoreBadge.style.fontWeight = 'bold';
+      playerEntry.appendChild(scoreBadge);
     }
-    return $playerEntry;
+    return playerEntry;
   }
 }

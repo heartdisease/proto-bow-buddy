@@ -17,7 +17,6 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import * as $ from 'jquery';
 import { BaseView } from './base-view';
 
 import '../styles/main-menu.scss';
@@ -41,10 +40,10 @@ export class MainMenuView extends BaseView {
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-    this.dbDumpModalElement = this.getViewContainer().querySelector('#db-dump-modal')!;
-    this.deleteDbModalElement = this.getViewContainer().querySelector('#delete-db-modal')!;
+    this.dbDumpModalElement = this.queryElement('.db-dump-modal')!;
+    this.deleteDbModalElement = this.queryElement('.delete-db-modal')!;
 
-    $('.app-logo > h1').text(document.title);
+    this.queryElement('.app-logo > h1').innerText = document.title;
     this.initControls();
 
     console.info('MainMenuView.onReveal()');
@@ -64,16 +63,18 @@ export class MainMenuView extends BaseView {
     M.Modal.init(this.dbDumpModalElement!, {});
     M.Modal.init(this.deleteDbModalElement!, {});
 
-    $('.app-logo').on('click', e => {
+    this.queryElement('.app-logo').addEventListener('click', e => {
       if (++this.logoCounter % 2 === 0) {
         this.getStorage()
           .dump()
           .then(dbObject => {
             const dbDump = JSON.stringify(dbObject);
-            const $textarea = $('#db-dump-modal textarea').val(dbDump);
+            const textarea = <HTMLTextAreaElement>this.queryElement('.db-dump-modal textarea');
 
-            $('#copy-json-btn').on('click', e => {
-              $textarea.select();
+            textarea.value = dbDump;
+
+            this.queryElement('.copy-json-btn').addEventListener('click', e => {
+              textarea.select();
 
               try {
                 if (!document.execCommand('copy')) {
@@ -84,10 +85,10 @@ export class MainMenuView extends BaseView {
               }
             });
 
-            $('#update-db-btn').on('click', e => {
+            this.queryElement('.update-db-btn').addEventListener('click', e => {
               if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
                 this.getStorage()
-                  .importDb(JSON.parse(<string>$textarea.val()))
+                  .importDb(JSON.parse(textarea.value))
                   .then(() => window.alert('Database successfully imported!'))
                   .catch(error => console.error(error));
               }
@@ -97,23 +98,19 @@ export class MainMenuView extends BaseView {
             console.log(dbObject); // show db object in console for close inspection
 
             M.Modal.getInstance(this.dbDumpModalElement!).open();
-            window.setTimeout(() => $textarea.select(), 500);
+            window.setTimeout(() => textarea.select(), 500);
           });
       }
     });
-    $('#quit-btn').on('click', e => {
+    this.queryElement('.quit-btn').addEventListener('click', e => {
       if (++this.quitCounter % 4 === 0 && window.confirm('Are you sure you want to erase the entire database?')) {
+        const modal = this.queryElement('.delete-db-modal .modal-msg');
+
         this.getStorage()
           .erase()
-          .then(e => {
-            $('#delete-db-modal .modal-msg').text('Database was successfully deleted!');
-          })
-          .catch(e => {
-            $('#delete-db-modal .modal-msg').text('Failed to delete database!');
-          })
-          .then(() => {
-            M.Modal.getInstance(this.deleteDbModalElement!).open();
-          });
+          .then(e => (modal.innerText = 'Database was successfully deleted!'))
+          .catch(e => (modal.innerText = 'Failed to delete database!'))
+          .then(() => M.Modal.getInstance(this.deleteDbModalElement!).open());
       }
     });
   }

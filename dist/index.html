@@ -37,17 +37,6 @@
           .register('/sw.js')
           .then(() => console.log('Successfully registered service worker.'))
           .catch(() => console.error('Failed to registered service worker.'));
-
-        window.addEventListener('beforeinstallprompt', event => {
-          event.prompt(); // showing the prompt directly to the user is actually an anti-pattern
-          event.userChoice.then(choice => {
-            if (choice.outcome === 'accepted') {
-              console.log('User accepted the A2HS prompt');
-            } else {
-              console.log('User dismissed the A2HS prompt');
-            }
-          });
-        });
       } else {
         console.error('Service workers are not supported.');
       }
@@ -74,7 +63,9 @@
       </p>
     </noscript>
 
-    <div id="main"><!-- VIEW CONTAINER --></div>
+    <div id="main">
+      <!-- VIEW CONTAINER -->
+    </div>
 
     <!-- [BEGIN TEMPLATE] MAIN MENU -->
     <template id="main-menu-template">
@@ -95,12 +86,12 @@
         <a class="waves-effect waves-light btn-large" href="#hall-of-fame" role="button">
           <i class="material-icons left">trending_up</i> Hall Of Fame
         </a>
-        <a class="waves-effect waves-light btn-large red" href="#" role="button" id="quit-btn">
+        <a class="quit-btn waves-effect waves-light btn-large red" href="#" role="button">
           <i class="material-icons left">settings_power</i> Quit
         </a>
       </div>
 
-      <div class="modal" id="delete-db-modal">
+      <div class="modal delete-db-modal">
         <div class="modal-content"><span class="modal-msg"></span></div>
         <div class="modal-footer">
           <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal"
@@ -109,17 +100,19 @@
         </div>
       </div>
 
-      <div class="modal modal-fixed-footer" id="db-dump-modal">
-        <div class="modal-content"><textarea rows="16" cols="35"></textarea></div>
+      <div class="modal modal-fixed-footer db-dump-modal">
+        <div class="modal-content">
+          <textarea rows="16" cols="35"></textarea>
+        </div>
         <div class="modal-footer">
           <div class="btn-group btn-group-justified">
             <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
               Close
             </a>
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" id="copy-json-btn">
+            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat copy-json-btn">
               Copy JSON
             </a>
-            <a type="button" class="modal-action waves-effect waves-blue btn-flat" id="update-db-btn">
+            <a type="button" class="modal-action waves-effect waves-blue btn-flat update-db-btn">
               Update Database
             </a>
           </div>
@@ -139,26 +132,25 @@
             <!-- BEGIN PLAYER SELECTION -->
 
             <div class="container">
-              <div id="select-player-container" class="row">
+              <div class="select-player-container row">
                 <div class="col s12">
-                  <select id="player-select">
+                  <select class="player-select">
                     <!-- PLAYER OPTIONS -->
                   </select>
                   <label>Choose player</label>
                 </div>
               </div>
-              <div id="add-player-container" class="row" style="display: none;">
+              <div class="add-player-container row" style="display: none;">
                 <div class="col s10">
                   <input
                     type="text"
                     placeholder="Add new player"
-                    id="new-player-name"
-                    class="form-control"
+                    class="new-player-name form-control"
                     aria-label="Add new player"
                   />
                 </div>
                 <div class="col s2">
-                  <a class="waves-effect waves-light btn-small disabled" href="#" id="add-player-btn">
+                  <a class="waves-effect waves-light btn-small disabled add-player-btn" href="#">
                     <i class="material-icons">add</i>
                   </a>
                 </div>
@@ -173,7 +165,7 @@
                   <th>Rang</th>
                 </tr>
               </thead>
-              <tbody id="player-entries">
+              <tbody class="player-entries">
                 <!-- PLAYER ENTRIES -->
               </tbody>
             </table>
@@ -187,29 +179,27 @@
             <!-- BEGIN COURSE SELECTION -->
 
             <div class="">
-              <div id="select-course-container">
-                <select id="course-select">
+              <div class="select-course-container">
+                <select class="course-select">
                   <!-- COURSE OPTIONS -->
                 </select>
                 <label>Choose course</label>
               </div>
-              <div id="add-course-container" style="display: none;">
+              <div class="add-course-container" style="display: none;">
                 <input
                   type="text"
                   placeholder="Add new course"
-                  id="new-course-name"
-                  class="form-control"
+                  class="new-course-name form-control"
                   aria-label="Add new course"
                 />
                 <input
                   type="number"
                   placeholder="#"
-                  id="new-course-no-of-stations"
-                  class="form-control"
+                  class="new-course-no-of-stations form-control"
                   aria-label="No. of stations"
                 />
                 <span class="input-group-btn">
-                  <a class="waves-effect waves-light btn-small disabled" href="#" id="set-course-btn">
+                  <a class="waves-effect waves-light btn-small disabled set-course-btn" href="#">
                     <i class="material-icons">add</i>
                   </a>
                 </span>
@@ -224,7 +214,7 @@
                   <th>Stations</th>
                 </tr>
               </thead>
-              <tbody id="course-entries">
+              <tbody class="course-entries">
                 <!-- COURSE ENTRIES -->
               </tbody>
             </table>
@@ -235,7 +225,7 @@
       </ul>
 
       <div>
-        <a class="waves-effect waves-light btn disabled" href="#" id="start-game-btn">
+        <a class="waves-effect waves-light btn disabled start-game-btn" href="#">
           <i class="material-icons left">play_arrow</i> Start Game
         </a>
       </div>
@@ -244,18 +234,20 @@
 
     <!-- [BEGIN TEMPLATE] SELECT PLAYER -->
     <template id="station-select-player-template">
-      <h1>Station <span id="station-no">?</span>: Select player</h1>
+      <h1>Station <span class="station-no">?</span>: Select player</h1>
 
       <div>
-        <a class="waves-effect waves-light btn-small" href="#" id="quick-assign-btn" disabled="disabled">
+        <a class="waves-effect waves-light btn-small quick-assign-btn" href="#" disabled="disabled">
           <i class="material-icons left">add_to_photos</i> Quick assign
         </a>
       </div>
 
-      <div class="collection" id="player-selection-list"><!-- PLAYER BUTTONS --></div>
+      <div class="collection player-selection-list">
+        <!-- PLAYER BUTTONS -->
+      </div>
 
       <div>
-        <a class="waves-effect waves-light btn-small" href="#" id="next-station-btn" disabled="disabled">
+        <a class="waves-effect waves-light btn-small next-station-btn" href="#" disabled="disabled">
           <i class="material-icons left">keyboard_arrow_right</i> Next station
         </a>
       </div>
@@ -264,7 +256,7 @@
 
     <!-- [BEGIN TEMPLATE] SET SCORE -->
     <template id="station-set-score-template">
-      <h1>Set score:<br />Station <span id="station-no">?</span> - <span class="player-name">???</span></h1>
+      <h1>Set score:<br />Station <span class="station-no">?</span> - <span class="player-name">???</span></h1>
 
       <div class="container" style="margin-top: 20px;">
         <div class="row">
@@ -307,13 +299,13 @@
 
       <a class="btn-large brown darken-4 miss-btn" href="#" role="button">Miss</a>
 
-      <div class="modal" id="score-modal">
+      <div class="modal score-modal">
         <div class="modal-content">
           <h4><span class="player-name">...</span> scored:</h4>
           <div class="container">
             <div class="row">
-              <div class="col s6" id="modal-hit-score"><!-- SCORE: HIT --></div>
-              <div class="col s6" id="modal-turn-score"><!-- SCORE: TURN --></div>
+              <div class="col s6 modal-hit-score"><!-- SCORE: HIT --></div>
+              <div class="col s6 modal-turn-score"><!-- SCORE: TURN --></div>
             </div>
           </div>
         </div>
@@ -325,21 +317,21 @@
     <template id="final-score-template">
       <!-- TODO implement feature for sending end results per email -->
 
-      <h1>Course complete:<br /><span id="course-label"></span></h1>
+      <h1>Course complete:<br /><span class="course-label"></span></h1>
 
-      <h2>Duration: <span id="course-duration"></span></h2>
+      <h2>Duration: <span class="course-duration"></span></h2>
 
-      <ul class="collection" id="leaderboard">
+      <ul class="collection leaderboard">
         <!-- LEADERBOARD ITEMS -->
       </ul>
 
       <table class="striped">
         <thead>
-          <tr id="player-header-row">
+          <tr class="player-header-row">
             <th>#</th>
           </tr>
         </thead>
-        <tbody id="player-score-entries">
+        <tbody class="player-score-entries">
           <!-- SCORE ENTRIES -->
         </tbody>
       </table>
@@ -360,11 +352,11 @@
 
       <table class="striped">
         <thead>
-          <tr id="player-header-row">
+          <tr class="player-header-row">
             <th>#</th>
           </tr>
         </thead>
-        <tbody id="player-score-entries">
+        <tbody class="player-score-entries">
           <!-- SCORE ENTRIES -->
         </tbody>
       </table>

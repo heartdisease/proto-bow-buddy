@@ -18,11 +18,11 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 #main.final-score-view {
-  #course-label {
+  .course-label {
     font-style: italic;
   }
 
-  #leaderboard > .collection-item.avatar {
+  .leaderboard > .collection-item.avatar {
     padding: 10px;
     text-align: left;
   }

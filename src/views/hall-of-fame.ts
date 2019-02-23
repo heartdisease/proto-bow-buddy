@@ -58,13 +58,13 @@ export class HallOfFameView extends BaseView {
           hour12: false
         });
 
-        $('#course-duration').html(`${duration}<br/>(${from} - ${to})`);
+        $('.course-duration').html(`${duration}<br/>(${from} - ${to})`);
       });
 
     this.getStorage()
       .getCourseForGame(gid)
       .then((course: Course) => {
-        $('#course-label').text(
+        $('.course-label').text(
           `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`
         );
         this.generateScoreTable(gid, course.stations);

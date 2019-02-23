@@ -52,15 +52,15 @@ export class StationSetScoreView extends BaseView {
       : [];
     const station = <number>urlParams.get('station');
 
-    this.scoreModalElement = this.getViewContainer().querySelector('#score-modal')!;
+    this.scoreModalElement = this.queryElement('.score-modal')!;
 
     M.Modal.init(this.scoreModalElement, {});
 
-    $('#station-no').text(station);
+    this.queryElement('.station-no').innerText = '' + station;
 
     Application.getStorage()
       .getPlayer(pid)
-      .then(player => $('span.player-name').text(player.name));
+      .then(player => (this.queryElement('span.player-name').innerText = player.name));
 
     this.initButtons(gid, pid, remainingPids, station);
   }
@@ -93,13 +93,13 @@ export class StationSetScoreView extends BaseView {
         this.logScore(gid, pid, station, remainingPids, hit, turn);
       });
 
-    $('.miss-btn').on('click', e => {
+    this.queryElement('.miss-btn').addEventListener('click', e => {
       e.preventDefault();
       this.logScore(gid, pid, station, remainingPids);
     });
   }
 
-  private navigateNext(gid: number, station: number, remainingPids: Array<number>): void {
+  private navigateNext(gid: number, station: number, remainingPids: number[]): void {
     if (remainingPids.length > 0) {
       this.navigateToNextPlayer(gid, station, remainingPids[0], remainingPids.slice(1));
     } else {
@@ -111,7 +111,7 @@ export class StationSetScoreView extends BaseView {
     window.location.href = `#station-select-player;gid=${gid};station=${station}`;
   }
 
-  private navigateToNextPlayer(gid: number, station: number, nextPid: number, remainingPids: Array<number>): void {
+  private navigateToNextPlayer(gid: number, station: number, nextPid: number, remainingPids: number[]): void {
     const qaParam = remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
     window.location.href = `#station-set-score;gid=${gid};pid=${nextPid}${qaParam};station=${station}`;
   }
@@ -129,10 +129,11 @@ export class StationSetScoreView extends BaseView {
     const score = miss ? 'miss' : turn + ':' + hit;
 
     if (miss) {
-      $('#modal-hit-score').html('<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>');
+      this.queryElement('.modal-hit-score').innerHTML =
+        '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>';
     } else {
-      $('#modal-hit-score').html(this.getHitButton(hit!));
-      $('#modal-turn-score').html(this.getTurnButton(turn!));
+      this.queryElement('.modal-hit-score').innerHTML = this.getHitButton(hit!);
+      this.queryElement('.modal-turn-score').innerHTML = this.getTurnButton(turn!);
     }
 
     M.Modal.getInstance(this.scoreModalElement!).open();
