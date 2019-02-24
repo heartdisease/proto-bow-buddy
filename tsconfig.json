@@ -2,7 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "module": "amd",
-    "target": "es5",
+    "target": "es2015",
     "outDir": "./dist/",
     "removeComments": true,
     "inlineSources": true,

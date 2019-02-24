@@ -63,6 +63,39 @@ export abstract class BaseView {
   /**
    * Never override this method!
    */
+  protected /*final*/ queryElements(selector: string): NodeListOf<HTMLElement> {
+    return <NodeListOf<HTMLElement>>this.viewContainer!.querySelectorAll(selector);
+  }
+
+  /**
+   * Never override this method!
+   */
+  protected /*final*/ hideElement(selector: string | HTMLElement): void {
+    if (selector instanceof HTMLElement) {
+      selector.style.display = 'none';
+    } else {
+      Array.prototype.forEach.call(this.queryElements(selector), (element: HTMLElement) => {
+        element.style.display = 'none';
+      });
+    }
+  }
+
+  /**
+   * Never override this method!
+   */
+  protected /*final*/ showElement(selector: string | HTMLElement): void {
+    if (selector instanceof HTMLElement) {
+      selector.style.display = 'none';
+    } else {
+      Array.prototype.forEach.call(this.queryElements(selector), (element: HTMLElement) => {
+        element.style.display = '';
+      });
+    }
+  }
+
+  /**
+   * Never override this method!
+   */
   protected /*final*/ createElement(
     tagName: string,
     content: string | null,

@@ -167,15 +167,13 @@ export class DbAccess {
   private dbWrapper: DbWrapper | null = null;
 
   async getPlayers(): Promise<Player[]> {
-    return this.db()
-      .transaction('players')
-      .then(playerObjectStore => this.fetchAll(playerObjectStore));
+    const playerObjectStore = await this.db().transaction('players');
+    return this.fetchAll(playerObjectStore);
   }
 
   async getPlayer(pid: number): Promise<Player> {
-    return this.db()
-      .transaction('players')
-      .then(playerObjectStore => this.fetchById(playerObjectStore, 'pid', pid));
+    const playerObjectStore = await this.db().transaction('players');
+    return this.fetchById(playerObjectStore, 'pid', pid);
   }
 
   async getPlayersWithScore(gid: number, station: number): Promise<PlayerWithScore[]> {
@@ -218,6 +216,12 @@ export class DbAccess {
           request.onerror = (event: any) => reject(event);
         });
       });
+  }
+
+  async getCourse(cid: number): Promise<Course> {
+    return this.db()
+      .transaction('courses')
+      .then(courseObjectStore => this.fetchById(courseObjectStore, 'cid', cid));
   }
 
   async getCourses(): Promise<Course[]> {
