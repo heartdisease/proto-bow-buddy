@@ -2,13 +2,13 @@
   "compilerOptions": {
     "sourceMap": true,
     "module": "amd",
-    "target": "es2015",
+    "target": "es6",
     "outDir": "./dist/",
     "removeComments": true,
     "inlineSources": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "lib": ["es2015.core", "es2015.collection", "es2015.promise", "es5", "dom"],
+    "lib": ["es2015.core", "es2015.collection", "es2015.iterable", "es2015.promise", "es2015", "dom", "dom.iterable"],
     "baseUrl": ".",
     "paths": {
       "jquery": ["node_modules/jquery/dist/jquery"],
