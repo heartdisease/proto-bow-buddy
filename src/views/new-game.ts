@@ -69,8 +69,6 @@ export class NewGameView extends BaseView {
     setCourseBtn.addEventListener('click', this.setCourseClickListener);
 
     this.initControls();
-
-    console.info('NewGameView.onReveal()');
   }
 
   onHide(): void {
@@ -89,8 +87,6 @@ export class NewGameView extends BaseView {
     M.Collapsible.getInstance(this.collapsibleElement!).destroy();
     M.FormSelect.getInstance(this.playerSelectElement!).destroy();
     M.FormSelect.getInstance(this.courseSelectElement!).destroy();
-
-    console.info('NewGameView.onHide()');
   }
 
   private initControls(): void {
@@ -133,10 +129,8 @@ export class NewGameView extends BaseView {
 
       M.FormSelect.init(playerSelect, {});
       this.registerPlayerSelectEventHandlers();
-
-      console.log('Rebuilt player selection menu.');
-    } catch (e) {
-      return console.error(e);
+    } catch (error) {
+      console.error(`Could not load players: ${error.message}`);
     }
   }
 
@@ -174,10 +168,8 @@ export class NewGameView extends BaseView {
 
       M.FormSelect.init(courseSelect, {});
       this.registerCourseSelectEventHandlers();
-
-      console.log('Rebuilt course selection menu.');
     } catch (error) {
-      return console.error(error);
+      console.error(`Could not load courses: ${error.message}`);
     }
   }
 
@@ -264,21 +256,20 @@ export class NewGameView extends BaseView {
     const courseName = this.queryInputElement('.new-course-name').value;
     const noOfStations = this.queryInputElement('.new-course-no-of-stations').value;
 
-    console.log('verifyCourseInput: ' + courseName + ', ' + noOfStations);
-
-    if (
-      !courseName ||
-      /^\s+/.test(courseName) ||
-      /\s+$/.test(courseName) ||
-      !noOfStations ||
-      !/^[1-9][0-9]*$/.test(noOfStations) ||
-      this.existingCourses.some(course => course.name === courseName)
-    ) {
-      console.log('existingCourses: ' + this.existingCourses);
-      this.queryElement('.set-course-btn').classList.add('disabled');
-    } else {
+    if (this.isValidCourse(courseName, noOfStations)) {
       this.queryElement('.set-course-btn').classList.remove('disabled');
+    } else {
+      this.queryElement('.set-course-btn').classList.add('disabled');
     }
+  }
+
+  private isValidCourse(courseName: string, noOfStations: string): boolean {
+    return (
+      !/^\s+/.test(courseName) &&
+      !/\s+$/.test(courseName) &&
+      /^[1-9][0-9]*$/.test(noOfStations) &&
+      this.existingCourses.every(course => course.name !== courseName)
+    );
   }
 
   private queryInputElement(selector: string): HTMLInputElement {
@@ -321,8 +312,6 @@ export class NewGameView extends BaseView {
   private async onPlayerSelectionChange(event: Event) {
     const pid = (<HTMLSelectElement>event.target).value;
 
-    console.log('pid change: ' + pid);
-
     if (pid === 'new') {
       this.hideElement('.select-player-container');
       this.showElement('.add-player-container');
@@ -341,8 +330,6 @@ export class NewGameView extends BaseView {
 
   private async onCourseSelectionChange(event: Event) {
     const cid = (<HTMLSelectElement>event.target).value;
-
-    console.log('cid change: ' + cid);
 
     if (cid === 'new') {
       this.hideElement('.select-course-container');
@@ -390,7 +377,7 @@ export class NewGameView extends BaseView {
     const cid = +this.queryElement('.course-entries > tr[data-cid]').dataset.cid!;
     const pids: number[] = [];
 
-    for (const playerEntry of <any>this.queryElements('.player-entries > tr[data-pid]')) {
+    for (const playerEntry of this.queryElements('.player-entries > tr[data-pid]')) {
       pids.push(+playerEntry.dataset.pid!);
     }
 

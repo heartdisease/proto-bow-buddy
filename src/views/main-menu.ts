@@ -45,8 +45,6 @@ export class MainMenuView extends BaseView {
 
     this.queryElement('.app-logo > h1').innerText = document.title;
     this.initControls();
-
-    console.info('MainMenuView.onReveal()');
   }
 
   onHide(): void {
@@ -55,8 +53,6 @@ export class MainMenuView extends BaseView {
 
     M.Modal.getInstance(this.deleteDbModalElement!).close();
     M.Modal.getInstance(this.deleteDbModalElement!).destroy();
-
-    console.info('MainMenuView.onHide()');
   }
 
   private initControls(): void {

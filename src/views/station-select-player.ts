@@ -70,8 +70,6 @@ export class StationSelectPlayerView extends BaseView {
   }
 
   private initPlayerButtons(gid: number, station: number): void {
-    console.log('initPlayerButtons: gid ' + gid + ', station ' + station);
-
     Promise.all([
       this.getStorage().getPlayersWithScore(gid, station),
       this.getStorage().getTotalScoreForGame(gid)

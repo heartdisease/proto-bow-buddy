@@ -71,8 +71,6 @@ export class StationSetScoreView extends BaseView {
   }
 
   private initButtons(gid: number, pid: number, remainingPids: number[], station: number): void {
-    console.log('Start button setup ....');
-
     const drake = dragula(
       [...this.queryElements('.hit-draggable-container'), ...this.queryElements('.turn-draggable-container')],
       {
@@ -93,8 +91,12 @@ export class StationSetScoreView extends BaseView {
         el.classList.remove('ex-moved');
       })
       .on('drop', (origin: HTMLElement, target: HTMLElement, source: HTMLElement, sibling: HTMLElement) => {
-        const hit = origin.classList.contains('hit') ? origin.dataset.dnd : sibling.dataset.dnd;
-        const turn = origin.classList.contains('turn') ? origin.dataset.dnd : sibling.dataset.dnd;
+        const hit = origin.classList.contains('hit')
+          ? origin.dataset.dnd
+          : this.getDndSibling(origin, target).dataset.dnd;
+        const turn = origin.classList.contains('turn')
+          ? origin.dataset.dnd
+          : this.getDndSibling(origin, target).dataset.dnd;
 
         console.log('hit = ' + hit);
         console.log('turn = ' + turn);
@@ -113,6 +115,15 @@ export class StationSetScoreView extends BaseView {
       e.preventDefault();
       this.logScore(gid, pid, station, remainingPids);
     });
+  }
+
+  private getDndSibling(origin: HTMLElement, target: HTMLElement): HTMLElement {
+    for (const el of target.childNodes) {
+      if (el.nodeType === Node.ELEMENT_NODE && el !== origin) {
+        return <HTMLElement>el;
+      }
+    }
+    throw new Error('No sibling found in target element');
   }
 
   private navigateNext(gid: number, station: number, remainingPids: number[]): void {

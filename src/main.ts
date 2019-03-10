@@ -69,7 +69,7 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.7.0';
+  private static readonly VERSION = '2.7.1';
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;
@@ -100,7 +100,6 @@ export class Application {
 
   static getUrlParams(): Readonly<Map<string, string | number>> {
     if (!window.location.hash) {
-      console.log('getUrlParams(): {}');
       return Object.freeze(new Map<string, string | number>());
     }
     const numRegExp = /^(0|-?[1-9][0-9]*)$/;
@@ -117,8 +116,6 @@ export class Application {
           return urlParams;
         }, new Map<string, string | number>())
     );
-
-    console.log('getUrlParams(): ' + JSON.stringify(urlParams));
     return urlParams;
   }
 
@@ -170,7 +167,7 @@ export class Application {
       case '#hall-of-fame':
         return new HallOfFameView();
       default:
-        console.log('Unknown place: ' + viewToken);
+        console.warn(`Unknown place: ${viewToken}`);
         return new MainMenuView();
     }
   }
