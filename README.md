@@ -22,11 +22,11 @@ This is a web-based prototype for an Android app called BowBuddy.
 
 ## Run web server locally for testing
 
-`npm run dev-server`
+`npm run dev`
 
 ## Build everything using webpack
 
-For development: `npm run dev` (better use `npm run dev-server` instead)
+For development: `npm run dev` (better use `npm run dev` instead)
 
 For production: `npm run build`
 
@@ -36,4 +36,4 @@ For production: `npm run build`
 
 ## Run local HTTP server for serving files in `/dist`
 
-`npm run server`
+`npm run start`

@@ -4,11 +4,10 @@
   "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
   "main": "index.html",
   "scripts": {
+    "start": "http-server -c-1 dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack --config webpack.dev.js",
+    "dev": "webpack-dev-server --config webpack.dev.js --progress --content-base dist",
     "build": "webpack --config webpack.prod.js",
-    "dev-server": "webpack-dev-server --config webpack.dev.js --progress --content-base dist",
-    "server": "http-server -c-1 dist",
     "clean": "for f in $(ls dist); do if [ $f != 'index.html' ] && [ $f != 'sw.js' ] && [ $f != 'site.webmanifest' ] && [ $f != 'icon.png' ] && [ $f != 'icon-large.png' ] && [ $f != 'favicon.ico' ]; then rm -rfv dist/$f; fi; done"
   },
   "repository": {
