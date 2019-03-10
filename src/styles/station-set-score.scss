@@ -87,9 +87,14 @@
 
   div.hit-draggable-container,
   div.turn-draggable-container {
+    position: relative;
+    height: 110px;
+
     & > a.btn-large {
+      position: absolute;
       width: 110px;
-      height: 110px;
+      height: 100%;
+      left: 30px;
     }
   }
 
