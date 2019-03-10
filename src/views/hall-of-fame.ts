@@ -17,7 +17,6 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import * as $ from 'jquery';
 import { BaseView } from './base-view';
 import { Game, Application, Player, Course } from '../main';
 
@@ -37,10 +36,10 @@ export class HallOfFameView extends BaseView {
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-    const gid = <number>urlParams.get('gid');
+    const gid = <number>urlParams.get('gid'); // TODO list all available rounds instead
 
     // sets timestamp for field 'endtime'
-    this.getStorage()
+    /*this.getStorage()
       .finishGame(gid)
       .then((game: Game) => {
         const duration = Application.getDuration(game.starttime, game.endtime);
@@ -58,17 +57,17 @@ export class HallOfFameView extends BaseView {
           hour12: false
         });
 
-        $('.course-duration').html(`${duration}<br/>(${from} - ${to})`);
+        this.queryElement('.course-duration').innerHTML = `${duration}<br/>(${from} - ${to})`;
       });
 
     this.getStorage()
       .getCourseForGame(gid)
-      .then((course: Course) => {
-        $('.course-label').text(
-          `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`
-        );
+      .then(course => {
+        const courseLabel = `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`;
+
+        this.queryElement('.course-label').innerText = courseLabel;
         this.generateScoreTable(gid, course.stations);
-      });
+      });*/
   }
 
   onHide(): void {

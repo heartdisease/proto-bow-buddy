@@ -1,6 +1,6 @@
 {
   "name": "proto-bow-buddy",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
   "main": "index.html",
   "scripts": {
@@ -23,27 +23,24 @@
   "homepage": "https://github.com/heartdisease/proto-bow-buddy#readme",
   "devDependencies": {
     "@types/dragula": "^2.1.34",
-    "@types/jquery": "^3.3.29",
     "@types/materialize-css": "^1.0.6",
-    "css-loader": "^1.0.1",
+    "css-loader": "^2.1.1",
     "http-server": "^0.11.1",
-    "mini-css-extract-plugin": "^0.4.5",
+    "mini-css-extract-plugin": "^0.5.0",
     "node-sass": "^4.11.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "ts-loader": "^5.3.3",
-    "typescript": "^3.2.2",
-    "uglifyjs-webpack-plugin": "^2.1.1",
-    "webpack": "^4.28.4",
-    "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14",
+    "typescript": "^3.3.3333",
+    "uglifyjs-webpack-plugin": "^2.1.2",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.1",
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
     "dragula": "^3.7.2",
-    "jquery": "^3.3.1",
-    "materialize-css": "^1.0.0",
-    "touch-dnd": "^1.2.1"
+    "materialize-css": "^1.0.0"
   }
 }

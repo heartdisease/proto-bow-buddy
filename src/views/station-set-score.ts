@@ -17,12 +17,12 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import * as $ from 'jquery';
-import 'vendor/touch-dnd';
+import * as dragula from 'dragula';
 import 'materialize-css';
 import { BaseView } from './base-view';
 import { Application } from '../main';
 
+import '../../node_modules/dragula/dist/dragula.min.css';
 import '../styles/station-set-score.scss';
 
 export class StationSetScoreView extends BaseView {
@@ -48,7 +48,7 @@ export class StationSetScoreView extends BaseView {
     const remainingPids: number[] = urlParams.has('qa')
       ? String(urlParams.get('qa'))
           .split('+')
-          .map((s: string) => +s)
+          .map(s => +s)
       : [];
     const station = <number>urlParams.get('station');
 
@@ -70,27 +70,43 @@ export class StationSetScoreView extends BaseView {
     M.Modal.getInstance(this.scoreModalElement!).destroy();
   }
 
-  private initButtons(gid: number, pid: number, remainingPids: Array<number>, station: number): void {
+  private initButtons(gid: number, pid: number, remainingPids: number[], station: number): void {
     console.log('Start button setup ....');
 
-    $('.hit')
-      .draggable({ connectWith: '.turn' })
-      .droppable({ accept: '.turn', activeClass: 'active', hoverClass: 'dropZone' })
-      .on('droppable:drop', (e: any, ui: any) => {
-        const hit = e.target.getAttribute('data-dnd');
-        const turn = ui.item[0].getAttribute('data-dnd');
+    const drake = dragula(
+      [...this.queryElements('.hit-draggable-container'), ...this.queryElements('.turn-draggable-container')],
+      {
+        copy: true,
+        moves: () => true,
+        revertOnSpill: true,
+        accepts: (origin: HTMLElement, target: HTMLElement) => {
+          return (
+            (origin.classList.contains('hit') && target.classList.contains('turn-draggable-container')) ||
+            (origin.classList.contains('turn') && target.classList.contains('hit-draggable-container'))
+          );
+        }
+      }
+    );
 
+    drake
+      .on('drag', (el: HTMLElement) => {
+        el.classList.remove('ex-moved');
+      })
+      .on('drop', (origin: HTMLElement, target: HTMLElement, source: HTMLElement, sibling: HTMLElement) => {
+        const hit = origin.classList.contains('hit') ? origin.dataset.dnd : sibling.dataset.dnd;
+        const turn = origin.classList.contains('turn') ? origin.dataset.dnd : sibling.dataset.dnd;
+
+        console.log('hit = ' + hit);
+        console.log('turn = ' + turn);
+
+        origin.classList.add('ex-moved');
         this.logScore(gid, pid, station, remainingPids, hit, turn);
-      });
-
-    $('.turn')
-      .draggable({ connectWith: '.turn' })
-      .droppable({ accept: '.hit', activeClass: 'active', hoverClass: 'dropZone' })
-      .on('droppable:drop', (e: any, ui: any) => {
-        const hit = ui.item[0].getAttribute('data-dnd');
-        const turn = e.target.getAttribute('data-dnd');
-
-        this.logScore(gid, pid, station, remainingPids, hit, turn);
+      })
+      .on('over', (el: HTMLElement, container: HTMLElement) => {
+        container.classList.add('ex-over');
+      })
+      .on('out', (el: HTMLElement, container: HTMLElement) => {
+        container.classList.remove('ex-over');
       });
 
     this.queryElement('.miss-btn').addEventListener('click', e => {

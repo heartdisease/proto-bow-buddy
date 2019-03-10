@@ -39,6 +39,7 @@
   a.turn {
     margin-left: auto !important;
     margin-right: auto !important;
+    touch-action: none;
 
     &.active {
       z-index: 2;

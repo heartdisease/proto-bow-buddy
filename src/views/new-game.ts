@@ -211,7 +211,7 @@ export class NewGameView extends BaseView {
     const playerEntries = this.queryElement('.player-entries');
     const playerEntry = document.createElement('tr');
 
-    playerEntry.setAttribute('data-pid', '' + player.pid);
+    playerEntry.dataset.pid = player.pid.toString();
     playerEntry.appendChild(this.createElement('td', player.name));
     playerEntry.appendChild(this.createElement('td', player.email || '-'));
     playerEntry.appendChild(this.createElement('td', '-'));
@@ -231,10 +231,10 @@ export class NewGameView extends BaseView {
 
     this.removeChildren(courseEntries);
 
-    courseEntry.setAttribute('data-cid', '' + course.cid);
+    courseEntry.dataset.cid = course.cid.toString();
     courseEntry.appendChild(this.createElement('td', course.name));
     courseEntry.appendChild(this.createElement('td', course.place || '-'));
-    courseEntry.appendChild(this.createElement('td', '' + course.stations));
+    courseEntry.appendChild(this.createElement('td', course.stations.toString()));
 
     courseEntries.appendChild(courseEntry);
 
@@ -289,7 +289,7 @@ export class NewGameView extends BaseView {
     const option = <HTMLOptionElement>this.createElement('option', content);
 
     if (value !== undefined) {
-      option.value = '' + value;
+      option.value = value.toString();
     }
     return option;
   }
@@ -314,7 +314,7 @@ export class NewGameView extends BaseView {
       this.hideElement('.add-player-container');
       this.showElement('.select-player-container');
     } catch (error) {
-      console.error(`Failed to add player ${playerName}`);
+      console.error(`Failed to add player ${playerName}: ${error.message}`);
     }
   }
 
@@ -334,7 +334,7 @@ export class NewGameView extends BaseView {
         this.addPlayerToTable(player);
         this.updatePlayerSelectionMenu();
       } catch (error) {
-        console.error(`Failed to load player with pid ${pid}.`);
+        console.error(`Failed to load player with pid ${pid}: ${error.message}`);
       }
     }
   }
@@ -355,7 +355,7 @@ export class NewGameView extends BaseView {
         this.addCourseToTable(course);
         this.updateCourseSelectionMenu();
       } catch (error) {
-        console.error(`Failed to load course with cid ${cid}.`);
+        console.error(`Failed to load course with cid ${cid}: ${error.message}`);
       }
     }
   }
@@ -379,7 +379,7 @@ export class NewGameView extends BaseView {
       this.hideElement('.add-course-container');
       this.showElement('.select-course-container');
     } catch (error) {
-      console.log(`Failed to add course '${courseName}'`);
+      console.log(`Failed to add course '${courseName}': ${error.message}`);
     }
   }
 
@@ -387,11 +387,11 @@ export class NewGameView extends BaseView {
     event.preventDefault();
     this.queryElement('.start-game-btn').classList.add('disabled'); // disable button while async db action is running
 
-    const cid = +this.queryElement('.course-entries > tr[data-cid]').getAttribute('data-cid')!;
+    const cid = +this.queryElement('.course-entries > tr[data-cid]').dataset.cid!;
     const pids: number[] = [];
 
     for (const playerEntry of <any>this.queryElements('.player-entries > tr[data-pid]')) {
-      pids.push(+playerEntry.getAttribute('data-pid')!);
+      pids.push(+playerEntry.dataset.pid!);
     }
 
     try {
@@ -399,7 +399,7 @@ export class NewGameView extends BaseView {
 
       window.location.href = `#station-select-player;gid=${game.gid};station=1`;
     } catch (error) {
-      console.error('Failed to add new game.');
+      console.error(`Failed to add new game: ${error.message}`);
     }
   }
 }

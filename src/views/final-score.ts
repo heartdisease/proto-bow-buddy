@@ -18,7 +18,7 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
-import { Game, Application, Player } from '../main';
+import { Game, Application } from '../main';
 import { ScoreUtils, TotalScore, PlayerScore } from '../score-utils';
 
 import '../styles/final-score.scss';
