@@ -18,7 +18,6 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
-import { Game, Application, Player, Course } from '../main';
 
 import '../styles/hall-of-fame.scss';
 
