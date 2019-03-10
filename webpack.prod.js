@@ -12,7 +12,12 @@ module.exports = merge(common, {
     minimizer: [
       new TerserPlugin({
         parallel: true,
-        sourceMap: true
+        sourceMap: true,
+        terserOptions: {
+          output: {
+            comments: false
+          }
+        }
       }),
       new OptimizeCSSAssetsPlugin({
         cssProcessorOptions: {
