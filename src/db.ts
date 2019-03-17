@@ -52,7 +52,7 @@ export class DbWrapper {
     try {
       await this.close();
 
-      return new Promise<any>((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         (function tryDeleteDb() {
           console.info('We now try to erase the db...');
           const deletionRequest = window.indexedDB.deleteDatabase('BowBuddyDb');
@@ -211,7 +211,7 @@ export class DbAccess {
       const playerRecord = { name, email };
       const request = playerObjectStore.add(playerRecord);
 
-      return new Promise<any>((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         request.onsuccess = (event: any) => resolve({ pid: event.target.result, ...playerRecord });
         request.onerror = (event: any) => reject(event);
       });
@@ -257,7 +257,7 @@ export class DbAccess {
       const courseRecord = { name, place, geolocation, stations };
       const request = courseObjectStore.add(courseRecord);
 
-      return new Promise<any>((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         request.onsuccess = (event: any) => resolve({ cid: event.target.result, ...courseRecord });
         request.onerror = (event: any) => reject(event);
       });
@@ -421,14 +421,14 @@ export class DbAccess {
       let steps = 2;
 
       return new Promise((resolve, reject) => {
-        objectStoreNames.forEach(objectStoreName => {
+        for (const objectStoreName of objectStoreNames) {
           console.log(`>> Step ${++steps}: Add all data records into object storage '${objectStoreName}'`);
 
           const dataRecords = dbObject[objectStoreName];
           let recordsAdded = 0;
 
-          dataRecords.forEach((dataRecord: any) => {
-            let addRequest = objectStores[objectStoreName].add(dataRecord);
+          for (const dataRecord of dataRecords) {
+            const addRequest = objectStores[objectStoreName].add(dataRecord);
 
             addRequest.onsuccess = (e: any) => {
               console.log('recordsAdded: ' + recordsAdded);
@@ -439,8 +439,8 @@ export class DbAccess {
               }
             };
             addRequest.onerror = (e: any) => reject(e);
-          });
-        });
+          }
+        }
       });
     } catch (error) {
       throw new Error(`Failed to import database from object: ${error.message}`);
@@ -452,9 +452,10 @@ export class DbAccess {
   }
 
   private fetchAll(objectStore: IDBObjectStore, keyRange?: IDBKeyRange, filter?: (o: any) => boolean): Promise<any[]> {
-    if (filter !== undefined && keyRange !== undefined) {
-      return new Promise<any[]>((resolve, reject) => {
-        const cursorRequest = objectStore.openCursor(keyRange);
+    return new Promise<any[]>((resolve, reject) => {
+      const cursorRequest = objectStore.openCursor(keyRange);
+
+      if (filter !== undefined && keyRange !== undefined) {
         const filteredDataObjects: any[] = [];
 
         cursorRequest.onsuccess = (event: any) => {
@@ -471,34 +472,33 @@ export class DbAccess {
             resolve(filteredDataObjects);
           }
         };
-      });
-    }
+      } else {
+        const cursorRequest = objectStore.openCursor();
+        const dataObjects: Array<any> = [];
 
-    return new Promise<any>((resolve, reject) => {
-      const cursorRequest = objectStore.openCursor();
-      const dataObjects: Array<any> = [];
+        cursorRequest.onsuccess = (event: any) => {
+          const cursor = cursorRequest.result;
 
-      cursorRequest.onsuccess = (event: any) => {
-        const cursor = cursorRequest.result;
+          if (cursor) {
+            dataObjects.push(cursor.value);
+            cursor.continue();
+          } else {
+            resolve(dataObjects);
+          }
+        };
+      }
 
-        if (cursor) {
-          dataObjects.push(cursor.value);
-          cursor.continue();
-        } else {
-          resolve(dataObjects);
-        }
-      };
+      cursorRequest.onerror = (e: any) => reject(e);
     });
   }
 
-  private fetchById(objectStore: IDBObjectStore, indexName: string, keyPath: number | Array<number>): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
+  private fetchById(objectStore: IDBObjectStore, indexName: string, keyPath: number | number[]): Promise<any> {
+    return new Promise((resolve, reject) => {
       const index: IDBIndex = objectStore.index(indexName);
       const request: IDBRequest = index.get(keyPath);
 
-      request.onsuccess = (event: any) => {
-        resolve(request.result);
-      };
+      request.onsuccess = (event: any) => resolve(request.result);
+      request.onerror = (e: any) => reject(e);
     });
   }
 
@@ -508,7 +508,7 @@ export class DbAccess {
     keyPath: number,
     update: (record: any) => boolean
   ): Promise<any> {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const index = objectStore.index(indexName);
       const cursorRequest = index.openCursor(keyPath);
 
