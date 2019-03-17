@@ -26,7 +26,7 @@ export class DbWrapper {
   private dbConnected: boolean = false;
   private dbPromise: Promise<any> | null = null;
 
-  async transaction(objectStores: string | string[], writeAccess: boolean = false) {
+  async transaction(objectStores: string | string[], writeAccess: boolean = false): Promise<any> {
     const db = await this.requestDb();
     const transaction = db.transaction(objectStores, writeAccess ? 'readwrite' : 'readonly');
 
@@ -38,12 +38,20 @@ export class DbWrapper {
       : transaction.objectStore(objectStores);
   }
 
-  async objectStoreNames() {
-    return this.requestDb().then(db => Array.prototype.slice.call(db.objectStoreNames));
+  async objectStoreNames(): Promise<string[]> {
+    try {
+      const db = await this.requestDb();
+
+      return Array.prototype.slice.call(db.objectStoreNames);
+    } catch (error) {
+      throw new Error(`Failed to close database: ${error.message}`);
+    }
   }
 
   async erase() {
-    return this.close().then(() => {
+    try {
+      await this.close();
+
       return new Promise<any>((resolve, reject) => {
         (function tryDeleteDb() {
           console.info('We now try to erase the db...');
@@ -63,10 +71,12 @@ export class DbWrapper {
           };
         })();
       });
-    });
+    } catch (error) {
+      throw new Error(`Failed to erase database: ${error.message}`);
+    }
   }
 
-  async close() {
+  async close(): Promise<void> {
     try {
       // TODO check if db is even open before calling requestDb()
       const db = await this.requestDb();
@@ -80,90 +90,83 @@ export class DbWrapper {
     }
   }
 
-  private requestDb(): Promise<IDBDatabase> {
-    if (this.dbPromise !== null) {
-      return this.dbPromise;
-    }
-    return (this.dbPromise = new Promise<any>((resolve, reject) => {
-      const dbRequest = window.indexedDB.open('BowBuddyDb', 1);
+  private async requestDb(): Promise<IDBDatabase> {
+    if (!this.dbPromise) {
+      this.dbPromise = new Promise((resolve, reject) => {
+        const dbRequest = window.indexedDB.open('BowBuddyDb', 1);
 
-      dbRequest.onupgradeneeded = (event: any) => {
-        console.log('dbRequest.onupgradeneeded');
+        dbRequest.onupgradeneeded = (event: any) => {
+          console.log('dbRequest.onupgradeneeded');
 
-        const request = <IDBRequest>event.target;
-        const db = request.result;
-
-        const playerStore = db.createObjectStore('players', {
-          keyPath: 'pid',
-          autoIncrement: true
-        });
-        playerStore.createIndex('pid', 'pid', { unique: true });
-        playerStore.createIndex('name', 'name', { unique: true });
-        playerStore.createIndex('email', 'email', { unique: false });
-
-        const courseStore = db.createObjectStore('courses', {
-          keyPath: 'cid',
-          autoIncrement: true
-        });
-        courseStore.createIndex('cid', 'cid', { unique: true });
-        courseStore.createIndex('name', 'name', { unique: false });
-        courseStore.createIndex('place', 'place', { unique: false });
-        courseStore.createIndex('geolocation', 'geolocation', {
-          unique: false
-        });
-        courseStore.createIndex('stations', 'stations', { unique: false });
-
-        const gameStore = db.createObjectStore('games', {
-          keyPath: 'gid',
-          autoIncrement: true
-        });
-        gameStore.createIndex('gid', 'gid', { unique: true });
-        gameStore.createIndex('cid', 'cid', { unique: false });
-        gameStore.createIndex('pids', 'pids', {
-          unique: false,
-          multiEntry: true
-        });
-        gameStore.createIndex('starttime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
-        gameStore.createIndex('endtime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
-
-        const scoreStore = db.createObjectStore('scores', {
-          keyPath: ['gid', 'pid', 'station']
-        });
-        scoreStore.createIndex('sid', ['gid', 'pid', 'station'], {
-          unique: true
-        }); // compound key path
-        scoreStore.createIndex('gid', 'gid', { unique: false });
-        scoreStore.createIndex('pid', 'pid', { unique: false });
-        scoreStore.createIndex('station', 'station', { unique: false });
-        scoreStore.createIndex('score', 'score', { unique: false }); // string format: 'first-turn:body-hit' OR 'miss'
-      };
-      dbRequest.onsuccess = (event: any) => {
-        console.log('dbRequest.onsuccess');
-
-        if (!this.dbConnected) {
           const request = <IDBRequest>event.target;
-          this.dbConnected = true;
-          resolve(request.result);
-        }
-      };
-      dbRequest.onerror = (event: any) => {
-        console.log('dbRequest.onerror');
+          const db = request.result;
 
-        if (!this.dbConnected) {
-          window.alert('This app does not work without IndexedDB enabled!');
-          reject(event);
-        }
-        this.dbPromise = null;
-        this.dbConnected = false;
-      };
-      // dbRequest.onclose = (event: any) => {
-      //   console.log('dbRequest.onclose');
+          const playerStore = db.createObjectStore('players', {
+            keyPath: 'pid',
+            autoIncrement: true
+          });
+          playerStore.createIndex('pid', 'pid', { unique: true });
+          playerStore.createIndex('name', 'name', { unique: true });
+          playerStore.createIndex('email', 'email', { unique: false });
 
-      //   this.dbPromise = null;
-      //   this.dbConnected = false;
-      //   window.alert('The database got closed unexpectedly!');
-      // };
-    }));
+          const courseStore = db.createObjectStore('courses', {
+            keyPath: 'cid',
+            autoIncrement: true
+          });
+          courseStore.createIndex('cid', 'cid', { unique: true });
+          courseStore.createIndex('name', 'name', { unique: false });
+          courseStore.createIndex('place', 'place', { unique: false });
+          courseStore.createIndex('geolocation', 'geolocation', {
+            unique: false
+          });
+          courseStore.createIndex('stations', 'stations', { unique: false });
+
+          const gameStore = db.createObjectStore('games', {
+            keyPath: 'gid',
+            autoIncrement: true
+          });
+          gameStore.createIndex('gid', 'gid', { unique: true });
+          gameStore.createIndex('cid', 'cid', { unique: false });
+          gameStore.createIndex('pids', 'pids', {
+            unique: false,
+            multiEntry: true
+          });
+          gameStore.createIndex('starttime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+          gameStore.createIndex('endtime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+
+          const scoreStore = db.createObjectStore('scores', {
+            keyPath: ['gid', 'pid', 'station']
+          });
+          scoreStore.createIndex('sid', ['gid', 'pid', 'station'], {
+            unique: true
+          }); // compound key path
+          scoreStore.createIndex('gid', 'gid', { unique: false });
+          scoreStore.createIndex('pid', 'pid', { unique: false });
+          scoreStore.createIndex('station', 'station', { unique: false });
+          scoreStore.createIndex('score', 'score', { unique: false }); // string format: 'first-turn:body-hit' OR 'miss'
+        };
+        dbRequest.onsuccess = (event: any) => {
+          console.log('dbRequest.onsuccess');
+
+          if (!this.dbConnected) {
+            const request = <IDBRequest>event.target;
+            this.dbConnected = true;
+            resolve(request.result);
+          }
+        };
+        dbRequest.onerror = (event: any) => {
+          console.log('dbRequest.onerror');
+
+          if (!this.dbConnected) {
+            window.alert('This app does not work without IndexedDB enabled!');
+            reject(event);
+          }
+          this.dbPromise = null;
+          this.dbConnected = false;
+        };
+      });
+    }
+    return this.dbPromise;
   }
 }
 
@@ -181,254 +184,267 @@ export class DbAccess {
   }
 
   async getPlayersWithScore(gid: number, station: number): Promise<PlayerWithScore[]> {
-    return this.getPlayersForGame(gid).then(players => {
+    try {
+      const players = await this.getPlayersForGame(gid);
+
       if (players.length === 0) {
         return [];
       } else {
-        return this.db()
-          .transaction('scores')
-          .then(scoreObjectStore => {
-            const playersWithScore: Array<PlayerWithScore> = [];
+        const scoreObjectStore = await this.db().transaction('scores');
+        const playersWithScore: PlayerWithScore[] = [];
 
-            return new Promise<any>((resolve, reject) => {
-              players.forEach(player => {
-                this.fetchById(scoreObjectStore, 'sid', [gid, player.pid, station]).then(score => {
-                  playersWithScore.push(
-                    score && score.score ? (<any>Object).assign(player, { score: score.score }) : player
-                  );
+        for (const player of players) {
+          const score = await this.fetchById(scoreObjectStore, 'sid', [gid, player.pid, station]);
 
-                  if (players.length === playersWithScore.length) {
-                    resolve(playersWithScore);
-                  }
-                });
-              });
-            });
-          });
+          playersWithScore.push(score && score.score ? Object.assign(player, { score: score.score }) : player);
+        }
+        return playersWithScore;
       }
-    });
+    } catch (error) {
+      throw new Error(`Failed to load players with score: ${error.message}`);
+    }
   }
 
   async addPlayer(name: string, email: string = ''): Promise<Player> {
-    return this.db()
-      .transaction('players', true)
-      .then(playerObjectStore => {
-        const playerRecord = { name, email };
-        const request = playerObjectStore.add(playerRecord);
+    try {
+      const playerObjectStore = await this.db().transaction('players', true);
+      const playerRecord = { name, email };
+      const request = playerObjectStore.add(playerRecord);
 
-        return new Promise<any>((resolve, reject) => {
-          request.onsuccess = (event: any) => resolve({ pid: event.target.result, ...playerRecord });
-          request.onerror = (event: any) => reject(event);
-        });
+      return new Promise<any>((resolve, reject) => {
+        request.onsuccess = (event: any) => resolve({ pid: event.target.result, ...playerRecord });
+        request.onerror = (event: any) => reject(event);
       });
+    } catch (error) {
+      throw new Error(`Failed to add player: ${error.message}`);
+    }
   }
 
   async getCourse(cid: number): Promise<Course> {
-    return this.db()
-      .transaction('courses')
-      .then(courseObjectStore => this.fetchById(courseObjectStore, 'cid', cid));
+    try {
+      const courseObjectStore = await this.db().transaction('courses');
+
+      return this.fetchById(courseObjectStore, 'cid', cid);
+    } catch (error) {
+      throw new Error(`Failed to fetch course with cid ${cid}: ${error.message}`);
+    }
   }
 
   async getCourses(): Promise<Course[]> {
-    return this.db()
-      .transaction('courses')
-      .then(courseObjectStore => this.fetchAll(courseObjectStore));
+    try {
+      const courseObjectStore = await this.db().transaction('courses');
+
+      return this.fetchAll(courseObjectStore);
+    } catch (error) {
+      throw new Error(`Failed to fetch all courses: ${error.message}`);
+    }
   }
 
-  async getCourseForGame(gid: number) {
-    return this.db()
-      .transaction(['courses', 'games'])
-      .then(objectStores =>
-        this.fetchById(objectStores.games, 'gid', gid).then(game =>
-          this.fetchById(objectStores.courses, 'cid', game.cid)
-        )
-      );
+  async getCourseForGame(gid: number): Promise<Course> {
+    try {
+      const objectStores = await this.db().transaction(['courses', 'games']);
+      const game = await this.fetchById(objectStores.games, 'gid', gid);
+
+      return this.fetchById(objectStores.courses, 'cid', game.cid);
+    } catch (error) {
+      throw new Error(`Failed to fetch course for game with gid ${gid}: ${error.message}`);
+    }
   }
 
-  async addCourse(name: string, place: string, geolocation: string, stations: number) {
-    return this.db()
-      .transaction('courses', true)
-      .then(courseObjectStore => {
-        const courseRecord = { name, place, geolocation, stations };
-        const request = courseObjectStore.add(courseRecord);
+  async addCourse(name: string, place: string, geolocation: string, stations: number): Promise<Course> {
+    try {
+      const courseObjectStore = await this.db().transaction('courses', true);
+      const courseRecord = { name, place, geolocation, stations };
+      const request = courseObjectStore.add(courseRecord);
 
-        return new Promise<any>((resolve, reject) => {
-          request.onsuccess = (event: any) => resolve({ cid: event.target.result, ...courseRecord });
-          request.onerror = (event: any) => reject(event);
-        });
+      return new Promise<any>((resolve, reject) => {
+        request.onsuccess = (event: any) => resolve({ cid: event.target.result, ...courseRecord });
+        request.onerror = (event: any) => reject(event);
       });
+    } catch (error) {
+      throw new Error(`Failed to add course ${name} (${stations}): ${error.message}`);
+    }
   }
 
   async getGames(): Promise<Game[]> {
-    return this.db()
-      .transaction('games')
-      .then(gameObjectStore => this.fetchAll(gameObjectStore));
+    try {
+      const gameObjectStore = await this.db().transaction('games');
+
+      return this.fetchAll(gameObjectStore);
+    } catch (error) {
+      throw new Error(`Failed to fetch all games: ${error.message}`);
+    }
   }
 
   async getGame(gid: number): Promise<Game> {
-    return this.db()
-      .transaction('games')
-      .then(gameObjectStore => this.fetchById(gameObjectStore, 'gid', gid));
+    try {
+      const gameObjectStore = await this.db().transaction('games');
+
+      return this.fetchById(gameObjectStore, 'gid', gid);
+    } catch (error) {
+      throw new Error(`Failed to fetch game with gid ${gid}: ${error.message}`);
+    }
   }
 
   async addGame(cid: number, pids: Array<number>, starttime?: string, endtime?: string): Promise<Game> {
-    return this.db()
-      .transaction('games', true)
-      .then(gameObjectStore => {
-        const request = gameObjectStore.add({
-          cid: cid,
-          pids: pids,
-          starttime: starttime || new Date().toISOString(),
-          endtime: endtime || null
-        });
-
-        return new Promise<any>((resolve, reject) => {
-          request.onsuccess = (event: any) =>
-            resolve({
-              gid: event.target.result,
-              cid: cid,
-              pids: pids,
-              starttime: starttime,
-              endtime: endtime
-            });
-          request.onerror = (event: any) => reject(event);
-        });
+    try {
+      const gameObjectStore = await this.db().transaction('games', true);
+      const request = gameObjectStore.add({
+        cid: cid,
+        pids: pids,
+        starttime: starttime || new Date().toISOString(),
+        endtime: endtime || null
       });
+
+      return new Promise<any>((resolve, reject) => {
+        request.onsuccess = (event: any) =>
+          resolve({
+            gid: event.target.result,
+            cid: cid,
+            pids: pids,
+            starttime: starttime,
+            endtime: endtime
+          });
+        request.onerror = (event: any) => reject(event);
+      });
+    } catch (error) {
+      throw new Error(`Failed to fetch course with cid ${cid}: ${error.message}`);
+    }
   }
 
   // returns promise with updated game record
   async finishGame(gid: number) {
-    return this.db()
-      .transaction('games', true)
-      .then(gameObjectStore => {
-        return this.updateRecord(gameObjectStore, 'gid', gid, game => {
-          // change timestamp only if it has not already been set!
-          if (!game.endtime) {
-            game.endtime = new Date().toISOString();
-            return true;
-          }
-          return false;
-        });
+    try {
+      const gameObjectStore = await this.db().transaction('games', true);
+
+      return this.updateRecord(gameObjectStore, 'gid', gid, game => {
+        // change timestamp only if it has not already been set!
+        if (!game.endtime) {
+          game.endtime = new Date().toISOString();
+          return true;
+        }
+        return false;
       });
+    } catch (error) {
+      throw new Error(`Failed to finish game with gid ${gid}: ${error.message}`);
+    }
   }
 
   async setScore(gid: number, pid: number, station: number, score: string): Promise<Score> {
-    return this.db()
-      .transaction('scores', true)
-      .then(scoreObjectStore => {
-        const scoreRecord = { gid, pid, station, score };
-        const request = scoreObjectStore.put(scoreRecord);
+    try {
+      const scoreObjectStore = await this.db().transaction('scores', true);
+      const scoreRecord = { gid, pid, station, score };
+      const request = scoreObjectStore.put(scoreRecord);
 
-        return new Promise<any>((resolve, reject) => {
-          request.onsuccess = (event: any) => resolve(scoreRecord);
-          request.onerror = (event: any) => reject(event);
-        });
+      return new Promise<any>((resolve, reject) => {
+        request.onsuccess = (event: any) => resolve(scoreRecord);
+        request.onerror = (event: any) => reject(event);
       });
+    } catch (error) {
+      throw new Error(`Failed to set score for gid: ${gid}, pid: ${pid}, station: ${station}: ${error.message}`);
+    }
   }
 
   async getTotalScoreForGame(gid: number): Promise<TotalScoreForGame> {
-    return this.getPlayersForGame(gid).then((players: Player[]) => {
-      return this.db()
-        .transaction('scores')
-        .then(scoreObjectStore => {
-          return this.fetchAll(scoreObjectStore).then((scores: Score[]) => {
-            const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
+    try {
+      const players = await this.getPlayersForGame(gid);
+      const scoreObjectStore = await this.db().transaction('scores');
 
-            players.forEach(player => totalScore.scores.set(player.pid, []));
-            scores
-              .filter(score => score.gid === gid)
-              .sort((scoreA, scoreB) => scoreA.station - scoreB.station)
-              .forEach(score => {
-                totalScore.scores.get(score.pid)!.push(score.score || 'undefined-score');
-              });
-            return totalScore;
+      return this.fetchAll(scoreObjectStore).then((scores: Score[]) => {
+        const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
+
+        players.forEach(player => totalScore.scores.set(player.pid, []));
+        scores
+          .filter(score => score.gid === gid)
+          .sort((scoreA, scoreB) => scoreA.station - scoreB.station)
+          .forEach(score => {
+            totalScore.scores.get(score.pid)!.push(score.score || 'undefined-score');
           });
-        });
-    });
+        return totalScore;
+      });
+    } catch (error) {
+      throw new Error(`Failed to fetch course with gid ${gid}: ${error.message}`);
+    }
   }
 
   private async getPlayersForGame(gid: number): Promise<Player[]> {
-    return this.db()
-      .transaction(['games', 'players'])
-      .then(objectStores => {
-        return this.fetchById(objectStores.games, 'gid', gid).then(game =>
-          this.fetchAll(
-            objectStores.players,
-            IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
-            player => game.pids.indexOf(player.pid) !== -1
-          )
-        );
-      });
+    try {
+      const objectStores = await this.db().transaction(['games', 'players']);
+
+      return this.fetchById(objectStores.games, 'gid', gid).then(game =>
+        this.fetchAll(
+          objectStores.players,
+          IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
+          player => game.pids.indexOf(player.pid) !== -1
+        )
+      );
+    } catch (error) {
+      throw new Error(`Failed to fetch all players for game with gid ${gid}: ${error.message}`);
+    }
   }
 
   async dump(): Promise<any> {
     const dbRef = this.db();
     let dbObject: any = {};
 
-    return dbRef.objectStoreNames().then(objectStoreNames => {
-      return dbRef.transaction(objectStoreNames).then(objectStores => {
-        let storagesDumped = 0;
+    try {
+      const objectStoreNames = await dbRef.objectStoreNames();
+      const objectStores = await dbRef.transaction(objectStoreNames);
 
-        return new Promise<any>((resolve, reject) => {
-          objectStoreNames.forEach((objectStoreName: string) => {
-            return this.fetchAll(objectStores[objectStoreName]).then(records => {
-              dbObject[objectStoreName] = records;
-              if (++storagesDumped === objectStoreNames.length) {
-                resolve(dbObject);
-              }
-            });
-          });
-        });
-      });
-    });
+      for (const objectStoreName of objectStoreNames) {
+        const records = await this.fetchAll(objectStores[objectStoreName]);
+
+        dbObject[objectStoreName] = records;
+      }
+      return dbObject;
+    } catch (error) {
+      throw new Error(`Failed to create database dump: ${error.message}`);
+    }
   }
 
   async importDb(dbObject: any): Promise<any> {
     console.log('>> Step 1: Delete old database');
 
-    return this.db()
-      .erase()
-      .then(e => {
-        const objectStoreNames = Object.getOwnPropertyNames(dbObject);
+    try {
+      await this.db().erase();
 
-        console.log('>> Step 2: Requested transactions for ' + objectStoreNames);
+      const objectStoreNames = Object.getOwnPropertyNames(dbObject);
 
-        return this.db()
-          .transaction(objectStoreNames, true)
-          .then((objectStores: any) => {
-            // TODO check why we never get here!!
-            console.log('>> Step 2.1: We now have all the requested object stores');
+      console.log('>> Step 2: Requested transactions for ' + objectStoreNames);
 
-            let objectStoresCompleted = 0;
-            let steps = 2;
+      const objectStores = await this.db().transaction(objectStoreNames, true);
 
-            return new Promise<any>((resolve, reject) => {
-              objectStoreNames.forEach(objectStoreName => {
-                console.log(`>> Step ${++steps}: Add all data records into object storage '${objectStoreName}'`);
+      // TODO check why we never get here!!
+      console.log('>> Step 2.1: We now have all the requested object stores');
 
-                const dataRecords = dbObject[objectStoreName];
-                let recordsAdded = 0;
+      let objectStoresCompleted = 0;
+      let steps = 2;
 
-                dataRecords.forEach((dataRecord: any) => {
-                  let addRequest = objectStores[objectStoreName].add(dataRecord);
+      return new Promise((resolve, reject) => {
+        objectStoreNames.forEach(objectStoreName => {
+          console.log(`>> Step ${++steps}: Add all data records into object storage '${objectStoreName}'`);
 
-                  addRequest.onsuccess = (e: any) => {
-                    console.log('recordsAdded: ' + recordsAdded);
-                    console.log('objectStoresCompleted: ' + objectStoresCompleted);
+          const dataRecords = dbObject[objectStoreName];
+          let recordsAdded = 0;
 
-                    if (++recordsAdded === dataRecords.length && ++objectStoresCompleted === objectStoreNames.length) {
-                      resolve();
-                    }
-                  };
-                  addRequest.onerror = (e: any) => reject(e);
-                });
-              });
-            });
-          })
-          .catch(error => {
-            console.error('Cannot open transaction: ' + error);
-            throw error;
+          dataRecords.forEach((dataRecord: any) => {
+            let addRequest = objectStores[objectStoreName].add(dataRecord);
+
+            addRequest.onsuccess = (e: any) => {
+              console.log('recordsAdded: ' + recordsAdded);
+              console.log('objectStoresCompleted: ' + objectStoresCompleted);
+
+              if (++recordsAdded === dataRecords.length && ++objectStoresCompleted === objectStoreNames.length) {
+                resolve();
+              }
+            };
+            addRequest.onerror = (e: any) => reject(e);
           });
+        });
       });
+    } catch (error) {
+      throw new Error(`Failed to import database from object: ${error.message}`);
+    }
   }
 
   erase(): Promise<any> {
