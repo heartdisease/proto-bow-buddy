@@ -67,13 +67,17 @@ export class DbWrapper {
   }
 
   async close() {
-    // TODO check if db is even open before calling requestDb()
-    return this.requestDb().then(db => {
+    try {
+      // TODO check if db is even open before calling requestDb()
+      const db = await this.requestDb();
+
       // reset db handle promise
       this.dbPromise = null;
       this.dbConnected = false;
       db.close();
-    });
+    } catch (error) {
+      console.log(`Failed to close database: ${error.message}`);
+    }
   }
 
   private requestDb(): Promise<IDBDatabase> {
