@@ -347,11 +347,9 @@ export class DbAccess {
 
   async getTotalScoreForGame(gid: number): Promise<TotalScoreForGame> {
     try {
-      const [players, scoreObjectStore] = await Promise.all([
-        this.getPlayersForGame(gid),
-        this.db().transaction('scores')
-      ]);
+      const scoreObjectStore = await this.db().transaction('scores');
       const scores = await this.fetchAll(scoreObjectStore);
+      const players = await this.getPlayersForGame(gid);
       const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
 
       players.forEach(player => totalScore.scores.set(player.pid, []));
