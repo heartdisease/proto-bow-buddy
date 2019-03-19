@@ -52,17 +52,7 @@ export class StationSetScoreView extends BaseView {
       : [];
     const station = <number>urlParams.get('station');
 
-    this.scoreModalElement = this.queryElement('.score-modal')!;
-
-    M.Modal.init(this.scoreModalElement, {});
-
-    this.queryElement('.station-no').innerText = '' + station;
-
-    Application.getStorage()
-      .getPlayer(pid)
-      .then(player => (this.queryElement('span.player-name').innerText = player.name));
-
-    this.initButtons(gid, pid, remainingPids, station);
+    this.init(gid, pid, remainingPids, station);
   }
 
   onHide(): void {
@@ -117,6 +107,18 @@ export class StationSetScoreView extends BaseView {
     });
   }
 
+  private async init(gid: number, pid: number, remainingPids: number[], station: number): Promise<void> {
+    const player = await Application.getStorage().getPlayer(pid);
+
+    this.scoreModalElement = this.queryElement('.score-modal')!;
+
+    M.Modal.init(this.scoreModalElement, {});
+
+    this.queryElement('.station-no').innerText = '' + station;
+    this.queryElement('span.player-name').innerText = player.name;
+    this.initButtons(gid, pid, remainingPids, station);
+  }
+
   private getDndSibling(origin: HTMLElement, target: HTMLElement): HTMLElement {
     for (const el of target.childNodes) {
       if (el.nodeType === Node.ELEMENT_NODE && el !== origin) {
@@ -143,17 +145,16 @@ export class StationSetScoreView extends BaseView {
     window.location.href = `#station-set-score;gid=${gid};pid=${nextPid}${qaParam};station=${station}`;
   }
 
-  private logScore(
+  private async logScore(
     gid: number,
     pid: number,
     station: number,
     remainingPids: number[],
     hit?: string,
     turn?: string
-  ): void {
+  ): Promise<void> {
     const before = Date.now();
     const miss = hit === undefined || turn === undefined;
-    const score = miss ? 'miss' : turn + ':' + hit;
 
     if (miss) {
       this.queryElement('.modal-hit-score').innerHTML =
@@ -164,21 +165,18 @@ export class StationSetScoreView extends BaseView {
     }
 
     M.Modal.getInstance(this.scoreModalElement!).open();
+    await Application.getStorage().setScore(gid, pid, station, miss ? 'miss' : turn + ':' + hit);
 
-    Application.getStorage()
-      .setScore(gid, pid, station, score)
-      .then(score => {
-        const timeDiff = Date.now() - before;
+    const timeDiff = Date.now() - before;
 
-        if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
-          this.navigateNext(gid, station, remainingPids);
-        } else {
-          window.setTimeout(
-            () => this.navigateNext(gid, station, remainingPids),
-            StationSetScoreView.NAVIGATION_DELAY - timeDiff
-          );
-        }
-      });
+    if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
+      this.navigateNext(gid, station, remainingPids);
+    } else {
+      window.setTimeout(
+        () => this.navigateNext(gid, station, remainingPids),
+        StationSetScoreView.NAVIGATION_DELAY - timeDiff
+      );
+    }
   }
 
   private getHitButton(hit: string): string {

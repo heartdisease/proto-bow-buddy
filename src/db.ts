@@ -286,7 +286,7 @@ export class DbAccess {
     }
   }
 
-  async addGame(cid: number, pids: Array<number>, starttime?: string, endtime?: string): Promise<Game> {
+  async addGame(cid: number, pids: number[], starttime?: string, endtime?: string): Promise<Game> {
     try {
       const gameObjectStore = await this.db().transaction('games', true);
       const request = gameObjectStore.add({
@@ -347,21 +347,21 @@ export class DbAccess {
 
   async getTotalScoreForGame(gid: number): Promise<TotalScoreForGame> {
     try {
-      const players = await this.getPlayersForGame(gid);
-      const scoreObjectStore = await this.db().transaction('scores');
+      const [players, scoreObjectStore] = await Promise.all([
+        this.getPlayersForGame(gid),
+        this.db().transaction('scores')
+      ]);
+      const scores = await this.fetchAll(scoreObjectStore);
+      const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
 
-      return this.fetchAll(scoreObjectStore).then((scores: Score[]) => {
-        const totalScore: TotalScoreForGame = { players: players, scores: new Map() };
-
-        players.forEach(player => totalScore.scores.set(player.pid, []));
-        scores
-          .filter(score => score.gid === gid)
-          .sort((scoreA, scoreB) => scoreA.station - scoreB.station)
-          .forEach(score => {
-            totalScore.scores.get(score.pid)!.push(score.score || 'undefined-score');
-          });
-        return totalScore;
-      });
+      players.forEach(player => totalScore.scores.set(player.pid, []));
+      scores
+        .filter(score => score.gid === gid)
+        .sort((scoreA, scoreB) => scoreA.station - scoreB.station)
+        .forEach(score => {
+          totalScore.scores.get(score.pid)!.push(score.score || 'undefined-score');
+        });
+      return totalScore;
     } catch (error) {
       throw new Error(`Failed to fetch course with gid ${gid}: ${error.message}`);
     }
@@ -370,13 +370,12 @@ export class DbAccess {
   private async getPlayersForGame(gid: number): Promise<Player[]> {
     try {
       const objectStores = await this.db().transaction(['games', 'players']);
+      const game = await this.fetchById(objectStores.games, 'gid', gid);
 
-      return this.fetchById(objectStores.games, 'gid', gid).then(game =>
-        this.fetchAll(
-          objectStores.players,
-          IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
-          player => game.pids.indexOf(player.pid) !== -1
-        )
+      return this.fetchAll(
+        objectStores.players,
+        IDBKeyRange.bound(Math.min.apply(null, game.pids), Math.max.apply(null, game.pids)),
+        player => game.pids.indexOf(player.pid) !== -1
       );
     } catch (error) {
       throw new Error(`Failed to fetch all players for game with gid ${gid}: ${error.message}`);
@@ -474,7 +473,7 @@ export class DbAccess {
         };
       } else {
         const cursorRequest = objectStore.openCursor();
-        const dataObjects: Array<any> = [];
+        const dataObjects: any[] = [];
 
         cursorRequest.onsuccess = (event: any) => {
           const cursor = cursorRequest.result;

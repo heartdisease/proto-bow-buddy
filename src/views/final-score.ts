@@ -38,72 +38,68 @@ export class FinalScoreView extends BaseView {
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
     const gid = <number>urlParams.get('gid');
+    this.init(gid);
+  }
 
+  private async init(gid: number): Promise<void> {
     // sets timestamp for field 'endtime'
-    this.getStorage()
-      .finishGame(gid)
-      .then((game: Game) => {
-        const duration = Application.getDuration(game.starttime, game.endtime);
-        const from = new Date(game.starttime).toLocaleDateString('de-AT', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-        const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
+    const [game, course] = await Promise.all([
+      this.getStorage().finishGame(gid),
+      this.getStorage().getCourseForGame(gid)
+    ]);
+    const courseLabel = `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`;
+    const duration = Application.getDuration(game.starttime, game.endtime);
+    const from = new Date(game.starttime).toLocaleDateString('de-AT', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
 
-        this.queryElement('.course-duration').innerHTML = `${duration}<br/>(${from} - ${to})`;
-      });
-
-    this.getStorage()
-      .getCourseForGame(gid)
-      .then(course => {
-        const courseLabel = `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`;
-
-        this.queryElement('.course-label').innerText = courseLabel;
-        this.generateScoreTable(gid, course.stations);
-      });
+    this.queryElement('.course-duration').innerHTML = `${duration}<br/>(${from} - ${to})`;
+    this.queryElement('.course-label').innerText = courseLabel;
+    this.generateScoreTable(gid, course.stations);
   }
 
   onHide(): void {
     // nothing to do
   }
 
-  private generateScoreTable(gid: number, stations: number): void {
-    ScoreUtils.generateScoreTable(gid, stations).then((totalScore: TotalScore) => {
-      const players = totalScore.totalScoreForGame.players;
-      const scores = totalScore.totalScoreForGame.scores;
-      const playerScores = totalScore.playerScores;
-      const playerScoreEntries = this.queryElement('.player-score-entries');
-      const playerHeaderRow = this.queryElement('.player-header-row');
+  private async generateScoreTable(gid: number, stations: number): Promise<void> {
+    const totalScore = await ScoreUtils.generateScoreTable(gid, stations);
+    const players = totalScore.totalScoreForGame.players;
+    const scores = totalScore.totalScoreForGame.scores;
+    const playerScores = totalScore.playerScores;
+    const playerScoreEntries = this.queryElement('.player-score-entries');
+    const playerHeaderRow = this.queryElement('.player-header-row');
 
-      players.forEach(player => playerHeaderRow.appendChild(this.createElement('th', player.name)));
+    players.forEach(player => playerHeaderRow.appendChild(this.createElement('th', player.name)));
 
-      for (let station = 1; station <= stations; station++) {
-        const playerScoreEntry = document.createElement('tr');
-        const stationColumn = this.createElement('td', `${station}.`);
+    for (let station = 1; station <= stations; station++) {
+      const playerScoreEntry = document.createElement('tr');
+      const stationColumn = this.createElement('td', `${station}.`);
 
-        stationColumn.style.fontStyle = 'italic';
-        playerScoreEntry.appendChild(stationColumn);
-        players
-          .map(player => scores.get(player.pid)!)
-          .forEach(scores => {
-            const scoreColumn = this.createElement('td', '' + ScoreUtils.scoreToPoints(scores[station - 1]));
+      stationColumn.style.fontStyle = 'italic';
+      playerScoreEntry.appendChild(stationColumn);
+      players
+        .map(player => scores.get(player.pid)!)
+        .forEach(scores => {
+          const scoreColumn = this.createElement('td', '' + ScoreUtils.scoreToPoints(scores[station - 1]));
 
-            playerScoreEntry.appendChild(scoreColumn);
-          });
-        playerScoreEntries.appendChild(playerScoreEntry);
-      }
+          playerScoreEntry.appendChild(scoreColumn);
+        });
+      playerScoreEntries.appendChild(playerScoreEntry);
+    }
 
-      this.sumUpScore(playerScoreEntries, playerScores);
-      this.generateLeaderBoard(playerScores);
-    });
+    this.sumUpScore(playerScoreEntries, playerScores);
+    this.generateLeaderBoard(playerScores);
   }
 
   private sumUpScore(playerScoreEntries: HTMLElement, playerScores: PlayerScore[]): void {

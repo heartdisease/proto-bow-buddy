@@ -59,54 +59,55 @@ export class MainMenuView extends BaseView {
     M.Modal.init(this.dbDumpModalElement!, {});
     M.Modal.init(this.deleteDbModalElement!, {});
 
-    this.queryElement('.app-logo').addEventListener('click', e => {
+    this.queryElement('.app-logo').addEventListener('click', async e => {
       if (++this.logoCounter % 2 === 0) {
-        this.getStorage()
-          .dump()
-          .then(dbObject => {
-            const dbDump = JSON.stringify(dbObject);
-            const textarea = <HTMLTextAreaElement>this.queryElement('.db-dump-modal textarea');
+        const dbObject = await this.getStorage().dump();
+        const dbDump = JSON.stringify(dbObject);
+        const textarea = <HTMLTextAreaElement>this.queryElement('.db-dump-modal textarea');
 
-            textarea.value = dbDump;
+        textarea.value = dbDump;
 
-            this.queryElement('.copy-json-btn').addEventListener('click', e => {
-              textarea.select();
+        this.queryElement('.copy-json-btn').addEventListener('click', e => {
+          textarea.select();
 
-              try {
-                if (!document.execCommand('copy')) {
-                  throw new Error('execCommand copy could not be executed');
-                }
-              } catch (e) {
-                console.error(e.message);
-              }
-            });
+          try {
+            if (!document.execCommand('copy')) {
+              throw new Error('execCommand copy could not be executed');
+            }
+          } catch (e) {
+            console.error(e.message);
+          }
+        });
 
-            this.queryElement('.update-db-btn').addEventListener('click', e => {
-              if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
-                this.getStorage()
-                  .importDb(JSON.parse(textarea.value))
-                  .then(() => window.alert('Database successfully imported!'))
-                  .catch(error => console.error(error));
-              }
-            });
+        this.queryElement('.update-db-btn').addEventListener('click', async e => {
+          if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
+            try {
+              await this.getStorage().importDb(JSON.parse(textarea.value));
+              window.alert('Database successfully imported!');
+            } catch (error) {
+              console.error(`Failed to import database: ${error.message}`);
+            }
+          }
+        });
 
-            console.log('BowBuddyDb dump:');
-            console.log(dbObject); // show db object in console for close inspection
+        console.log('BowBuddyDb dump:');
+        console.log(dbObject); // show db object in console for close inspection
 
-            M.Modal.getInstance(this.dbDumpModalElement!).open();
-            window.setTimeout(() => textarea.select(), 500);
-          });
+        M.Modal.getInstance(this.dbDumpModalElement!).open();
+        window.setTimeout(() => textarea.select(), 500);
       }
     });
-    this.queryElement('.quit-btn').addEventListener('click', e => {
+    this.queryElement('.quit-btn').addEventListener('click', async e => {
       if (++this.quitCounter % 4 === 0 && window.confirm('Are you sure you want to erase the entire database?')) {
         const modal = this.queryElement('.delete-db-modal .modal-msg');
 
-        this.getStorage()
-          .erase()
-          .then(e => (modal.innerText = 'Database was successfully deleted!'))
-          .catch(e => (modal.innerText = 'Failed to delete database!'))
-          .then(() => M.Modal.getInstance(this.deleteDbModalElement!).open());
+        try {
+          await this.getStorage().erase();
+          modal.innerText = 'Database was successfully deleted!';
+        } catch (error) {
+          modal.innerText = 'Failed to delete database!';
+        }
+        M.Modal.getInstance(this.deleteDbModalElement!).open();
       }
     });
   }

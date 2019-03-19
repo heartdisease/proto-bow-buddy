@@ -36,37 +36,7 @@ export class HallOfFameView extends BaseView {
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
     const gid = <number>urlParams.get('gid'); // TODO list all available rounds instead
-
-    // sets timestamp for field 'endtime'
-    /*this.getStorage()
-      .finishGame(gid)
-      .then((game: Game) => {
-        const duration = Application.getDuration(game.starttime, game.endtime);
-        const from = new Date(game.starttime).toLocaleDateString('de-AT', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-        const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-
-        this.queryElement('.course-duration').innerHTML = `${duration}<br/>(${from} - ${to})`;
-      });
-
-    this.getStorage()
-      .getCourseForGame(gid)
-      .then(course => {
-        const courseLabel = `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`;
-
-        this.queryElement('.course-label').innerText = courseLabel;
-        this.generateScoreTable(gid, course.stations);
-      });*/
+    // TODO implement
   }
 
   onHide(): void {
