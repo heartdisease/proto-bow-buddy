@@ -35,15 +35,39 @@ export class HallOfFameView extends BaseView {
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number>>): void {
-    const gid = <number>urlParams.get('gid'); // TODO list all available rounds instead
-    // TODO implement
+    this.init();
   }
 
   onHide(): void {
     // nothing to do
   }
 
-  private generateScoreTable(gid: number, stations: number): void {
-    // TODO implement
+  private async init(): Promise<void> {
+    const tbody = this.queryElement('tbody.game-entries');
+    const games = await this.getStorage().getGames();
+
+    // TODO filter out unfinished games (should we automatically clean up unfinished games?)
+    for (const game of games.sort((a, b) => new Date(b.starttime).getTime() - new Date(a.starttime).getTime())) {
+      const course = await this.getStorage().getCourseForGame(game.gid);
+      const from = new Date(game.starttime).toLocaleDateString('de-AT', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const linkLabel = `${course.name} (${course.stations})<br/>[${from} - ${to}]`;
+      const row = this.createElement('tr', null);
+      const cell = this.createElement('td', `<a href="#final-score;gid=${game.gid}">${linkLabel}</a>`, true);
+
+      row.appendChild(cell);
+      tbody.appendChild(row);
+    }
   }
 }

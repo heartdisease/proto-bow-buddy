@@ -2,7 +2,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "module": "amd",
-    "target": "es6",
+    "target": "es2017",
     "outDir": "./dist/",
     "removeComments": true,
     "inlineSources": true,
