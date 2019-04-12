@@ -36,7 +36,7 @@ export class StationSelectPlayerView extends BaseView {
     return 'station-select-player-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
     const gid = <number>urlParams.get('gid');
     const station = <number>urlParams.get('station');
 
@@ -101,6 +101,12 @@ export class StationSelectPlayerView extends BaseView {
         window.location.href = `#station-set-score;gid=${gid};pid=${firstPid};station=${station}`;
       }
     });
+    this.queryElement('.assign-all-btn').addEventListener('click', e => {
+      const quickAssign = players.map(p => p.pid).join('+');
+
+      e.preventDefault();
+      window.location.href = `#station-set-score;gid=${gid};qa=${quickAssign};aa=true;station=${station}`;
+    });
 
     for (const player of players) {
       const scores = totalScoreForGame.scores.get(player.pid);
@@ -116,14 +122,17 @@ export class StationSelectPlayerView extends BaseView {
     if (playersWithScore === players.length) {
       this.queryElement('.next-station-btn').removeAttribute('disabled');
     } else if (playersWithScore === 0) {
-      this.queryElement('.quick-assign-btn').removeAttribute('disabled'); // enable quick-assign only when no player has a score yet
+      // enable quick-assign and assign-all only when no player has a score yet
+      this.queryElement('.quick-assign-btn').removeAttribute('disabled');
+      this.queryElement('.assign-all-btn').removeAttribute('disabled');
     }
   }
 
   private createPlayerButton(gid: number, station: number, totalScore: number, player: PlayerWithScore): HTMLElement {
+    const averageScore = ScoreUtils.averageScore(totalScore, Math.max(1, station - 1));
     const playerEntry = this.createElement(
       'a',
-      totalScore > 0 ? `${player.name} (${totalScore}) ` : player.name,
+      totalScore > 0 ? `${player.name} (${totalScore}) [${averageScore} avg] ` : player.name,
       false,
       'collection-item'
     );

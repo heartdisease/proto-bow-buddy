@@ -69,7 +69,9 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.8.0';
+  private static readonly VERSION = '2.9.0';
+  private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
+  private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;
@@ -98,25 +100,30 @@ export class Application {
     document.title = `BowBuddy ${Application.VERSION}${viewTitle ? ' - ' + viewTitle : ''}`;
   }
 
-  static getUrlParams(): Readonly<Map<string, string | number>> {
-    if (!window.location.hash) {
-      return Object.freeze(new Map<string, string | number>());
-    }
-    const numRegExp = /^(0|-?[1-9][0-9]*)$/;
-    const urlParams = Object.freeze(
-      window.location.hash
-        .substring(1) // omit the # at the beginning
-        .split(';')
-        .map(keyValueStr => keyValueStr.split('='))
-        .reduce((urlParams, keyValuePair) => {
-          const key = keyValuePair[0];
-          const value = keyValuePair[1];
+  static getUrlParams(): Readonly<Map<string, string | number | boolean>> {
+    const urlParams = new Map<string, string | number | boolean>();
 
-          urlParams.set(key, numRegExp.test(value) ? +value : value);
-          return urlParams;
-        }, new Map<string, string | number>())
+    return Object.freeze(
+      window.location.hash
+        ? window.location.hash
+            .substring(1) // omit the # at the beginning
+            .split(';')
+            .map(keyValueStr => keyValueStr.split('='))
+            .reduce((urlParams, keyValuePair) => {
+              const key = keyValuePair[0];
+              const value = keyValuePair[1];
+
+              if (Application.BOOLEAN_PATTERN.test(value)) {
+                urlParams.set(key, value.toLowerCase() === 'true');
+              } else if (Application.NUMBER_PATTERN.test(value)) {
+                urlParams.set(key, +value);
+              } else {
+                urlParams.set(key, value);
+              }
+              return urlParams;
+            }, urlParams)
+        : urlParams
     );
-    return urlParams;
   }
 
   static getDuration(starttime: string, endtime: string): string {

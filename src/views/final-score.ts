@@ -18,8 +18,8 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
-import { Game, Application } from '../main';
-import { ScoreUtils, TotalScore, PlayerScore } from '../score-utils';
+import { Application } from '../main';
+import { ScoreUtils, PlayerScore } from '../score-utils';
 
 import '../styles/final-score.scss';
 
@@ -36,7 +36,7 @@ export class FinalScoreView extends BaseView {
     return 'final-score-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
     const gid = <number>urlParams.get('gid');
     this.init(gid);
   }
@@ -105,10 +105,15 @@ export class FinalScoreView extends BaseView {
   private sumUpScore(playerScoreEntries: HTMLElement, playerScores: PlayerScore[]): void {
     const playerTotalScore = document.createElement('tr');
     const playerAverageScore = document.createElement('tr');
+
     const playerMissCount = document.createElement('tr');
     const playerBodyHitCount = document.createElement('tr');
     const playerKillHitCount = document.createElement('tr');
     const playerCenterKillHitCount = document.createElement('tr');
+
+    const playerFirstTurnCount = document.createElement('tr');
+    const playerSecondTurnCount = document.createElement('tr');
+    const playerThirdTurnCount = document.createElement('tr');
 
     playerTotalScore.style.fontWeight = 'bold';
     playerTotalScore.appendChild(this.createElement('td', 'Total:'));
@@ -128,21 +133,40 @@ export class FinalScoreView extends BaseView {
     playerCenterKillHitCount.style.fontStyle = 'italic';
     playerCenterKillHitCount.appendChild(this.createElement('td', 'Center Kill:'));
 
+    playerFirstTurnCount.style.fontStyle = 'italic';
+    playerFirstTurnCount.appendChild(this.createElement('td', 'First shot:'));
+
+    playerSecondTurnCount.style.fontStyle = 'italic';
+    playerSecondTurnCount.appendChild(this.createElement('td', 'Second shot:'));
+
+    playerThirdTurnCount.style.fontStyle = 'italic';
+    playerThirdTurnCount.appendChild(this.createElement('td', 'Third shot:'));
+
     playerScores.forEach(playerScore => {
       playerTotalScore.appendChild(this.createElement('td', '' + playerScore.totalScore));
       playerAverageScore.appendChild(this.createElement('td', '' + playerScore.averageScore));
+
       playerMissCount.appendChild(this.createElement('td', `${playerScore.missCount}&times;`, true));
       playerBodyHitCount.appendChild(this.createElement('td', `${playerScore.bodyHitCount}&times;`, true));
       playerKillHitCount.appendChild(this.createElement('td', `${playerScore.killHitCount}&times;`, true));
       playerCenterKillHitCount.appendChild(this.createElement('td', `${playerScore.centerKillHitCount}&times;`, true));
+
+      playerFirstTurnCount.appendChild(this.createElement('td', `${playerScore.firstTurnCount}&times;`, true));
+      playerSecondTurnCount.appendChild(this.createElement('td', `${playerScore.secondTurnCount}&times;`, true));
+      playerThirdTurnCount.appendChild(this.createElement('td', `${playerScore.thirdTurnCount}&times;`, true));
     });
 
     playerScoreEntries.appendChild(playerTotalScore);
     playerScoreEntries.appendChild(playerAverageScore);
+
     playerScoreEntries.appendChild(playerMissCount);
     playerScoreEntries.appendChild(playerBodyHitCount);
     playerScoreEntries.appendChild(playerKillHitCount);
     playerScoreEntries.appendChild(playerCenterKillHitCount);
+
+    playerScoreEntries.appendChild(playerFirstTurnCount);
+    playerScoreEntries.appendChild(playerSecondTurnCount);
+    playerScoreEntries.appendChild(playerThirdTurnCount);
   }
 
   private generateLeaderBoard(playerScores: PlayerScore[]): void {

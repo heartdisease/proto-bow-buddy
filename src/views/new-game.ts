@@ -51,7 +51,7 @@ export class NewGameView extends BaseView {
     return 'new-game-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
     const newPlayerName = this.queryElement('.new-player-name');
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');

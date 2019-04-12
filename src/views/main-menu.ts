@@ -39,7 +39,7 @@ export class MainMenuView extends BaseView {
     return 'main-menu-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
     this.dbDumpModalElement = this.queryElement('.db-dump-modal')!;
     this.deleteDbModalElement = this.queryElement('.delete-db-modal')!;
 

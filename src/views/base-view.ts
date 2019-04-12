@@ -132,7 +132,7 @@ export abstract class BaseView {
 
   abstract getTitle(): string;
 
-  protected abstract onReveal(urlParams: Readonly<Map<string, string | number>>): void;
+  protected abstract onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void;
 
   protected abstract onHide(): void;
 

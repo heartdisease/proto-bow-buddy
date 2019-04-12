@@ -26,7 +26,7 @@ import '../../node_modules/dragula/dist/dragula.min.css';
 import '../styles/station-set-score.scss';
 
 export class StationSetScoreView extends BaseView {
-  private static readonly NAVIGATION_DELAY = 600;
+  private static readonly NAVIGATION_DELAY = 500;
 
   private scoreModalElement?: Element;
 
@@ -42,17 +42,14 @@ export class StationSetScoreView extends BaseView {
     return 'station-set-score-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number>>): void {
+  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
+    const assignAll = urlParams.has('aa') && <boolean>urlParams.get('aa');
     const gid = <number>urlParams.get('gid');
-    const pid = <number>urlParams.get('pid');
-    const remainingPids: number[] = urlParams.has('qa')
-      ? String(urlParams.get('qa'))
-          .split('+')
-          .map(s => +s)
-      : [];
+    const pid = assignAll ? -1 : <number>urlParams.get('pid');
+    const remainingPids: number[] = urlParams.has('qa') ? (<string>urlParams.get('qa')).split('+').map(s => +s) : [];
     const station = <number>urlParams.get('station');
 
-    this.init(gid, pid, remainingPids, station);
+    this.init(gid, pid, remainingPids, station, assignAll);
   }
 
   onHide(): void {
@@ -60,7 +57,7 @@ export class StationSetScoreView extends BaseView {
     M.Modal.getInstance(this.scoreModalElement!).destroy();
   }
 
-  private initButtons(gid: number, pid: number, remainingPids: number[], station: number): void {
+  private initButtons(gid: number, pid: number, remainingPids: number[], station: number, assignAll: boolean): void {
     const drake = dragula(
       [...this.queryElements('.hit-draggable-container'), ...this.queryElements('.turn-draggable-container')],
       {
@@ -92,7 +89,7 @@ export class StationSetScoreView extends BaseView {
         console.log('turn = ' + turn);
 
         origin.classList.add('ex-moved');
-        this.logScore(gid, pid, station, remainingPids, hit, turn);
+        this.logScore(gid, pid, station, remainingPids, assignAll, hit, turn);
       })
       .on('over', (el: HTMLElement, container: HTMLElement) => {
         container.classList.add('ex-over');
@@ -103,20 +100,31 @@ export class StationSetScoreView extends BaseView {
 
     this.queryElement('.miss-btn').addEventListener('click', e => {
       e.preventDefault();
-      this.logScore(gid, pid, station, remainingPids);
+      this.logScore(gid, pid, station, remainingPids, assignAll);
     });
   }
 
-  private async init(gid: number, pid: number, remainingPids: number[], station: number): Promise<void> {
-    const player = await Application.getStorage().getPlayer(pid);
-
+  private async init(
+    gid: number,
+    pid: number,
+    remainingPids: number[],
+    station: number,
+    assignAll: boolean
+  ): Promise<void> {
     this.scoreModalElement = this.queryElement('.score-modal')!;
 
     M.Modal.init(this.scoreModalElement, {});
 
     this.queryElement('.station-no').innerText = '' + station;
-    this.queryElement('span.player-name').innerText = player.name;
-    this.initButtons(gid, pid, remainingPids, station);
+
+    if (assignAll) {
+      this.queryElement('span.player-name').innerText = `All players (${remainingPids.length})`;
+    } else {
+      const player = await Application.getStorage().getPlayer(pid);
+      this.queryElement('span.player-name').innerText = player.name;
+    }
+
+    this.initButtons(gid, pid, remainingPids, station, assignAll);
   }
 
   private getDndSibling(origin: HTMLElement, target: HTMLElement): HTMLElement {
@@ -150,11 +158,14 @@ export class StationSetScoreView extends BaseView {
     pid: number,
     station: number,
     remainingPids: number[],
+    assignAll: boolean,
     hit?: string,
     turn?: string
   ): Promise<void> {
     const before = Date.now();
     const miss = hit === undefined || turn === undefined;
+    const storage = Application.getStorage();
+    const score = miss ? 'miss' : `${turn}:${hit}`;
 
     if (miss) {
       this.queryElement('.modal-hit-score').innerHTML =
@@ -165,17 +176,43 @@ export class StationSetScoreView extends BaseView {
     }
 
     M.Modal.getInstance(this.scoreModalElement!).open();
-    await Application.getStorage().setScore(gid, pid, station, miss ? 'miss' : turn + ':' + hit);
 
-    const timeDiff = Date.now() - before;
+    try {
+      if (assignAll) {
+        const persistScores = [];
 
-    if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
-      this.navigateNext(gid, station, remainingPids);
-    } else {
-      window.setTimeout(
-        () => this.navigateNext(gid, station, remainingPids),
-        StationSetScoreView.NAVIGATION_DELAY - timeDiff
-      );
+        for (const rpid of remainingPids) {
+          persistScores.push(storage.setScore(gid, rpid, station, score));
+        }
+        await Promise.all(persistScores);
+
+        const timeDiff = Date.now() - before;
+
+        if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
+          this.navigateToPlayerSelection(gid, station);
+        } else {
+          window.setTimeout(
+            () => this.navigateToPlayerSelection(gid, station),
+            StationSetScoreView.NAVIGATION_DELAY - timeDiff
+          );
+        }
+      } else {
+        await storage.setScore(gid, pid, station, score);
+
+        const timeDiff = Date.now() - before;
+
+        if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
+          this.navigateNext(gid, station, remainingPids);
+        } else {
+          window.setTimeout(
+            () => this.navigateNext(gid, station, remainingPids),
+            StationSetScoreView.NAVIGATION_DELAY - timeDiff
+          );
+        }
+      }
+    } catch (e) {
+      console.error(`Failed to persist score: ${e.message}`);
+      this.navigateToPlayerSelection(gid, station);
     }
   }
 

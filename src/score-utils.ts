@@ -27,6 +27,9 @@ export interface PlayerScore {
   bodyHitCount: number;
   killHitCount: number;
   centerKillHitCount: number;
+  firstTurnCount: number;
+  secondTurnCount: number;
+  thirdTurnCount: number;
 }
 
 export interface TotalScore {
@@ -41,21 +44,20 @@ export /*final*/ class ScoreUtils {
 
     totalScoreForGame.players.forEach((player: Player) => {
       const scores = totalScoreForGame.scores.get(player.pid)!;
-      const totalScore = scores.map((score_1: string) => ScoreUtils.scoreToPoints(score_1)).reduce((a, b) => a + b, 0);
-      const averageScore = Math.floor(((totalScore / stations) * 10) / 10);
-      const missCount = scores.filter((score_2: string) => score_2 === 'miss').length;
-      const bodyHitCount = scores.filter((score_3: string) => score_3.endsWith(':body-hit')).length;
-      const killHitCount = scores.filter((score_4: string) => score_4.endsWith(':kill-hit')).length;
-      const centerKillHitCount = scores.filter((score_5: string) => score_5.endsWith(':center-kill-hit')).length;
+      const totalScore = scores.map((score: string) => ScoreUtils.scoreToPoints(score)).reduce((a, b) => a + b, 0);
+      const averageScore = ScoreUtils.averageScore(totalScore, stations);
 
       playerScores.push({
         playerName: player.name,
         totalScore,
         averageScore,
-        missCount,
-        bodyHitCount,
-        killHitCount,
-        centerKillHitCount
+        missCount: scores.filter((score: string) => score === 'miss').length,
+        bodyHitCount: scores.filter((score: string) => score.endsWith(':body-hit')).length,
+        killHitCount: scores.filter((score: string) => score.endsWith(':kill-hit')).length,
+        centerKillHitCount: scores.filter((score: string) => score.endsWith(':center-kill-hit')).length,
+        firstTurnCount: scores.filter((score: string) => score.startsWith('first-turn:')).length,
+        secondTurnCount: scores.filter((score: string) => score.startsWith('second-turn:')).length,
+        thirdTurnCount: scores.filter((score: string) => score.startsWith('third-turn:')).length
       });
     });
     return { totalScoreForGame, playerScores };
@@ -131,5 +133,9 @@ export /*final*/ class ScoreUtils {
     }
 
     return scoreLabel;
+  }
+
+  static averageScore(totalScore: number, stations: number): number {
+    return Math.floor((totalScore / stations) * 100) / 100; // TODO make configurable whether to round to 1 or 2 decimals;
   }
 }
