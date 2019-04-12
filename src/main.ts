@@ -69,7 +69,7 @@ export interface TotalScoreForGame {
 }
 
 export class Application {
-  private static readonly VERSION = '2.9.0';
+  private static readonly VERSION = '2.9.1';
   private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
   private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
 
