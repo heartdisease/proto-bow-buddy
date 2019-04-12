@@ -136,6 +136,6 @@ export /*final*/ class ScoreUtils {
   }
 
   static averageScore(totalScore: number, stations: number): number {
-    return Math.floor((totalScore / stations) * 100) / 100; // TODO make configurable whether to round to 1 or 2 decimals;
+    return Math.round((totalScore / stations) * 10) / 10; // TODO make configurable whether to round to 1 or 2 decimals;
   }
 }
