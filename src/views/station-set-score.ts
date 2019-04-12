@@ -46,7 +46,7 @@ export class StationSetScoreView extends BaseView {
     const assignAll = urlParams.has('aa') && <boolean>urlParams.get('aa');
     const gid = <number>urlParams.get('gid');
     const pid = assignAll ? -1 : <number>urlParams.get('pid');
-    const remainingPids: number[] = urlParams.has('qa') ? (<string>urlParams.get('qa')).split('+').map(s => +s) : [];
+    const remainingPids: number[] = urlParams.has('qa') ? ('' + urlParams.get('qa')).split('+').map(s => +s) : [];
     const station = <number>urlParams.get('station');
 
     this.init(gid, pid, remainingPids, station, assignAll);
