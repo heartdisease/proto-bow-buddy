@@ -31,4 +31,9 @@
       content: ''; /* hack to get rid of the 'new' label without losing the styling of the badge */
     }
   }
+
+  .hide-score-switch {
+    position: absolute;
+    bottom: 10px;
+  }
 }

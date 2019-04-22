@@ -98,7 +98,7 @@ export class DbWrapper {
         dbRequest.onupgradeneeded = (event: any) => {
           console.log('dbRequest.onupgradeneeded');
 
-          const request = <IDBRequest>event.target;
+          const request = event.target as IDBRequest;
           const db = request.result;
 
           const playerStore = db.createObjectStore('players', {
@@ -149,7 +149,7 @@ export class DbWrapper {
           console.log('dbRequest.onsuccess');
 
           if (!this.dbConnected) {
-            const request = <IDBRequest>event.target;
+            const request = event.target as IDBRequest;
             this.dbConnected = true;
             resolve(request.result);
           }

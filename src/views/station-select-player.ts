@@ -37,8 +37,8 @@ export class StationSelectPlayerView extends BaseView {
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
-    const gid = <number>urlParams.get('gid');
-    const station = <number>urlParams.get('station');
+    const gid = urlParams.get('gid') as number;
+    const station = urlParams.get('station') as number;
 
     this.queryElement('.station-no').innerText = '' + station;
     this.init(gid, station);
@@ -52,6 +52,7 @@ export class StationSelectPlayerView extends BaseView {
     try {
       const course = await this.getStorage().getCourseForGame(gid);
       const nextStationBtn = this.queryElement('.next-station-btn');
+      const showScoreSwitch = this.queryElement('.hide-score-switch input[type=checkbox]') as HTMLInputElement;
 
       if (station >= course.stations) {
         nextStationBtn.innerHTML = '<i class="material-icons left">check</i> Show total score';
@@ -65,6 +66,12 @@ export class StationSelectPlayerView extends BaseView {
           window.location.href = `#station-select-player;gid=${gid};station=${station + 1}`;
         });
       }
+
+      showScoreSwitch.checked = !StationSelectPlayerView.hideIntermediateScore();
+      showScoreSwitch.addEventListener('change', e => {
+        StationSelectPlayerView.hideIntermediateScore(!showScoreSwitch.checked);
+        window.location.reload();
+      });
 
       this.initPlayerButtons(gid, station);
     } catch (error) {
@@ -132,7 +139,9 @@ export class StationSelectPlayerView extends BaseView {
     const averageScore = ScoreUtils.averageScore(totalScore, Math.max(1, station - 1));
     const playerEntry = this.createElement(
       'a',
-      totalScore > 0 ? `${player.name} (${totalScore}) [${averageScore} avg] ` : player.name,
+      totalScore > 0 && !StationSelectPlayerView.hideIntermediateScore()
+        ? `${player.name} (${totalScore}) [${averageScore} avg] `
+        : player.name,
       false,
       'collection-item'
     );
@@ -152,5 +161,15 @@ export class StationSelectPlayerView extends BaseView {
       playerEntry.appendChild(scoreBadge);
     }
     return playerEntry;
+  }
+
+  // TODO move into its own utility
+  private static hideIntermediateScore(hide?: boolean): boolean {
+    if (hide === undefined) {
+      const value = window.localStorage.getItem('bow-buddy-settings:hide-intermediate-score');
+      return value === 'true';
+    }
+    window.localStorage.setItem('bow-buddy-settings:hide-intermediate-score', '' + hide);
+    return hide;
   }
 }

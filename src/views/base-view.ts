@@ -57,14 +57,14 @@ export abstract class BaseView {
    * Never override this method!
    */
   protected /*final*/ queryElement(selector: string): HTMLElement {
-    return <HTMLElement>this.viewContainer!.querySelector(selector);
+    return this.viewContainer!.querySelector(selector) as HTMLElement;
   }
 
   /**
    * Never override this method!
    */
   protected /*final*/ queryElements(selector: string): NodeListOf<HTMLElement> {
-    return <NodeListOf<HTMLElement>>this.viewContainer!.querySelectorAll(selector);
+    return this.viewContainer!.querySelectorAll(selector) as NodeListOf<HTMLElement>;
   }
 
   /**
@@ -141,9 +141,9 @@ export abstract class BaseView {
   protected abstract getViewClassName(): string;
 
   private loadTemplate(): void {
-    const template = <HTMLTemplateElement>document.querySelector(this.getTemplateLocator());
+    const template = document.querySelector(this.getTemplateLocator()) as HTMLTemplateElement;
 
-    this.viewContainer = this.viewContainer || <HTMLElement>document.querySelector('#main');
+    this.viewContainer = this.viewContainer || (document.querySelector('#main') as HTMLElement);
     this.viewContainer.classList.add(this.getViewClassName());
     this.viewContainer.appendChild(document.importNode(template.content, true));
 

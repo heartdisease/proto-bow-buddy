@@ -273,11 +273,11 @@ export class NewGameView extends BaseView {
   }
 
   private queryInputElement(selector: string): HTMLInputElement {
-    return <HTMLInputElement>this.queryElement(selector);
+    return this.queryElement(selector) as HTMLInputElement;
   }
 
   private createOptionElement(content: string, value?: string | number): HTMLOptionElement {
-    const option = <HTMLOptionElement>this.createElement('option', content);
+    const option = this.createElement('option', content) as HTMLOptionElement;
 
     if (value !== undefined) {
       option.value = value.toString();
@@ -310,7 +310,7 @@ export class NewGameView extends BaseView {
   }
 
   private async onPlayerSelectionChange(event: Event) {
-    const pid = (<HTMLSelectElement>event.target).value;
+    const pid = (event.target as HTMLSelectElement).value;
 
     if (pid === 'new') {
       this.hideElement('.select-player-container');
@@ -329,7 +329,7 @@ export class NewGameView extends BaseView {
   }
 
   private async onCourseSelectionChange(event: Event) {
-    const cid = (<HTMLSelectElement>event.target).value;
+    const cid = (event.target as HTMLSelectElement).value;
 
     if (cid === 'new') {
       this.hideElement('.select-course-container');

@@ -37,7 +37,7 @@ export class FinalScoreView extends BaseView {
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
-    const gid = <number>urlParams.get('gid');
+    const gid = urlParams.get('gid') as number;
     this.init(gid);
   }
 

@@ -63,7 +63,7 @@ export class MainMenuView extends BaseView {
       if (++this.logoCounter % 2 === 0) {
         const dbObject = await this.getStorage().dump();
         const dbDump = JSON.stringify(dbObject);
-        const textarea = <HTMLTextAreaElement>this.queryElement('.db-dump-modal textarea');
+        const textarea = this.queryElement('.db-dump-modal textarea') as HTMLTextAreaElement;
 
         textarea.value = dbDump;
 

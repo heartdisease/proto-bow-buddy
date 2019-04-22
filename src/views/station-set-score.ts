@@ -26,7 +26,7 @@ import '../../node_modules/dragula/dist/dragula.min.css';
 import '../styles/station-set-score.scss';
 
 export class StationSetScoreView extends BaseView {
-  private static readonly NAVIGATION_DELAY = 500;
+  private static readonly NAVIGATION_DELAY = 350;
 
   private scoreModalElement?: Element;
 
@@ -43,11 +43,11 @@ export class StationSetScoreView extends BaseView {
   }
 
   onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
-    const assignAll = urlParams.has('aa') && <boolean>urlParams.get('aa');
-    const gid = <number>urlParams.get('gid');
-    const pid = assignAll ? -1 : <number>urlParams.get('pid');
+    const assignAll = urlParams.has('aa') && (urlParams.get('aa') as boolean);
+    const gid = urlParams.get('gid') as number;
+    const pid = assignAll ? -1 : (urlParams.get('pid') as number);
     const remainingPids: number[] = urlParams.has('qa') ? ('' + urlParams.get('qa')).split('+').map(s => +s) : [];
-    const station = <number>urlParams.get('station');
+    const station = urlParams.get('station') as number;
 
     this.init(gid, pid, remainingPids, station, assignAll);
   }
@@ -130,7 +130,7 @@ export class StationSetScoreView extends BaseView {
   private getDndSibling(origin: HTMLElement, target: HTMLElement): HTMLElement {
     for (const el of target.childNodes) {
       if (el.nodeType === Node.ELEMENT_NODE && el !== origin) {
-        return <HTMLElement>el;
+        return el as HTMLElement;
       }
     }
     throw new Error('No sibling found in target element');
