@@ -95,6 +95,7 @@ export class DbWrapper {
       this.dbPromise = new Promise((resolve, reject) => {
         const dbRequest = window.indexedDB.open('BowBuddyDb', 1);
 
+        // TODO make IndexedDB code run with Firefox
         dbRequest.onupgradeneeded = (event: any) => {
           console.log('dbRequest.onupgradeneeded');
 

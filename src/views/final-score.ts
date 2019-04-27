@@ -65,11 +65,16 @@ export class FinalScoreView extends BaseView {
 
     this.queryElement('.course-duration').innerHTML = `${duration}<br/>(${from} - ${to})`;
     this.queryElement('.course-label').innerText = courseLabel;
+    this.generateScoreChart(gid, course.stations);
     this.generateScoreTable(gid, course.stations);
   }
 
   onHide(): void {
     // nothing to do
+  }
+
+  private async generateScoreChart(gid: number, stations: number): Promise<void> {
+    return Promise.resolve(); // TODO implement score chart with chartist.js
   }
 
   private async generateScoreTable(gid: number, stations: number): Promise<void> {

@@ -68,6 +68,8 @@ export class MainMenuView extends BaseView {
         textarea.value = dbDump;
 
         this.queryElement('.copy-json-btn').addEventListener('click', e => {
+          e.preventDefault();
+
           textarea.select();
 
           try {
@@ -80,12 +82,67 @@ export class MainMenuView extends BaseView {
         });
 
         this.queryElement('.update-db-btn').addEventListener('click', async e => {
+          e.preventDefault();
+
           if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
             try {
               await this.getStorage().importDb(JSON.parse(textarea.value));
               window.alert('Database successfully imported!');
             } catch (error) {
               console.error(`Failed to import database: ${error.message}`);
+            }
+          }
+        });
+
+        this.queryElement('.upload-json-btn').addEventListener('click', async e => {
+          e.preventDefault();
+
+          if (window.confirm('Do you want to upload the entire database to the server?')) {
+            const user = window.prompt('Username:') || '';
+            //const password = window.prompt('Password:') || '';
+            const password = 'BananaB0y';
+
+            try {
+              // bplaced seems to be having trouble with certain special characters
+              const encodeAllCharacters = (str: string) => {
+                let encodedStr = '';
+
+                for (let i = 0; i < str.length; i++) {
+                  encodedStr += '%' + str.charCodeAt(i).toString(16);
+                }
+                return encodedStr;
+              };
+              const response = await fetch(`sync.php?user=${user}`, {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(dbDump)}`
+              });
+
+              if (response.ok) {
+                console.log(response.json());
+                window.alert('Database successfully uploaded!');
+              } else {
+                console.log(response.json());
+                window.alert('Failed to upload database!');
+              }
+            } catch (error) {
+              console.error(`Failed to export database to server: ${error.message}`);
+            }
+          }
+        });
+
+        this.queryElement('.import-server-db-btn').addEventListener('click', async e => {
+          e.preventDefault();
+
+          if (window.confirm('Do you want to import the entire database from the server?')) {
+            try {
+              // TODO implement
+              window.alert('This feature is not yet implemented!');
+            } catch (error) {
+              console.error(`Failed to import database from server: ${error.message}`);
             }
           }
         });
