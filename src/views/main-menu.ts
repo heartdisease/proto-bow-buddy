@@ -124,7 +124,6 @@ export class MainMenuView extends BaseView {
               });
 
               if (response.ok) {
-                console.log(response.json());
                 window.alert('Database successfully uploaded!');
               } else {
                 console.log(response.status + ' ' + response.statusText);
@@ -146,7 +145,7 @@ export class MainMenuView extends BaseView {
               const response = await fetch(`./sync/${user}/latest.json`, { cache: 'no-cache' });
 
               if (response.ok) {
-                console.log(response.json());
+                await this.getStorage().importDb(await response.json());
                 window.alert('Database successfully uploaded!');
               } else {
                 console.log(response.status + ' ' + response.statusText);
