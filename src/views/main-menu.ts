@@ -26,6 +26,7 @@ export class MainMenuView extends BaseView {
   private quitCounter = 0;
   private dbDumpModalElement?: Element;
   private deleteDbModalElement?: Element;
+  private dbDumpModalListeners: { [key: string]: (e: Event) => any } = {};
 
   getTitle(): string {
     return '';
@@ -55,6 +56,16 @@ export class MainMenuView extends BaseView {
     M.Modal.getInstance(this.deleteDbModalElement!).destroy();
   }
 
+  private addDbDumpModalListener(btnIdentifier: string, listener: (e: Event) => any): void {
+    const element = this.queryElement('.' + btnIdentifier);
+
+    if (this.dbDumpModalListeners[btnIdentifier]) {
+      element.removeEventListener('click', this.dbDumpModalListeners[btnIdentifier]);
+    }
+    this.dbDumpModalListeners[btnIdentifier] = listener;
+    element.addEventListener('click', listener);
+  }
+
   private initControls(): void {
     M.Modal.init(this.dbDumpModalElement!, {});
     M.Modal.init(this.deleteDbModalElement!, {});
@@ -67,7 +78,8 @@ export class MainMenuView extends BaseView {
 
         textarea.value = dbDump;
 
-        this.queryElement('.copy-json-btn').addEventListener('click', e => {
+        // TODO deregister old click handlers!!
+        this.addDbDumpModalListener('copy-json-btn', (e: Event) => {
           e.preventDefault();
 
           textarea.select();
@@ -81,7 +93,7 @@ export class MainMenuView extends BaseView {
           }
         });
 
-        this.queryElement('.update-db-btn').addEventListener('click', async e => {
+        this.addDbDumpModalListener('update-db-btn', async e => {
           e.preventDefault();
 
           if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
@@ -94,24 +106,14 @@ export class MainMenuView extends BaseView {
           }
         });
 
-        this.queryElement('.upload-json-btn').addEventListener('click', async e => {
+        this.addDbDumpModalListener('upload-json-btn', async e => {
           e.preventDefault();
 
           if (window.confirm('Do you want to upload the entire database to the server?')) {
-            const user = window.prompt('Username:') || '';
-            //const password = window.prompt('Password:') || '';
-            const password = 'BananaB0y';
+            const user = window.prompt('Username:') || 'anonymous';
+            const password = window.prompt('Password:') || '';
 
             try {
-              // bplaced seems to be having trouble with certain special characters
-              const encodeAllCharacters = (str: string) => {
-                let encodedStr = '';
-
-                for (let i = 0; i < str.length; i++) {
-                  encodedStr += '%' + str.charCodeAt(i).toString(16);
-                }
-                return encodedStr;
-              };
               const response = await fetch(`sync.php?user=${user}`, {
                 method: 'POST',
                 cache: 'no-cache',
@@ -125,7 +127,7 @@ export class MainMenuView extends BaseView {
                 console.log(response.json());
                 window.alert('Database successfully uploaded!');
               } else {
-                console.log(response.json());
+                console.log(response.status + ' ' + response.statusText);
                 window.alert('Failed to upload database!');
               }
             } catch (error) {
@@ -134,13 +136,27 @@ export class MainMenuView extends BaseView {
           }
         });
 
-        this.queryElement('.import-server-db-btn').addEventListener('click', async e => {
+        this.addDbDumpModalListener('import-server-db-btn', async e => {
           e.preventDefault();
 
           if (window.confirm('Do you want to import the entire database from the server?')) {
+            const user = window.prompt('Username:') || 'anonymous';
+
             try {
-              // TODO implement
-              window.alert('This feature is not yet implemented!');
+              const response = await fetch(`./sync/${user}/latest.json`, { cache: 'no-cache' });
+
+              if (response.ok) {
+                console.log(response.json());
+                window.alert('Database successfully uploaded!');
+              } else {
+                console.log(response.status + ' ' + response.statusText);
+
+                if (response.status === 404) {
+                  window.alert(`Failed to import database: no database exists on server for user ${user}!`);
+                } else {
+                  window.alert('Failed to import database!');
+                }
+              }
             } catch (error) {
               console.error(`Failed to import database from server: ${error.message}`);
             }

@@ -11,22 +11,24 @@ function persistDatabase($user, $db) {
   fclose($sync_file);
 }
 
-if (isset($_GET["user"]) && isset($_POST["pw"])) {
-  if (isset($_POST["db"])) {
-    $user = $_GET["user"];
-    $pw = $_POST["pw"];
-    $db = $_POST["db"];
+if (isset($_REQUEST["user"]) && isset($_REQUEST["pw"])) {
+  if (isset($_REQUEST["db"])) {
+    $user = $_REQUEST["user"];
+    $pw = $_REQUEST["pw"];
+    $db = $_REQUEST["db"];
+
+    //header("Content-Type", "application/json; charset=utf-8"); // <== kills bplaced with a HTTP 500!
+    //echo '{"message": "Hello user ' . $user . '!", "pw-hash": "' . hash("sha512", $pw, false) . '"}';
+    //exit(0);
 
     if (!preg_match("/^[A-Za-z0-9_-]{4,}$/", $user)) {
       http_response_code(400); // 400 Bad Request
-    } else if (hash("sha512", $pw, false) !== "86642621caf2bbc6811a9aa8851e6a6f585ec4afd5a5afeaf39a5bac3427c861cbea725977179dd95ecd8858f31efb63425c5e9fcb424a2f20b62f88a3f876ac") {
-      //http_response_code(403); // 403 Forbidden
-      header("Content-Type", "application/json; charset=utf-8");
-      echo '{"message": "invalid password: ' . $pw . '!", "hash": "' . hash("sha512", $pw, false) . '"}';
+    } else if (hash("sha512", $pw, false) !== "22075b1805402b15e63efb5ea39047dda9daee041e58ccd5d5b726c306d4f6d75c8c09d42fed0aac8c85f2f09b8eb2d2baaffad30ab58d43baef5afa5d4ca27d") {
+      http_response_code(403); // 403 Forbidden
     } else if (empty($db) || $db[0] !== "{" || $db[strlen($db) - 1] !== "}") {
       http_response_code(400); // 400 Bad Request
     } else {
-      header("Content-Type", "application/json; charset=utf-8");
+      //header("Content-Type", "application/json; charset=utf-8");
       persistDatabase($user, $db);
       echo '{"message": "file was saved successfully!"}';
     }
