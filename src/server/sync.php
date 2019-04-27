@@ -1,14 +1,18 @@
 <?php
 function persistDatabase($user, $db) {
   $sync_directory = "./sync/" . $user;
+  $sync_file = $sync_directory . "/latest.json";
 
   if (!file_exists($sync_directory)) {
     mkdir($sync_directory, 0777, true);
+  } else if (file_exists($sync_file)) {
+    $backup_file = $sync_directory . "/" . date("c", filectime($sync_file)) . ".json"; // this fails on Windows servers!
+    rename($sync_file, $backup_file); // prevent overriding old save file
   }
 
-  $sync_file = fopen($sync_directory . "/latest.json", "w");
-  fwrite($sync_file, $db);
-  fclose($sync_file);
+  $sync_file_handle = fopen($sync_file, "w");
+  fwrite($sync_file_handle, $db);
+  fclose($sync_file_handle);
 }
 
 if (isset($_REQUEST["user"]) && isset($_REQUEST["pw"])) {
