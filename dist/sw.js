@@ -18,17 +18,29 @@ self.addEventListener('install', event => {
   );
 });
 
+async function fetchWithTimeout(request, timeoutInMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort();
+    console.warn(`Aborted request '${request.url}': request took longer than ${timeoutInMs}ms.`);
+  }, timeout);
+
+  return fetch(request, { signal: controller.signal }).finally(() => clearTimeout(timeoutInMs));
+}
+
 self.addEventListener('fetch', event => {
   console.log('Fetching resource: ' + event.request.url);
 
   event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) {
-        console.log('Use resource from cache. (' + event.request.url + ')');
-        return response;
-      }
-      console.log('Cache miss, need to load resource from server. (' + event.request.url + ')');
-      return fetch(event.request);
+    fetchWithTimeout(event.request, 1500).catch(async error => {
+      return caches.match(event.request).then(response => {
+        if (response) {
+          console.log(`Using resource from cache. (${event.request.url})`);
+          return response;
+        }
+        console.log(`Cache miss, need to load resource from server. (${event.request.url})`);
+        return fetch(event.request);
+      });
     })
   );
 });

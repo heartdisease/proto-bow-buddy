@@ -32,13 +32,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <script type="text/javascript">
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then(() => console.log('Successfully registered service worker.'))
-          .catch(() => console.error('Failed to registered service worker.'));
+      if (window.isSecureContext) {
+        if (navigator.serviceWorker) {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then(() => console.log('Successfully registered service worker.'))
+            .catch(error => console.error('Failed to register service worker: ' + error.message));
+        } else {
+          console.warn('ServiceWorkers are not supported.');
+        }
       } else {
-        console.error('Service workers are not supported.');
+        console.warn('ServiceWorkers cannot be registered within an unsecure context.');
       }
     </script>
 
