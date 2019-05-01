@@ -25,6 +25,7 @@ import { StationSelectPlayerView } from './views/station-select-player';
 import { StationSetScoreView } from './views/station-set-score';
 import { FinalScoreView } from './views/final-score';
 import { HallOfFameView } from './views/hall-of-fame';
+import { AppSettingsView } from './views/app-settings';
 
 import './styles/main.scss';
 import '../node_modules/materialize-css/dist/css/materialize.min.css';
@@ -68,10 +69,25 @@ export interface TotalScoreForGame {
   readonly scores: Map<number, string[]>;
 }
 
+interface Route {
+  path: string;
+  view: new () => BaseView;
+}
+
 export class Application {
-  private static readonly VERSION = '2.12.0';
+  private static readonly VERSION = '2.12.1';
   private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
   private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
+  private static readonly ROUTES: Route[] = [
+    { path: '', view: MainMenuView },
+    { path: '#main-menu', view: MainMenuView },
+    { path: '#new-game', view: NewGameView },
+    { path: '#station-select-player', view: StationSelectPlayerView },
+    { path: '#station-set-score', view: StationSetScoreView },
+    { path: '#final-score', view: FinalScoreView },
+    { path: '#app-settings', view: AppSettingsView },
+    { path: '#hall-of-fame', view: HallOfFameView }
+  ];
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;
@@ -159,24 +175,13 @@ export class Application {
   }
 
   private static createViewForToken(viewToken: string): BaseView {
-    switch (viewToken) {
-      case '':
-      case '#main-menu':
-        return new MainMenuView();
-      case '#new-game':
-        return new NewGameView();
-      case '#station-select-player':
-        return new StationSelectPlayerView();
-      case '#station-set-score':
-        return new StationSetScoreView();
-      case '#final-score':
-        return new FinalScoreView();
-      case '#hall-of-fame':
-        return new HallOfFameView();
-      default:
-        console.warn(`Unknown place: ${viewToken}`);
-        return new MainMenuView();
+    const route = Application.ROUTES.find(route => route.path === viewToken);
+
+    if (route !== undefined) {
+      return new route.view();
     }
+    console.warn(`Unknown place: ${viewToken}`);
+    return new MainMenuView();
   }
 }
 

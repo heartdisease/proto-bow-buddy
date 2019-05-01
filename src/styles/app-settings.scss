@@ -17,28 +17,17 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { BaseView } from './base-view';
+#main.app-settings-view {
+  .app-settings {
+    textarea {
+      margin-top: 14px;
+      width: 100%;
+      height: auto;
+      font-family: monospace;
+    }
 
-import '../styles/main-menu.scss';
-
-export class MainMenuView extends BaseView {
-  getTitle(): string {
-    return '';
-  }
-
-  protected getTemplateLocator(): string {
-    return '#main-menu-template';
-  }
-
-  protected getViewClassName(): string {
-    return 'main-menu-view';
-  }
-
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
-    this.queryElement('.app-logo > h1').innerText = document.title;
-  }
-
-  onHide(): void {
-    // nothing to do
+    .btn-flat {
+      padding: 0 0.6rem;
+    }
   }
 }

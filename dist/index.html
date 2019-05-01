@@ -83,11 +83,11 @@
         <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
           <i class="material-icons left">face</i> Player Settings
         </a>
+        <a class="waves-effect waves-light btn-large" href="#app-settings" role="button">
+          <i class="material-icons left">build</i> Settings
+        </a>
         <a class="waves-effect waves-light btn-large" href="#hall-of-fame" role="button">
           <i class="material-icons left">trending_up</i> Hall Of Fame
-        </a>
-        <a class="quit-btn waves-effect waves-light btn-large red" href="#" role="button">
-          <i class="material-icons left">settings_power</i> Quit
         </a>
       </div>
 
@@ -97,34 +97,6 @@
           <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
             Close
           </a>
-        </div>
-      </div>
-
-      <div class="modal modal-fixed-footer db-dump-modal">
-        <div class="modal-content">
-          <textarea rows="16" cols="35"></textarea>
-        </div>
-        <div class="modal-footer">
-          <div class="btn-group btn-group-justified">
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
-              Close
-            </a>
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat copy-json-btn">
-              Copy JSON
-            </a>
-            <a type="button" class="modal-action waves-effect waves-blue btn-flat update-db-btn">
-              Update Database
-            </a>
-
-            <br />
-
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat upload-json-btn">
-              Upload JSON to Server
-            </a>
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat import-server-db-btn">
-              Import Database from Server
-            </a>
-          </div>
         </div>
       </div>
     </template>
@@ -364,6 +336,50 @@
       </div>
     </template>
     <!-- [END TEMPLATE] FINAL SCORE -->
+
+    <!-- [BEGIN TEMPLATE] APP SETTINGS -->
+    <template id="app-settings-template">
+      <div class="modal delete-db-modal">
+        <div class="modal-content"><span class="modal-msg"></span></div>
+        <div class="modal-footer">
+          <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
+            Close
+          </a>
+        </div>
+      </div>
+
+      <div class="app-settings">
+        <div class="modal-content">
+          <textarea rows="16" cols="35"></textarea>
+        </div>
+        <div class="modal-footer">
+          <div class="btn-group btn-group-justified">
+            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
+              Close
+            </a>
+            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat copy-json-btn">
+              Copy JSON
+            </a>
+            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat quit-btn">
+              <b>Delete</b> Database
+            </a>
+            <a type="button" class="modal-action waves-effect waves-blue btn-flat update-db-btn">
+              Update Database
+            </a>
+
+            <br />
+
+            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat upload-json-btn">
+              Upload JSON to Server
+            </a>
+            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat import-server-db-btn">
+              Import Database from Server
+            </a>
+          </div>
+        </div>
+      </div>
+    </template>
+    <!-- [END TEMPLATE] APP SETTINGS -->
 
     <!-- [BEGIN TEMPLATE] HALL OF FAME -->
     <template id="hall-of-fame-template">
