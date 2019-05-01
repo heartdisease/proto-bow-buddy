@@ -1,4 +1,5 @@
 const path = require('path');
+const Fiber = require('fibers');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const SRC_ROOT = path.resolve(__dirname, 'src');
@@ -30,7 +31,21 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: 'css-loader'
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              implementation: require('dart-sass'),
+              fiber: Fiber
+            }
+          }
+        ]
       }
     ]
   },

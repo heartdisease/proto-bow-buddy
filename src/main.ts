@@ -75,7 +75,7 @@ interface Route {
 }
 
 export class Application {
-  private static readonly VERSION = '2.12.1';
+  private static readonly VERSION = '2.12.2';
   private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
   private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
   private static readonly ROUTES: Route[] = [
