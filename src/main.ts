@@ -30,52 +30,13 @@ import { AppSettingsView } from './views/app-settings';
 import './styles/main.scss';
 import '../node_modules/materialize-css/dist/css/materialize.min.css';
 
-export interface Player {
-  readonly pid: number;
-  name: string;
-  email: string;
-}
-
-export interface PlayerWithScore extends Player {
-  readonly score?: string;
-}
-
-export interface Course {
-  readonly cid: number;
-  name: string;
-  place: string;
-  geolocation: string;
-  stations: number;
-}
-
-export interface Game {
-  readonly gid: number;
-  readonly cid: number;
-  readonly pids: number[];
-  starttime: string; // new Date().toISOString() = ISO 8601 (UTC)
-  endtime: string; // new Date().toISOString() = ISO 8601 (UTC)
-}
-
-export interface Score {
-  readonly sid: number;
-  readonly gid: number;
-  readonly pid: number;
-  station: number;
-  score: string; // format: 'first-turn:body-hit' OR 'miss'
-}
-
-export interface TotalScoreForGame {
-  readonly players: Player[];
-  readonly scores: Map<number, string[]>;
-}
-
 interface Route {
   path: string;
   view: new () => BaseView;
 }
 
 export class Application {
-  private static readonly VERSION = '2.12.2';
+  private static readonly VERSION = '2.12.3';
   private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
   private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
   private static readonly ROUTES: Route[] = [
@@ -97,71 +58,20 @@ export class Application {
 
     console.info('Application starting...');
 
-    window.addEventListener('hashchange', e => Application.onHashChange(window.location.hash.split(';')));
-    Application.onHashChange(window.location.hash.split(';'));
+    window.addEventListener('hashchange', e => Application.onHashChange());
+    Application.onHashChange();
   }
 
   static getStorage(): DbAccess {
-    if (!Application.storage) {
-      Application.storage = new DbAccess();
-    }
-    return Application.storage;
+    return Application.storage || (Application.storage = new DbAccess());
   }
 
-  static getVersion(): string {
-    return Application.VERSION;
-  }
-
-  static updateWindowTitle(viewTitle: string): void {
+  private static updateWindowTitle(viewTitle: string): void {
     document.title = `BowBuddy ${Application.VERSION}${viewTitle ? ' - ' + viewTitle : ''}`;
   }
 
-  static getUrlParams(): Readonly<Map<string, string | number | boolean>> {
-    const urlParams = new Map<string, string | number | boolean>();
-
-    return Object.freeze(
-      window.location.hash
-        ? window.location.hash
-            .substring(1) // omit the # at the beginning
-            .split(';')
-            .map(keyValueStr => keyValueStr.split('='))
-            .reduce((urlParams, keyValuePair) => {
-              const key = keyValuePair[0];
-              const value = keyValuePair[1];
-
-              if (Application.BOOLEAN_PATTERN.test(value)) {
-                urlParams.set(key, value.toLowerCase() === 'true');
-              } else if (Application.NUMBER_PATTERN.test(value)) {
-                urlParams.set(key, +value);
-              } else {
-                urlParams.set(key, value);
-              }
-              return urlParams;
-            }, urlParams)
-        : urlParams
-    );
-  }
-
-  static getDuration(starttime: string, endtime: string): string {
-    const startDate = new Date(starttime);
-    const endDate = new Date(endtime);
-    const diffInMs = endDate.getTime() - startDate.getTime();
-    let duration = '';
-
-    if (diffInMs < 0) {
-      throw new Error('Start time is after end time!');
-    }
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMinutes / 60);
-
-    if (diffInHours >= 1) {
-      duration += diffInHours + 'h ';
-    }
-    duration += diffInMinutes - diffInHours * 60 + 'm';
-    return duration;
-  }
-
-  private static onHashChange(params: string[]): void {
+  private static onHashChange(): void {
+    const params = window.location.hash.split(';');
     const viewToken = params[0];
     const view = Application.createViewForToken(viewToken);
 
@@ -171,7 +81,7 @@ export class Application {
     this.currentView = view;
 
     Application.updateWindowTitle(view.getTitle());
-    view.initView();
+    view.initView(Application.getUrlParams());
   }
 
   private static createViewForToken(viewToken: string): BaseView {
@@ -180,8 +90,32 @@ export class Application {
     if (route !== undefined) {
       return new route.view();
     }
-    console.warn(`Unknown place: ${viewToken}`);
+    console.warn(`Unknown route: ${viewToken}`);
     return new MainMenuView();
+  }
+
+  private static getUrlParams(): ReadonlyMap<string, string | number | boolean> {
+    const urlParams = new Map<string, string | number | boolean>();
+
+    return window.location.hash
+      ? window.location.hash
+          .substring(1) // omit the # at the beginning
+          .split(';')
+          .map(keyValueStr => keyValueStr.split('='))
+          .reduce((urlParams, keyValuePair) => {
+            const key = keyValuePair[0];
+            const value = keyValuePair[1];
+
+            if (Application.BOOLEAN_PATTERN.test(value)) {
+              urlParams.set(key, value.toLowerCase() === 'true');
+            } else if (Application.NUMBER_PATTERN.test(value)) {
+              urlParams.set(key, +value);
+            } else {
+              urlParams.set(key, value);
+            }
+            return urlParams;
+          }, urlParams)
+      : urlParams;
   }
 }
 

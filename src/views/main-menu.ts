@@ -34,7 +34,7 @@ export class MainMenuView extends BaseView {
     return 'main-menu-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.queryElement('.app-logo > h1').innerText = document.title;
   }
 

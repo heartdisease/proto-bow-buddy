@@ -26,9 +26,9 @@ export abstract class BaseView {
   /**
    * Never override this method!
    */
-  /*final*/ initView(): void {
+  /*final*/ initView(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.loadTemplate();
-    this.onReveal(Application.getUrlParams());
+    this.onReveal(parameters);
   }
 
   /**
@@ -132,7 +132,7 @@ export abstract class BaseView {
 
   abstract getTitle(): string;
 
-  protected abstract onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void;
+  protected abstract onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void;
 
   protected abstract onHide(): void;
 

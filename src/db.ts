@@ -17,7 +17,44 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { Player, PlayerWithScore, Course, Game, Score, TotalScoreForGame } from './main';
+export interface Player {
+  readonly pid: number;
+  name: string;
+  email: string;
+}
+
+export interface PlayerWithScore extends Player {
+  readonly score?: string;
+}
+
+export interface Course {
+  readonly cid: number;
+  name: string;
+  place: string;
+  geolocation: string;
+  stations: number;
+}
+
+export interface Game {
+  readonly gid: number;
+  readonly cid: number;
+  readonly pids: number[];
+  starttime: string; // new Date().toISOString() = ISO 8601 (UTC)
+  endtime: string; // new Date().toISOString() = ISO 8601 (UTC)
+}
+
+export interface Score {
+  readonly sid: number;
+  readonly gid: number;
+  readonly pid: number;
+  station: number;
+  score: string; // format: 'first-turn:body-hit' OR 'miss'
+}
+
+export interface TotalScoreForGame {
+  readonly players: Player[];
+  readonly scores: Map<number, string[]>;
+}
 
 /**
  * Do not call any of these functions after calling erase() or close()!

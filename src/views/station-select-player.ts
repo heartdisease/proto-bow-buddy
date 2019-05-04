@@ -18,7 +18,7 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
-import { PlayerWithScore } from '../main';
+import { PlayerWithScore } from '../db';
 import { ScoreUtils } from '../score-utils';
 
 import '../styles/station-select-player.scss';
@@ -36,9 +36,9 @@ export class StationSelectPlayerView extends BaseView {
     return 'station-select-player-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
-    const gid = urlParams.get('gid') as number;
-    const station = urlParams.get('station') as number;
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+    const gid = parameters.get('gid') as number;
+    const station = parameters.get('station') as number;
 
     this.queryElement('.station-no').innerText = '' + station;
     this.init(gid, station);

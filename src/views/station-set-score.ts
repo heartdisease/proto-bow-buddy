@@ -42,12 +42,12 @@ export class StationSetScoreView extends BaseView {
     return 'station-set-score-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
-    const assignAll = urlParams.has('aa') && (urlParams.get('aa') as boolean);
-    const gid = urlParams.get('gid') as number;
-    const pid = assignAll ? -1 : (urlParams.get('pid') as number);
-    const remainingPids: number[] = urlParams.has('qa') ? ('' + urlParams.get('qa')).split('+').map(s => +s) : [];
-    const station = urlParams.get('station') as number;
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+    const assignAll = parameters.has('aa') && (parameters.get('aa') as boolean);
+    const gid = parameters.get('gid') as number;
+    const pid = assignAll ? -1 : (parameters.get('pid') as number);
+    const remainingPids: number[] = parameters.has('qa') ? ('' + parameters.get('qa')).split('+').map(s => +s) : [];
+    const station = parameters.get('station') as number;
 
     this.init(gid, pid, remainingPids, station, assignAll);
   }

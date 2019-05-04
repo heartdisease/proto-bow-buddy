@@ -18,7 +18,7 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
-import { Player, Course } from '../main';
+import { Player, Course } from '../db';
 
 import '../styles/new-game.scss';
 
@@ -51,7 +51,7 @@ export class NewGameView extends BaseView {
     return 'new-game-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     const newPlayerName = this.queryElement('.new-player-name');
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');

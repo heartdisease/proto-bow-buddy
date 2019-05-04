@@ -34,7 +34,7 @@ export class HallOfFameView extends BaseView {
     return 'hall-of-fame-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.init();
   }
 

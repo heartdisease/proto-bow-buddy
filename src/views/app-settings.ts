@@ -37,7 +37,7 @@ export class AppSettingsView extends BaseView {
     return 'app-settings-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.deleteDbModalElement = this.queryElement('.delete-db-modal')!;
     this.initControls();
   }

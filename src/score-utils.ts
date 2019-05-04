@@ -17,7 +17,8 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { Application, Player, TotalScoreForGame } from './main';
+import { Application } from './main';
+import { Player, TotalScoreForGame } from './db';
 
 export interface PlayerScore {
   playerName: string;

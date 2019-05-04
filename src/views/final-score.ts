@@ -36,9 +36,8 @@ export class FinalScoreView extends BaseView {
     return 'final-score-view';
   }
 
-  onReveal(urlParams: Readonly<Map<string, string | number | boolean>>): void {
-    const gid = urlParams.get('gid') as number;
-    this.init(gid);
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+    this.init(parameters.get('gid') as number);
   }
 
   private async init(gid: number): Promise<void> {
@@ -48,7 +47,7 @@ export class FinalScoreView extends BaseView {
       this.getStorage().getCourseForGame(gid)
     ]);
     const courseLabel = `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`;
-    const duration = Application.getDuration(game.starttime, game.endtime);
+    const duration = FinalScoreView.getDuration(game.starttime, game.endtime);
     const from = new Date(game.starttime).toLocaleDateString('de-AT', {
       year: 'numeric',
       month: '2-digit',
@@ -230,5 +229,24 @@ export class FinalScoreView extends BaseView {
       default:
         return this.createElement('div', `<span>${place}<sup>th</sup></span>`, true, 'leaderboard-badge grey darken-4');
     }
+  }
+
+  private static getDuration(starttime: string, endtime: string): string {
+    const startDate = new Date(starttime);
+    const endDate = new Date(endtime);
+    const diffInMs = endDate.getTime() - startDate.getTime();
+    let duration = '';
+
+    if (diffInMs < 0) {
+      throw new Error('Start time is after end time!');
+    }
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+
+    if (diffInHours >= 1) {
+      duration += diffInHours + 'h ';
+    }
+    duration += diffInMinutes - diffInHours * 60 + 'm';
+    return duration;
   }
 }
