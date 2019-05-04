@@ -94,15 +94,6 @@
           <i class="material-icons left">trending_up</i> Hall Of Fame
         </a>
       </div>
-
-      <div class="modal delete-db-modal">
-        <div class="modal-content"><span class="modal-msg"></span></div>
-        <div class="modal-footer">
-          <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
-            Close
-          </a>
-        </div>
-      </div>
     </template>
     <!-- [END TEMPLATE] MAIN MENU -->
 
@@ -343,45 +334,51 @@
 
     <!-- [BEGIN TEMPLATE] APP SETTINGS -->
     <template id="app-settings-template">
-      <div class="modal delete-db-modal">
-        <div class="modal-content"><span class="modal-msg"></span></div>
-        <div class="modal-footer">
-          <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
-            Close
-          </a>
-        </div>
-      </div>
+      <h1>Application Settings</h1>
 
-      <div class="app-settings">
-        <div class="modal-content">
-          <textarea rows="16" cols="35"></textarea>
-        </div>
-        <div class="modal-footer">
-          <div class="btn-group btn-group-justified">
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat" data-dismiss="modal">
-              Close
+      <ul class="collapsible app-settings-collapsible">
+        <li class="server-sync-collapsible">
+          <div class="collapsible-header">
+            <i class="material-icons">cloud</i>
+            Synchronize Database with Server
+          </div>
+          <div class="collapsible-body">
+            <a class="waves-effect waves-light btn-large upload-json-btn">
+              <i class="material-icons left">cloud_upload</i> Upload JSON to Server
             </a>
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat copy-json-btn">
-              Copy JSON
-            </a>
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat quit-btn">
-              <b>Delete</b> Database
-            </a>
-            <a type="button" class="modal-action waves-effect waves-blue btn-flat update-db-btn">
-              Update Database
-            </a>
-
-            <br />
-
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat upload-json-btn">
-              Upload JSON to Server
-            </a>
-            <a type="button" class="modal-action modal-close waves-effect waves-red btn-flat import-server-db-btn">
-              Import Database from Server
+            <a class="waves-effect waves-light btn-large import-server-db-btn">
+              <i class="material-icons left">save_alt</i> Import Database from Server
             </a>
           </div>
-        </div>
-      </div>
+        </li>
+        <li class="import-export-json-collapsible">
+          <div class="collapsible-header">
+            <i class="material-icons">archive</i>
+            Import/export Database as JSON
+          </div>
+          <div class="collapsible-body">
+            <textarea rows="16" cols="35"></textarea>
+
+            <a class="waves-effect waves-light btn-large copy-json-btn">
+              <i class="material-icons left">file_copy</i> Copy JSON
+            </a>
+            <a class="waves-effect waves-light btn-large update-db-btn">
+              <i class="material-icons left">update</i> Update Database
+            </a>
+          </div>
+        </li>
+        <li class="reset-db-collapsible">
+          <div class="collapsible-header">
+            <i class="material-icons">error</i>
+            Reset Database
+          </div>
+          <div class="collapsible-body">
+            <a class="waves-effect waves-light btn-large red quit-btn">
+              <i class="material-icons left">not_interested</i> <b>Delete</b> Database
+            </a>
+          </div>
+        </li>
+      </ul>
     </template>
     <!-- [END TEMPLATE] APP SETTINGS -->
 

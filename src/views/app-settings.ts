@@ -22,8 +22,8 @@ import { BaseView } from './base-view';
 import '../styles/app-settings.scss';
 
 export class AppSettingsView extends BaseView {
-  private deleteDbModalElement?: Element;
-  private dbDumpModalListeners: { [key: string]: (e: Event) => any } = {};
+  private appSettingsCollapsibleElement?: Element;
+  private textarea?: HTMLTextAreaElement;
 
   getTitle(): string {
     return 'App Settings';
@@ -38,62 +38,46 @@ export class AppSettingsView extends BaseView {
   }
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    this.deleteDbModalElement = this.queryElement('.delete-db-modal')!;
+    this.appSettingsCollapsibleElement = this.queryElement('.app-settings-collapsible')!;
+    this.textarea = this.queryElement('.app-settings-collapsible textarea') as HTMLTextAreaElement;
     this.initControls();
   }
 
   onHide(): void {
-    M.Modal.getInstance(this.deleteDbModalElement!).close();
-    M.Modal.getInstance(this.deleteDbModalElement!).destroy();
-  }
-
-  private addDbDumpModalListener(btnIdentifier: string, listener: (e: Event) => any): void {
-    const element = this.queryElement('.' + btnIdentifier);
-
-    if (this.dbDumpModalListeners[btnIdentifier]) {
-      element.removeEventListener('click', this.dbDumpModalListeners[btnIdentifier]);
-    }
-    this.dbDumpModalListeners[btnIdentifier] = listener;
-    element.addEventListener('click', listener);
+    M.Collapsible.getInstance(this.appSettingsCollapsibleElement!).destroy();
   }
 
   private async initControls(): Promise<void> {
-    M.Modal.init(this.deleteDbModalElement!, {});
-
-    const dbObject = await this.getStorage().dump();
-    const dbDump = JSON.stringify(dbObject);
-    const textarea = this.queryElement('.app-settings textarea') as HTMLTextAreaElement;
-
-    textarea.value = dbDump;
-
-    this.addDbDumpModalListener('copy-json-btn', (e: Event) => {
-      e.preventDefault();
-
-      textarea.select();
-
-      try {
-        if (!document.execCommand('copy')) {
-          throw new Error('execCommand copy could not be executed');
+    const collapsible = M.Collapsible.init(this.appSettingsCollapsibleElement!, {
+      onOpenStart: (el: HTMLLIElement) => {
+        if (el.classList.contains('import-export-json-collapsible')) {
+          this.textarea!.value = '';
         }
-      } catch (e) {
-        console.error(e.message);
-      }
-    });
+      },
+      onOpenEnd: async (el: HTMLLIElement) => {
+        if (el.classList.contains('import-export-json-collapsible')) {
+          try {
+            const dbObject = await this.getStorage().dump();
+            const dbDump = JSON.stringify(dbObject);
 
-    this.addDbDumpModalListener('update-db-btn', async e => {
-      e.preventDefault();
-
-      if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
-        try {
-          await this.getStorage().importDb(JSON.parse(textarea.value));
-          window.alert('Database successfully imported!');
-        } catch (error) {
-          console.error(`Failed to import database: ${error.message}`);
+            this.textarea!.value = dbDump;
+            this.textarea!.select();
+          } catch (error) {
+            console.error(`Failed to export database: ${error.message}`);
+          }
         }
       }
     });
 
-    this.addDbDumpModalListener('upload-json-btn', async e => {
+    this.initServerSyncControls();
+    this.initImportExportControls();
+    this.initDeleteControls();
+
+    collapsible.open(0);
+  }
+
+  private initServerSyncControls(): void {
+    this.queryElement('.upload-json-btn').addEventListener('click', async e => {
       e.preventDefault();
 
       if (window.confirm('Do you want to upload the entire database to the server?')) {
@@ -101,14 +85,8 @@ export class AppSettingsView extends BaseView {
         const password = window.prompt('Password:') || '';
 
         try {
-          const response = await fetch(`sync.php?user=${user}`, {
-            method: 'POST',
-            cache: 'no-cache',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(dbDump)}`
-          });
+          const dbObject = await this.getStorage().dump();
+          const response = await this.uploadDatabaseToServer(user, password, dbObject);
 
           if (response.ok) {
             window.alert('Database successfully uploaded!');
@@ -122,14 +100,14 @@ export class AppSettingsView extends BaseView {
       }
     });
 
-    this.addDbDumpModalListener('import-server-db-btn', async e => {
+    this.queryElement('.import-server-db-btn').addEventListener('click', async e => {
       e.preventDefault();
 
       if (window.confirm('Do you want to import the entire database from the server?')) {
         const user = window.prompt('Username:') || 'anonymous';
 
         try {
-          const response = await fetch(`./sync/${user}/latest.json`, { cache: 'no-cache' });
+          const response = await this.fetchDatabaseFromServer(user);
 
           if (response.ok) {
             await this.getStorage().importDb(await response.json());
@@ -148,21 +126,64 @@ export class AppSettingsView extends BaseView {
         }
       }
     });
+  }
 
-    this.queryElement('.quit-btn').addEventListener('click', async e => {
-      if (window.confirm('Are you sure you want to erase the entire database?')) {
-        const modal = this.queryElement('.delete-db-modal .modal-msg');
+  private async initImportExportControls(): Promise<void> {
+    this.queryElement('.copy-json-btn').addEventListener('click', (e: Event) => {
+      e.preventDefault();
 
-        try {
-          await this.getStorage().erase();
-          modal.innerText = 'Database was successfully deleted!';
-        } catch (error) {
-          modal.innerText = 'Failed to delete database!';
+      this.textarea!.select();
+
+      try {
+        if (!document.execCommand('copy')) {
+          throw new Error('execCommand copy could not be executed');
         }
-        M.Modal.getInstance(this.deleteDbModalElement!).open();
+      } catch (e) {
+        console.error(e.message);
       }
     });
 
-    window.setTimeout(() => textarea.select(), 500);
+    this.queryElement('.update-db-btn').addEventListener('click', async (e: Event) => {
+      e.preventDefault();
+
+      if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
+        try {
+          await this.getStorage().importDb(JSON.parse(this.textarea!.value));
+          window.alert('Database successfully imported!');
+        } catch (error) {
+          window.alert(`Failed to import database: ${error.message}`);
+        }
+      }
+    });
+  }
+
+  private initDeleteControls(): void {
+    this.queryElement('.quit-btn').addEventListener('click', async e => {
+      if (window.confirm('Are you sure you want to erase the entire database?')) {
+        try {
+          await this.getStorage().erase();
+          window.alert('Database was successfully deleted!');
+        } catch (error) {
+          window.alert('Failed to delete database!');
+        }
+      }
+    });
+  }
+
+  private async fetchDatabaseFromServer(user: string): Promise<Response> {
+    return fetch(`./sync/${user}/latest.json`, { cache: 'no-cache' });
+  }
+
+  private async uploadDatabaseToServer(user: string, password: string, dbObject: any): Promise<Response> {
+    const dbDump = JSON.stringify(dbObject);
+
+    return fetch(`sync.php?user=${user}`, {
+      method: 'POST',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(dbDump)}`
+    });
   }
 }
