@@ -26,7 +26,9 @@ export abstract class BaseView {
   /**
    * Never override this method!
    */
-  /*final*/ initView(parameters: ReadonlyMap<string, string | number | boolean>): void {
+  /*final*/ initView(
+    parameters: ReadonlyMap<string, string | number | boolean>
+  ): void {
     this.loadTemplate();
     this.onReveal(parameters);
   }
@@ -64,7 +66,9 @@ export abstract class BaseView {
    * Never override this method!
    */
   protected /*final*/ queryElements(selector: string): NodeListOf<HTMLElement> {
-    return this.viewContainer!.querySelectorAll(selector) as NodeListOf<HTMLElement>;
+    return this.viewContainer!.querySelectorAll(selector) as NodeListOf<
+      HTMLElement
+    >;
   }
 
   /**
@@ -74,9 +78,12 @@ export abstract class BaseView {
     if (selector instanceof HTMLElement) {
       selector.style.display = 'none';
     } else {
-      Array.prototype.forEach.call(this.queryElements(selector), (element: HTMLElement) => {
-        element.style.display = 'none';
-      });
+      Array.prototype.forEach.call(
+        this.queryElements(selector),
+        (element: HTMLElement) => {
+          element.style.display = 'none';
+        }
+      );
     }
   }
 
@@ -87,9 +94,12 @@ export abstract class BaseView {
     if (selector instanceof HTMLElement) {
       selector.style.display = 'none';
     } else {
-      Array.prototype.forEach.call(this.queryElements(selector), (element: HTMLElement) => {
-        element.style.display = '';
-      });
+      Array.prototype.forEach.call(
+        this.queryElements(selector),
+        (element: HTMLElement) => {
+          element.style.display = '';
+        }
+      );
     }
   }
 
@@ -132,7 +142,9 @@ export abstract class BaseView {
 
   abstract getTitle(): string;
 
-  protected abstract onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void;
+  protected abstract onReveal(
+    parameters: ReadonlyMap<string, string | number | boolean>
+  ): void;
 
   protected abstract onHide(): void;
 
@@ -141,9 +153,12 @@ export abstract class BaseView {
   protected abstract getViewClassName(): string;
 
   private loadTemplate(): void {
-    const template = document.querySelector(this.getTemplateLocator()) as HTMLTemplateElement;
+    const template = document.querySelector(
+      this.getTemplateLocator()
+    ) as HTMLTemplateElement;
 
-    this.viewContainer = this.viewContainer || (document.querySelector('#main') as HTMLElement);
+    this.viewContainer =
+      this.viewContainer || (document.querySelector('#main') as HTMLElement);
     this.viewContainer.classList.add(this.getViewClassName());
     this.viewContainer.appendChild(document.importNode(template.content, true));
 
@@ -159,7 +174,11 @@ export abstract class BaseView {
 
       console.log('Un-loaded template ' + this.getTemplateLocator() + '.');
     } else {
-      console.warn('Tried to un-load uninitialized template ' + this.getTemplateLocator() + '.');
+      console.warn(
+        'Tried to un-load uninitialized template ' +
+          this.getTemplateLocator() +
+          '.'
+      );
     }
   }
 }

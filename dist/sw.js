@@ -22,10 +22,16 @@ async function fetchWithTimeout(request, timeoutInMs) {
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort();
-    console.warn(`Aborted request '${request.url}': request took longer than ${timeoutInMs}ms.`);
+    console.warn(
+      `Aborted request '${
+        request.url
+      }': request took longer than ${timeoutInMs}ms.`
+    );
   }, timeout);
 
-  return fetch(request, { signal: controller.signal }).finally(() => clearTimeout(timeoutInMs));
+  return fetch(request, { signal: controller.signal }).finally(() =>
+    clearTimeout(timeoutInMs)
+  );
 }
 
 self.addEventListener('fetch', event => {
@@ -38,7 +44,11 @@ self.addEventListener('fetch', event => {
           console.log(`Using resource from cache. (${event.request.url})`);
           return response;
         }
-        console.log(`Cache miss, need to load resource from server. (${event.request.url})`);
+        console.log(
+          `Cache miss, need to load resource from server. (${
+            event.request.url
+          })`
+        );
         return fetch(event.request);
       });
     })

@@ -7,6 +7,8 @@
     "start": "http-server -c-1 dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --config webpack.dev.js --https --progress --content-base dist",
+    "lint": "tslint -c tslint.json 'src/**/*.ts' 'dist/sw.js' 'dist/index.html'",
+    "prettier": "prettier --write 'src/**/*.ts' 'dist/sw.js' 'dist/index.html'",
     "browser": "google-chrome --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://localhost:8080 https://localhost:8080",
     "build": "webpack --config webpack.prod.js",
     "clean": "for f in $(ls dist); do if [ $f != 'index.html' ] && [ $f != 'sw.js' ] && [ $f != 'site.webmanifest' ] && [ $f != 'icon.png' ] && [ $f != 'icon-large.png' ] && [ $f != 'favicon.ico' ]; then rm -rfv dist/$f; fi; done"
@@ -24,16 +26,21 @@
   "devDependencies": {
     "@types/dragula": "^2.1.34",
     "@types/materialize-css": "^1.0.6",
+    "angular-tslint-rules": "^1.14.0",
     "css-loader": "^2.1.1",
     "dart-sass": "^1.20.1",
     "fibers": "^4.0.1",
     "http-server": "^0.11.1",
     "mini-css-extract-plugin": "^0.6.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
+    "prettier": "1.17.1",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "terser-webpack-plugin": "^1.2.3",
     "ts-loader": "^5.4.5",
+    "tslint": "^5.16.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.4.5",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.2",
@@ -44,5 +51,11 @@
     "chartist": "^0.11.0",
     "dragula": "^3.7.2",
     "materialize-css": "^1.0.0"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "useTabs": false,
+    "tabWidth": 2,
+    "singleQuote": true
   }
 }

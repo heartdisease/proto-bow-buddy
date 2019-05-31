@@ -52,10 +52,13 @@ export class StationSelectPlayerView extends BaseView {
     try {
       const course = await this.getStorage().getCourseForGame(gid);
       const nextStationBtn = this.queryElement('.next-station-btn');
-      const showScoreSwitch = this.queryElement('.hide-score-switch input[type=checkbox]') as HTMLInputElement;
+      const showScoreSwitch = this.queryElement(
+        '.hide-score-switch input[type=checkbox]'
+      ) as HTMLInputElement;
 
       if (station >= course.stations) {
-        nextStationBtn.innerHTML = '<i class="material-icons left">check</i> Show total score';
+        nextStationBtn.innerHTML =
+          '<i class="material-icons left">check</i> Show total score';
         nextStationBtn.addEventListener('click', e => {
           e.preventDefault();
           window.location.href = `#final-score;gid=${gid}`;
@@ -63,7 +66,8 @@ export class StationSelectPlayerView extends BaseView {
       } else {
         nextStationBtn.addEventListener('click', e => {
           e.preventDefault();
-          window.location.href = `#station-select-player;gid=${gid};station=${station + 1}`;
+          window.location.href = `#station-select-player;gid=${gid};station=${station +
+            1}`;
         });
       }
 
@@ -75,7 +79,11 @@ export class StationSelectPlayerView extends BaseView {
 
       this.initPlayerButtons(gid, station);
     } catch (error) {
-      console.error(`Failed to init view (gid: ${gid}, station: ${station}): ${error.message}`);
+      console.error(
+        `Failed to init view (gid: ${gid}, station: ${station}): ${
+          error.message
+        }`
+      );
     }
   }
 
@@ -90,7 +98,9 @@ export class StationSelectPlayerView extends BaseView {
     }
 
     const playerSelectionList = this.queryElement('.player-selection-list');
-    const playersWithScore = players.filter(player => player.score !== undefined).length;
+    const playersWithScore = players.filter(
+      player => player.score !== undefined
+    ).length;
 
     this.queryElement('.quick-assign-btn').addEventListener('click', e => {
       const firstPid = players[0].pid;
@@ -117,13 +127,17 @@ export class StationSelectPlayerView extends BaseView {
 
     for (const player of players) {
       const scores = totalScoreForGame.scores.get(player.pid);
-      const scorePoints = scores ? scores.map(score => ScoreUtils.scoreToPoints(score)) : [];
+      const scorePoints = scores
+        ? scores.map(score => ScoreUtils.scoreToPoints(score))
+        : [];
       const totalScore = scorePoints.reduce(
         (a, b) => a + b,
         scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1] // exclude score of current station
       );
 
-      playerSelectionList.appendChild(this.createPlayerButton(gid, station, totalScore, player));
+      playerSelectionList.appendChild(
+        this.createPlayerButton(gid, station, totalScore, player)
+      );
     }
 
     if (playersWithScore === players.length) {
@@ -135,8 +149,16 @@ export class StationSelectPlayerView extends BaseView {
     }
   }
 
-  private createPlayerButton(gid: number, station: number, totalScore: number, player: PlayerWithScore): HTMLElement {
-    const averageScore = ScoreUtils.averageScore(totalScore, Math.max(1, station - 1));
+  private createPlayerButton(
+    gid: number,
+    station: number,
+    totalScore: number,
+    player: PlayerWithScore
+  ): HTMLElement {
+    const averageScore = ScoreUtils.averageScore(
+      totalScore,
+      Math.max(1, station - 1)
+    );
     const playerEntry = this.createElement(
       'a',
       totalScore > 0 && !StationSelectPlayerView.hideIntermediateScore()
@@ -145,7 +167,10 @@ export class StationSelectPlayerView extends BaseView {
       false,
       'collection-item'
     );
-    playerEntry.setAttribute('href', `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`);
+    playerEntry.setAttribute(
+      'href',
+      `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`
+    );
 
     if (player.score) {
       const scoreDisplayName = ScoreUtils.scoreToDisplayName(player.score);
@@ -166,10 +191,15 @@ export class StationSelectPlayerView extends BaseView {
   // TODO move into its own utility
   private static hideIntermediateScore(hide?: boolean): boolean {
     if (hide === undefined) {
-      const value = window.localStorage.getItem('bow-buddy-settings:hide-intermediate-score');
+      const value = window.localStorage.getItem(
+        'bow-buddy-settings:hide-intermediate-score'
+      );
       return value === 'true';
     }
-    window.localStorage.setItem('bow-buddy-settings:hide-intermediate-score', '' + hide);
+    window.localStorage.setItem(
+      'bow-buddy-settings:hide-intermediate-score',
+      '' + hide
+    );
     return hide;
   }
 }

@@ -67,7 +67,9 @@ export class Application {
   }
 
   private static updateWindowTitle(viewTitle: string): void {
-    document.title = `BowBuddy ${Application.VERSION}${viewTitle ? ' - ' + viewTitle : ''}`;
+    document.title = `BowBuddy ${Application.VERSION}${
+      viewTitle ? ' - ' + viewTitle : ''
+    }`;
   }
 
   private static onHashChange(): void {
@@ -94,7 +96,10 @@ export class Application {
     return new MainMenuView();
   }
 
-  private static getUrlParams(): ReadonlyMap<string, string | number | boolean> {
+  private static getUrlParams(): ReadonlyMap<
+    string,
+    string | number | boolean
+  > {
     const urlParams = new Map<string, string | number | boolean>();
 
     return window.location.hash

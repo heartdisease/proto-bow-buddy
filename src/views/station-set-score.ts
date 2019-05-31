@@ -46,7 +46,9 @@ export class StationSetScoreView extends BaseView {
     const assignAll = parameters.has('aa') && (parameters.get('aa') as boolean);
     const gid = parameters.get('gid') as number;
     const pid = assignAll ? -1 : (parameters.get('pid') as number);
-    const remainingPids: number[] = parameters.has('qa') ? ('' + parameters.get('qa')).split('+').map(s => +s) : [];
+    const remainingPids: number[] = parameters.has('qa')
+      ? ('' + parameters.get('qa')).split('+').map(s => +s)
+      : [];
     const station = parameters.get('station') as number;
 
     this.init(gid, pid, remainingPids, station, assignAll);
@@ -57,17 +59,28 @@ export class StationSetScoreView extends BaseView {
     M.Modal.getInstance(this.scoreModalElement!).destroy();
   }
 
-  private initButtons(gid: number, pid: number, remainingPids: number[], station: number, assignAll: boolean): void {
+  private initButtons(
+    gid: number,
+    pid: number,
+    remainingPids: number[],
+    station: number,
+    assignAll: boolean
+  ): void {
     const drake = dragula(
-      [...this.queryElements('.hit-draggable-container'), ...this.queryElements('.turn-draggable-container')],
+      [
+        ...this.queryElements('.hit-draggable-container'),
+        ...this.queryElements('.turn-draggable-container')
+      ],
       {
         copy: true,
         moves: () => true,
         revertOnSpill: true,
         accepts: (origin: HTMLElement, target: HTMLElement) => {
           return (
-            (origin.classList.contains('hit') && target.classList.contains('turn-draggable-container')) ||
-            (origin.classList.contains('turn') && target.classList.contains('hit-draggable-container'))
+            (origin.classList.contains('hit') &&
+              target.classList.contains('turn-draggable-container')) ||
+            (origin.classList.contains('turn') &&
+              target.classList.contains('hit-draggable-container'))
           );
         }
       }
@@ -77,20 +90,28 @@ export class StationSetScoreView extends BaseView {
       .on('drag', (el: HTMLElement) => {
         el.classList.remove('ex-moved');
       })
-      .on('drop', (origin: HTMLElement, target: HTMLElement, source: HTMLElement, sibling: HTMLElement) => {
-        const hit = origin.classList.contains('hit')
-          ? origin.dataset.dnd
-          : this.getDndSibling(origin, target).dataset.dnd;
-        const turn = origin.classList.contains('turn')
-          ? origin.dataset.dnd
-          : this.getDndSibling(origin, target).dataset.dnd;
+      .on(
+        'drop',
+        (
+          origin: HTMLElement,
+          target: HTMLElement,
+          source: HTMLElement,
+          sibling: HTMLElement
+        ) => {
+          const hit = origin.classList.contains('hit')
+            ? origin.dataset.dnd
+            : this.getDndSibling(origin, target).dataset.dnd;
+          const turn = origin.classList.contains('turn')
+            ? origin.dataset.dnd
+            : this.getDndSibling(origin, target).dataset.dnd;
 
-        console.log('hit = ' + hit);
-        console.log('turn = ' + turn);
+          console.log('hit = ' + hit);
+          console.log('turn = ' + turn);
 
-        origin.classList.add('ex-moved');
-        this.logScore(gid, pid, station, remainingPids, assignAll, hit, turn);
-      })
+          origin.classList.add('ex-moved');
+          this.logScore(gid, pid, station, remainingPids, assignAll, hit, turn);
+        }
+      )
       .on('over', (el: HTMLElement, container: HTMLElement) => {
         container.classList.add('ex-over');
       })
@@ -118,7 +139,9 @@ export class StationSetScoreView extends BaseView {
     this.queryElement('.station-no').innerText = '' + station;
 
     if (assignAll) {
-      this.queryElement('span.player-name').innerText = `All players (${remainingPids.length})`;
+      this.queryElement('span.player-name').innerText = `All players (${
+        remainingPids.length
+      })`;
     } else {
       const player = await Application.getStorage().getPlayer(pid);
       this.queryElement('span.player-name').innerText = player.name;
@@ -136,9 +159,18 @@ export class StationSetScoreView extends BaseView {
     throw new Error('No sibling found in target element');
   }
 
-  private navigateNext(gid: number, station: number, remainingPids: number[]): void {
+  private navigateNext(
+    gid: number,
+    station: number,
+    remainingPids: number[]
+  ): void {
     if (remainingPids.length > 0) {
-      this.navigateToNextPlayer(gid, station, remainingPids[0], remainingPids.slice(1));
+      this.navigateToNextPlayer(
+        gid,
+        station,
+        remainingPids[0],
+        remainingPids.slice(1)
+      );
     } else {
       this.navigateToPlayerSelection(gid, station);
     }
@@ -148,8 +180,14 @@ export class StationSetScoreView extends BaseView {
     window.location.href = `#station-select-player;gid=${gid};station=${station}`;
   }
 
-  private navigateToNextPlayer(gid: number, station: number, nextPid: number, remainingPids: number[]): void {
-    const qaParam = remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
+  private navigateToNextPlayer(
+    gid: number,
+    station: number,
+    nextPid: number,
+    remainingPids: number[]
+  ): void {
+    const qaParam =
+      remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
     window.location.href = `#station-set-score;gid=${gid};pid=${nextPid}${qaParam};station=${station}`;
   }
 
@@ -172,7 +210,9 @@ export class StationSetScoreView extends BaseView {
         '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>';
     } else {
       this.queryElement('.modal-hit-score').innerHTML = this.getHitButton(hit!);
-      this.queryElement('.modal-turn-score').innerHTML = this.getTurnButton(turn!);
+      this.queryElement('.modal-turn-score').innerHTML = this.getTurnButton(
+        turn!
+      );
     }
 
     M.Modal.getInstance(this.scoreModalElement!).open();

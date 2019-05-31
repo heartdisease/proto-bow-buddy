@@ -46,7 +46,9 @@ export class FinalScoreView extends BaseView {
       this.getStorage().finishGame(gid),
       this.getStorage().getCourseForGame(gid)
     ]);
-    const courseLabel = `${course.place ? course.place + ' ' : ''}${course.name} (${course.stations} stations)`;
+    const courseLabel = `${course.place ? course.place + ' ' : ''}${
+      course.name
+    } (${course.stations} stations)`;
     const duration = FinalScoreView.getDuration(game.starttime, game.endtime);
     const from = new Date(game.starttime).toLocaleDateString('de-AT', {
       year: 'numeric',
@@ -62,7 +64,9 @@ export class FinalScoreView extends BaseView {
       hour12: false
     });
 
-    this.queryElement('.course-duration').innerHTML = `${duration}<br/>(${from} - ${to})`;
+    this.queryElement(
+      '.course-duration'
+    ).innerHTML = `${duration}<br/>(${from} - ${to})`;
     this.queryElement('.course-label').innerText = courseLabel;
     this.generateScoreChart(gid, course.stations);
     this.generateScoreTable(gid, course.stations);
@@ -72,11 +76,17 @@ export class FinalScoreView extends BaseView {
     // nothing to do
   }
 
-  private async generateScoreChart(gid: number, stations: number): Promise<void> {
+  private async generateScoreChart(
+    gid: number,
+    stations: number
+  ): Promise<void> {
     return Promise.resolve(); // TODO implement score chart with chartist.js
   }
 
-  private async generateScoreTable(gid: number, stations: number): Promise<void> {
+  private async generateScoreTable(
+    gid: number,
+    stations: number
+  ): Promise<void> {
     const totalScore = await ScoreUtils.generateScoreTable(gid, stations);
     const players = totalScore.totalScoreForGame.players;
     const scores = totalScore.totalScoreForGame.scores;
@@ -84,7 +94,9 @@ export class FinalScoreView extends BaseView {
     const playerScoreEntries = this.queryElement('.player-score-entries');
     const playerHeaderRow = this.queryElement('.player-header-row');
 
-    players.forEach(player => playerHeaderRow.appendChild(this.createElement('th', player.name)));
+    players.forEach(player =>
+      playerHeaderRow.appendChild(this.createElement('th', player.name))
+    );
 
     for (let station = 1; station <= stations; station++) {
       const playerScoreEntry = document.createElement('tr');
@@ -95,7 +107,10 @@ export class FinalScoreView extends BaseView {
       players
         .map(player => scores.get(player.pid)!)
         .forEach(scores => {
-          const scoreColumn = this.createElement('td', '' + ScoreUtils.scoreToPoints(scores[station - 1]));
+          const scoreColumn = this.createElement(
+            'td',
+            '' + ScoreUtils.scoreToPoints(scores[station - 1])
+          );
 
           playerScoreEntry.appendChild(scoreColumn);
         });
@@ -106,7 +121,10 @@ export class FinalScoreView extends BaseView {
     this.generateLeaderBoard(playerScores);
   }
 
-  private sumUpScore(playerScoreEntries: HTMLElement, playerScores: PlayerScore[]): void {
+  private sumUpScore(
+    playerScoreEntries: HTMLElement,
+    playerScores: PlayerScore[]
+  ): void {
     const playerTotalScore = document.createElement('tr');
     const playerAverageScore = document.createElement('tr');
 
@@ -135,7 +153,9 @@ export class FinalScoreView extends BaseView {
     playerKillHitCount.appendChild(this.createElement('td', 'Kill:'));
 
     playerCenterKillHitCount.style.fontStyle = 'italic';
-    playerCenterKillHitCount.appendChild(this.createElement('td', 'Center Kill:'));
+    playerCenterKillHitCount.appendChild(
+      this.createElement('td', 'Center Kill:')
+    );
 
     playerFirstTurnCount.style.fontStyle = 'italic';
     playerFirstTurnCount.appendChild(this.createElement('td', 'First shot:'));
@@ -147,17 +167,39 @@ export class FinalScoreView extends BaseView {
     playerThirdTurnCount.appendChild(this.createElement('td', 'Third shot:'));
 
     playerScores.forEach(playerScore => {
-      playerTotalScore.appendChild(this.createElement('td', '' + playerScore.totalScore));
-      playerAverageScore.appendChild(this.createElement('td', '' + playerScore.averageScore));
+      playerTotalScore.appendChild(
+        this.createElement('td', '' + playerScore.totalScore)
+      );
+      playerAverageScore.appendChild(
+        this.createElement('td', '' + playerScore.averageScore)
+      );
 
-      playerMissCount.appendChild(this.createElement('td', `${playerScore.missCount}&times;`, true));
-      playerBodyHitCount.appendChild(this.createElement('td', `${playerScore.bodyHitCount}&times;`, true));
-      playerKillHitCount.appendChild(this.createElement('td', `${playerScore.killHitCount}&times;`, true));
-      playerCenterKillHitCount.appendChild(this.createElement('td', `${playerScore.centerKillHitCount}&times;`, true));
+      playerMissCount.appendChild(
+        this.createElement('td', `${playerScore.missCount}&times;`, true)
+      );
+      playerBodyHitCount.appendChild(
+        this.createElement('td', `${playerScore.bodyHitCount}&times;`, true)
+      );
+      playerKillHitCount.appendChild(
+        this.createElement('td', `${playerScore.killHitCount}&times;`, true)
+      );
+      playerCenterKillHitCount.appendChild(
+        this.createElement(
+          'td',
+          `${playerScore.centerKillHitCount}&times;`,
+          true
+        )
+      );
 
-      playerFirstTurnCount.appendChild(this.createElement('td', `${playerScore.firstTurnCount}&times;`, true));
-      playerSecondTurnCount.appendChild(this.createElement('td', `${playerScore.secondTurnCount}&times;`, true));
-      playerThirdTurnCount.appendChild(this.createElement('td', `${playerScore.thirdTurnCount}&times;`, true));
+      playerFirstTurnCount.appendChild(
+        this.createElement('td', `${playerScore.firstTurnCount}&times;`, true)
+      );
+      playerSecondTurnCount.appendChild(
+        this.createElement('td', `${playerScore.secondTurnCount}&times;`, true)
+      );
+      playerThirdTurnCount.appendChild(
+        this.createElement('td', `${playerScore.thirdTurnCount}&times;`, true)
+      );
     });
 
     playerScoreEntries.appendChild(playerTotalScore);
@@ -178,18 +220,41 @@ export class FinalScoreView extends BaseView {
 
     playerScores
       .sort((a, b) => b.totalScore - a.totalScore)
-      .forEach((playerScore, index) => leaderboard.appendChild(this.createLeaderBoardEntry(playerScore, index + 1)));
+      .forEach((playerScore, index) =>
+        leaderboard.appendChild(
+          this.createLeaderBoardEntry(playerScore, index + 1)
+        )
+      );
   }
 
-  private createLeaderBoardEntry(playerScore: PlayerScore, place: number): HTMLElement {
-    const entry = this.createElement('li', null, false, 'collection-item avatar');
-    const playerName = this.createElement('span', playerScore.playerName, false, 'title');
+  private createLeaderBoardEntry(
+    playerScore: PlayerScore,
+    place: number
+  ): HTMLElement {
+    const entry = this.createElement(
+      'li',
+      null,
+      false,
+      'collection-item avatar'
+    );
+    const playerName = this.createElement(
+      'span',
+      playerScore.playerName,
+      false,
+      'title'
+    );
     const totalScore = this.createElement(
       'p',
-      `<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`,
+      `<b>Total score</b>: ${playerScore.totalScore} (Average: ${
+        playerScore.averageScore
+      })`,
       true
     );
-    const missCount = this.createElement('p', `<b>Miss</b>: ${playerScore.missCount}&times;`, true);
+    const missCount = this.createElement(
+      'p',
+      `<b>Miss</b>: ${playerScore.missCount}&times;`,
+      true
+    );
 
     entry.appendChild(this.createLeaderBoardBadge(place));
     entry.appendChild(playerName);
@@ -227,7 +292,12 @@ export class FinalScoreView extends BaseView {
           'leaderboard-badge third-place deep-orange darken-3'
         );
       default:
-        return this.createElement('div', `<span>${place}<sup>th</sup></span>`, true, 'leaderboard-badge grey darken-4');
+        return this.createElement(
+          'div',
+          `<span>${place}<sup>th</sup></span>`,
+          true,
+          'leaderboard-badge grey darken-4'
+        );
     }
   }
 

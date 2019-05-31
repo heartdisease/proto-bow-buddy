@@ -31,11 +31,16 @@ export class NewGameView extends BaseView {
   private playerSelectElement?: HTMLElement;
   private courseSelectElement?: HTMLElement;
 
-  private readonly addPlayerClickListener = async (event: Event) => this.onAddPlayerClick(event);
-  private readonly playerSelectionChangeListener = async (event: Event) => this.onPlayerSelectionChange(event);
-  private readonly courseSelectionChangeListener = async (event: Event) => this.onCourseSelectionChange(event);
-  private readonly setCourseClickListener = async (event: Event) => this.onSetCourseClick(event);
-  private readonly startGameClickListener = async (event: Event) => this.onStartGameClick(event);
+  private readonly addPlayerClickListener = async (event: Event) =>
+    this.onAddPlayerClick(event);
+  private readonly playerSelectionChangeListener = async (event: Event) =>
+    this.onPlayerSelectionChange(event);
+  private readonly courseSelectionChangeListener = async (event: Event) =>
+    this.onCourseSelectionChange(event);
+  private readonly setCourseClickListener = async (event: Event) =>
+    this.onSetCourseClick(event);
+  private readonly startGameClickListener = async (event: Event) =>
+    this.onStartGameClick(event);
   private readonly playerInputListener = () => this.verifyPlayerInput();
   private readonly courseInputListener = () => this.verifyCourseInput();
 
@@ -55,7 +60,9 @@ export class NewGameView extends BaseView {
     const newPlayerName = this.queryElement('.new-player-name');
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');
-    const newCourseNoOfStations = this.queryElement('.new-course-no-of-stations');
+    const newCourseNoOfStations = this.queryElement(
+      '.new-course-no-of-stations'
+    );
     const setCourseBtn = this.queryElement('.set-course-btn');
 
     this.collapsibleElement = this.queryElement('.collapsible');
@@ -75,13 +82,18 @@ export class NewGameView extends BaseView {
     const newPlayerName = this.queryElement('.new-player-name');
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');
-    const newCourseNoOfStations = this.queryElement('.new-course-no-of-stations');
+    const newCourseNoOfStations = this.queryElement(
+      '.new-course-no-of-stations'
+    );
     const setCourseBtn = this.queryElement('.set-course-btn');
 
     newPlayerName.removeEventListener('keyup', this.playerInputListener);
     addPlayerBtn.removeEventListener('click', this.addPlayerClickListener);
     newCourseName.removeEventListener('keyup', this.courseInputListener);
-    newCourseNoOfStations.removeEventListener('keyup', this.courseInputListener);
+    newCourseNoOfStations.removeEventListener(
+      'keyup',
+      this.courseInputListener
+    );
     setCourseBtn.removeEventListener('click', this.setCourseClickListener);
 
     M.Collapsible.getInstance(this.collapsibleElement!).destroy();
@@ -101,7 +113,10 @@ export class NewGameView extends BaseView {
     const playerSelect = this.playerSelectElement!;
 
     if (!init) {
-      playerSelect.removeEventListener('change', this.playerSelectionChangeListener); // deregister handler first, because invalid option is default selection
+      playerSelect.removeEventListener(
+        'change',
+        this.playerSelectionChangeListener
+      ); // deregister handler first, because invalid option is default selection
       M.FormSelect.getInstance(playerSelect).destroy();
     }
 
@@ -120,8 +135,16 @@ export class NewGameView extends BaseView {
       playerSelectFragment.appendChild(newPlayerOption);
 
       players
-        .filter(player => this.configuredPlayers.every(configuredPlayer => configuredPlayer.pid !== player.pid))
-        .forEach(player => playerSelectFragment.appendChild(this.createOptionElement(player.name, player.pid)));
+        .filter(player =>
+          this.configuredPlayers.every(
+            configuredPlayer => configuredPlayer.pid !== player.pid
+          )
+        )
+        .forEach(player =>
+          playerSelectFragment.appendChild(
+            this.createOptionElement(player.name, player.pid)
+          )
+        );
 
       // re-init widget
       this.removeChildren(playerSelect);
@@ -138,7 +161,10 @@ export class NewGameView extends BaseView {
     const courseSelect = this.courseSelectElement!;
 
     if (!init) {
-      courseSelect.removeEventListener('change', this.courseSelectionChangeListener); // deregister handler first, because invalid option is default selection
+      courseSelect.removeEventListener(
+        'change',
+        this.courseSelectionChangeListener
+      ); // deregister handler first, because invalid option is default selection
       M.FormSelect.getInstance(courseSelect).destroy();
     }
 
@@ -157,9 +183,18 @@ export class NewGameView extends BaseView {
       courseSelectFragment.appendChild(newCourseOption);
 
       courses
-        .filter(course => this.configuredCourse === undefined || this.configuredCourse.cid !== course.cid)
+        .filter(
+          course =>
+            this.configuredCourse === undefined ||
+            this.configuredCourse.cid !== course.cid
+        )
         .forEach(course => {
-          courseSelectFragment.appendChild(this.createOptionElement(`${course.name} (${course.stations})`, course.cid));
+          courseSelectFragment.appendChild(
+            this.createOptionElement(
+              `${course.name} (${course.stations})`,
+              course.cid
+            )
+          );
         });
 
       // re-init widget
@@ -176,19 +211,28 @@ export class NewGameView extends BaseView {
   private registerPlayerSelectEventHandlers(): void {
     const playerSelect = this.playerSelectElement!;
 
-    playerSelect.removeEventListener('change', this.playerSelectionChangeListener);
+    playerSelect.removeEventListener(
+      'change',
+      this.playerSelectionChangeListener
+    );
     playerSelect.addEventListener('change', this.playerSelectionChangeListener);
   }
 
   private registerCourseSelectEventHandlers(): void {
     const courseSelect = this.courseSelectElement!;
 
-    courseSelect.removeEventListener('change', this.courseSelectionChangeListener);
+    courseSelect.removeEventListener(
+      'change',
+      this.courseSelectionChangeListener
+    );
     courseSelect.addEventListener('change', this.courseSelectionChangeListener);
   }
 
   private registerStartButtonEventHandler(): void {
-    this.queryElement('.start-game-btn').addEventListener('click', this.startGameClickListener);
+    this.queryElement('.start-game-btn').addEventListener(
+      'click',
+      this.startGameClickListener
+    );
   }
 
   private isPlayerConfigured(): boolean {
@@ -226,7 +270,9 @@ export class NewGameView extends BaseView {
     courseEntry.dataset.cid = course.cid.toString();
     courseEntry.appendChild(this.createElement('td', course.name));
     courseEntry.appendChild(this.createElement('td', course.place || '-'));
-    courseEntry.appendChild(this.createElement('td', course.stations.toString()));
+    courseEntry.appendChild(
+      this.createElement('td', course.stations.toString())
+    );
 
     courseEntries.appendChild(courseEntry);
 
@@ -254,7 +300,8 @@ export class NewGameView extends BaseView {
 
   private verifyCourseInput(): void {
     const courseName = this.queryInputElement('.new-course-name').value;
-    const noOfStations = this.queryInputElement('.new-course-no-of-stations').value;
+    const noOfStations = this.queryInputElement('.new-course-no-of-stations')
+      .value;
 
     if (this.isValidCourse(courseName, noOfStations)) {
       this.queryElement('.set-course-btn').classList.remove('disabled');
@@ -276,7 +323,10 @@ export class NewGameView extends BaseView {
     return this.queryElement(selector) as HTMLInputElement;
   }
 
-  private createOptionElement(content: string, value?: string | number): HTMLOptionElement {
+  private createOptionElement(
+    content: string,
+    value?: string | number
+  ): HTMLOptionElement {
     const option = this.createElement('option', content) as HTMLOptionElement;
 
     if (value !== undefined) {
@@ -323,7 +373,9 @@ export class NewGameView extends BaseView {
         this.addPlayerToTable(player);
         this.updatePlayerSelectionMenu();
       } catch (error) {
-        console.error(`Failed to load player with pid ${pid}: ${error.message}`);
+        console.error(
+          `Failed to load player with pid ${pid}: ${error.message}`
+        );
       }
     }
   }
@@ -342,7 +394,9 @@ export class NewGameView extends BaseView {
         this.addCourseToTable(course);
         this.updateCourseSelectionMenu();
       } catch (error) {
-        console.error(`Failed to load course with cid ${cid}: ${error.message}`);
+        console.error(
+          `Failed to load course with cid ${cid}: ${error.message}`
+        );
       }
     }
   }
@@ -352,13 +406,19 @@ export class NewGameView extends BaseView {
     this.queryInputElement('.set-course-btn').classList.add('disabled');
 
     const courseName = this.queryInputElement('.new-course-name').value;
-    const noOfStations = +this.queryInputElement('.new-course-no-of-stations').value;
+    const noOfStations = +this.queryInputElement('.new-course-no-of-stations')
+      .value;
 
     this.queryInputElement('.new-course-name').value = '';
     this.queryInputElement('.new-course-no-of-stations').value = '';
 
     try {
-      const course = await this.getStorage().addCourse(courseName, '', '', noOfStations);
+      const course = await this.getStorage().addCourse(
+        courseName,
+        '',
+        '',
+        noOfStations
+      );
 
       this.addCourseToTable(course);
       await this.updateCourseSelectionMenu();
@@ -374,10 +434,13 @@ export class NewGameView extends BaseView {
     event.preventDefault();
     this.queryElement('.start-game-btn').classList.add('disabled'); // disable button while async db action is running
 
-    const cid = +this.queryElement('.course-entries > tr[data-cid]').dataset.cid!;
+    const cid = +this.queryElement('.course-entries > tr[data-cid]').dataset
+      .cid!;
     const pids: number[] = [];
 
-    for (const playerEntry of this.queryElements('.player-entries > tr[data-pid]')) {
+    for (const playerEntry of this.queryElements(
+      '.player-entries > tr[data-pid]'
+    )) {
       pids.push(+playerEntry.dataset.pid!);
     }
 

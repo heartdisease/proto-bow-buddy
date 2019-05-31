@@ -38,8 +38,12 @@ export class AppSettingsView extends BaseView {
   }
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    this.appSettingsCollapsibleElement = this.queryElement('.app-settings-collapsible')!;
-    this.textarea = this.queryElement('.app-settings-collapsible textarea') as HTMLTextAreaElement;
+    this.appSettingsCollapsibleElement = this.queryElement(
+      '.app-settings-collapsible'
+    )!;
+    this.textarea = this.queryElement(
+      '.app-settings-collapsible textarea'
+    ) as HTMLTextAreaElement;
     this.initControls();
   }
 
@@ -48,26 +52,29 @@ export class AppSettingsView extends BaseView {
   }
 
   private async initControls(): Promise<void> {
-    const collapsible = M.Collapsible.init(this.appSettingsCollapsibleElement!, {
-      onOpenStart: (el: HTMLLIElement) => {
-        if (el.classList.contains('import-export-json-collapsible')) {
-          this.textarea!.value = '';
-        }
-      },
-      onOpenEnd: async (el: HTMLLIElement) => {
-        if (el.classList.contains('import-export-json-collapsible')) {
-          try {
-            const dbObject = await this.getStorage().dump();
-            const dbDump = JSON.stringify(dbObject);
+    const collapsible = M.Collapsible.init(
+      this.appSettingsCollapsibleElement!,
+      {
+        onOpenStart: (el: HTMLLIElement) => {
+          if (el.classList.contains('import-export-json-collapsible')) {
+            this.textarea!.value = '';
+          }
+        },
+        onOpenEnd: async (el: HTMLLIElement) => {
+          if (el.classList.contains('import-export-json-collapsible')) {
+            try {
+              const dbObject = await this.getStorage().dump();
+              const dbDump = JSON.stringify(dbObject);
 
-            this.textarea!.value = dbDump;
-            this.textarea!.select();
-          } catch (error) {
-            console.error(`Failed to export database: ${error.message}`);
+              this.textarea!.value = dbDump;
+              this.textarea!.select();
+            } catch (error) {
+              console.error(`Failed to export database: ${error.message}`);
+            }
           }
         }
       }
-    });
+    );
 
     this.initServerSyncControls();
     this.initImportExportControls();
@@ -80,13 +87,21 @@ export class AppSettingsView extends BaseView {
     this.queryElement('.upload-json-btn').addEventListener('click', async e => {
       e.preventDefault();
 
-      if (window.confirm('Do you want to upload the entire database to the server?')) {
+      if (
+        window.confirm(
+          'Do you want to upload the entire database to the server?'
+        )
+      ) {
         const user = window.prompt('Username:') || 'anonymous';
         const password = window.prompt('Password:') || '';
 
         try {
           const dbObject = await this.getStorage().dump();
-          const response = await this.uploadDatabaseToServer(user, password, dbObject);
+          const response = await this.uploadDatabaseToServer(
+            user,
+            password,
+            dbObject
+          );
 
           if (response.ok) {
             window.alert('Database successfully uploaded!');
@@ -95,71 +110,96 @@ export class AppSettingsView extends BaseView {
             window.alert('Failed to upload database!');
           }
         } catch (error) {
-          console.error(`Failed to export database to server: ${error.message}`);
+          console.error(
+            `Failed to export database to server: ${error.message}`
+          );
         }
       }
     });
 
-    this.queryElement('.import-server-db-btn').addEventListener('click', async e => {
-      e.preventDefault();
+    this.queryElement('.import-server-db-btn').addEventListener(
+      'click',
+      async e => {
+        e.preventDefault();
 
-      if (window.confirm('Do you want to import the entire database from the server?')) {
-        const user = window.prompt('Username:') || 'anonymous';
+        if (
+          window.confirm(
+            'Do you want to import the entire database from the server?'
+          )
+        ) {
+          const user = window.prompt('Username:') || 'anonymous';
 
-        try {
-          const response = await this.fetchDatabaseFromServer(user);
+          try {
+            const response = await this.fetchDatabaseFromServer(user);
 
-          if (response.ok) {
-            await this.getStorage().importDb(await response.json());
-            window.alert('Database successfully uploaded!');
-          } else {
-            console.log(response.status + ' ' + response.statusText);
-
-            if (response.status === 404) {
-              window.alert(`Failed to import database: no database exists on server for user ${user}!`);
+            if (response.ok) {
+              await this.getStorage().importDb(await response.json());
+              window.alert('Database successfully uploaded!');
             } else {
-              window.alert('Failed to import database!');
+              console.log(response.status + ' ' + response.statusText);
+
+              if (response.status === 404) {
+                window.alert(
+                  `Failed to import database: no database exists on server for user ${user}!`
+                );
+              } else {
+                window.alert('Failed to import database!');
+              }
             }
+          } catch (error) {
+            console.error(
+              `Failed to import database from server: ${error.message}`
+            );
           }
-        } catch (error) {
-          console.error(`Failed to import database from server: ${error.message}`);
         }
       }
-    });
+    );
   }
 
   private async initImportExportControls(): Promise<void> {
-    this.queryElement('.copy-json-btn').addEventListener('click', (e: Event) => {
-      e.preventDefault();
+    this.queryElement('.copy-json-btn').addEventListener(
+      'click',
+      (e: Event) => {
+        e.preventDefault();
 
-      this.textarea!.select();
+        this.textarea!.select();
 
-      try {
-        if (!document.execCommand('copy')) {
-          throw new Error('execCommand copy could not be executed');
-        }
-      } catch (e) {
-        console.error(e.message);
-      }
-    });
-
-    this.queryElement('.update-db-btn').addEventListener('click', async (e: Event) => {
-      e.preventDefault();
-
-      if (window.confirm('Do you want to rewrite the entire database with input JSON?')) {
         try {
-          await this.getStorage().importDb(JSON.parse(this.textarea!.value));
-          window.alert('Database successfully imported!');
-        } catch (error) {
-          window.alert(`Failed to import database: ${error.message}`);
+          if (!document.execCommand('copy')) {
+            throw new Error('execCommand copy could not be executed');
+          }
+        } catch (e) {
+          console.error(e.message);
         }
       }
-    });
+    );
+
+    this.queryElement('.update-db-btn').addEventListener(
+      'click',
+      async (e: Event) => {
+        e.preventDefault();
+
+        if (
+          window.confirm(
+            'Do you want to rewrite the entire database with input JSON?'
+          )
+        ) {
+          try {
+            await this.getStorage().importDb(JSON.parse(this.textarea!.value));
+            window.alert('Database successfully imported!');
+          } catch (error) {
+            window.alert(`Failed to import database: ${error.message}`);
+          }
+        }
+      }
+    );
   }
 
   private initDeleteControls(): void {
     this.queryElement('.quit-btn').addEventListener('click', async e => {
-      if (window.confirm('Are you sure you want to erase the entire database?')) {
+      if (
+        window.confirm('Are you sure you want to erase the entire database?')
+      ) {
         try {
           await this.getStorage().erase();
           window.alert('Database was successfully deleted!');
@@ -174,7 +214,11 @@ export class AppSettingsView extends BaseView {
     return fetch(`./sync/${user}/latest.json`, { cache: 'no-cache' });
   }
 
-  private async uploadDatabaseToServer(user: string, password: string, dbObject: any): Promise<Response> {
+  private async uploadDatabaseToServer(
+    user: string,
+    password: string,
+    dbObject: any
+  ): Promise<Response> {
     const dbDump = JSON.stringify(dbObject);
 
     return fetch(`sync.php?user=${user}`, {
@@ -183,7 +227,9 @@ export class AppSettingsView extends BaseView {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(dbDump)}`
+      body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(
+        dbDump
+      )}`
     });
   }
 }

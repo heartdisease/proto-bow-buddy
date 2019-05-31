@@ -22,13 +22,19 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
     <meta name="theme-color" content="#222222" />
 
     <title>BowBuddy</title>
 
     <meta name="author" content="Christoph Matscheko" />
-    <meta name="description" content="An app for keeping track of your score in archery" />
+    <meta
+      name="description"
+      content="An app for keeping track of your score in archery"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <script type="text/javascript">
@@ -37,33 +43,44 @@
           navigator.serviceWorker
             .register('/sw.js')
             .then(() => console.log('Successfully registered service worker.'))
-            .catch(error => console.error('Failed to register service worker: ' + error.message));
+            .catch(error =>
+              console.error(
+                'Failed to register service worker: ' + error.message
+              )
+            );
         } else {
           console.warn('ServiceWorkers are not supported.');
         }
       } else {
-        console.warn('ServiceWorkers cannot be registered within an unsecure context.');
+        console.warn(
+          'ServiceWorkers cannot be registered within an unsecure context.'
+        );
       }
     </script>
 
     <link rel="manifest" href="site.webmanifest" />
     <link rel="apple-touch-icon" href="icon.png" />
 
-    <link crossorigin="anonymous" rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link
+      crossorigin="anonymous"
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
     <link rel="stylesheet" type="text/css" href="main.css" />
   </head>
   <body>
     <!--[if IE]>
       <p class="browserupgrade">
         You are using an <strong>outdated</strong> browser. Please
-        <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.
+        <a href="https://browsehappy.com/">upgrade your browser</a> to improve
+        your experience and security.
       </p>
     <![endif]-->
 
     <noscript>
       <p>
-        This PWA does not work without JavaScript activated in your browser. Please enable JavaScript and reload the
-        page.
+        This PWA does not work without JavaScript activated in your browser.
+        Please enable JavaScript and reload the page.
       </p>
     </noscript>
 
@@ -78,19 +95,39 @@
       </div>
 
       <div class="container-fluid main-menu">
-        <a class="waves-effect waves-light btn-large green" href="#new-game" role="button">
+        <a
+          class="waves-effect waves-light btn-large green"
+          href="#new-game"
+          role="button"
+        >
           <i class="material-icons left">games</i> New Game
         </a>
-        <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
+        <a
+          class="waves-effect waves-light btn-large disabled"
+          href="#"
+          role="button"
+        >
           <i class="material-icons left">settings</i> Course Settings
         </a>
-        <a class="waves-effect waves-light btn-large disabled" href="#" role="button">
+        <a
+          class="waves-effect waves-light btn-large disabled"
+          href="#"
+          role="button"
+        >
           <i class="material-icons left">face</i> Player Settings
         </a>
-        <a class="waves-effect waves-light btn-large" href="#app-settings" role="button">
+        <a
+          class="waves-effect waves-light btn-large"
+          href="#app-settings"
+          role="button"
+        >
           <i class="material-icons left">build</i> Settings
         </a>
-        <a class="waves-effect waves-light btn-large" href="#hall-of-fame" role="button">
+        <a
+          class="waves-effect waves-light btn-large"
+          href="#hall-of-fame"
+          role="button"
+        >
           <i class="material-icons left">trending_up</i> Hall Of Fame
         </a>
       </div>
@@ -103,7 +140,9 @@
 
       <ul class="collapsible">
         <li class="active">
-          <div class="collapsible-header"><i class="material-icons">person_pin</i> Choose players</div>
+          <div class="collapsible-header">
+            <i class="material-icons">person_pin</i> Choose players
+          </div>
           <div class="collapsible-body">
             <!-- BEGIN PLAYER SELECTION -->
 
@@ -126,7 +165,10 @@
                   />
                 </div>
                 <div class="col s2">
-                  <a class="waves-effect waves-light btn-small disabled add-player-btn" href="#">
+                  <a
+                    class="waves-effect waves-light btn-small disabled add-player-btn"
+                    href="#"
+                  >
                     <i class="material-icons">add</i>
                   </a>
                 </div>
@@ -150,7 +192,9 @@
           </div>
         </li>
         <li>
-          <div class="collapsible-header"><i class="material-icons">place</i> Choose course</div>
+          <div class="collapsible-header">
+            <i class="material-icons">place</i> Choose course
+          </div>
           <div class="collapsible-body">
             <!-- BEGIN COURSE SELECTION -->
 
@@ -175,7 +219,10 @@
                   aria-label="No. of stations"
                 />
                 <span class="input-group-btn">
-                  <a class="waves-effect waves-light btn-small disabled set-course-btn" href="#">
+                  <a
+                    class="waves-effect waves-light btn-small disabled set-course-btn"
+                    href="#"
+                  >
                     <i class="material-icons">add</i>
                   </a>
                 </span>
@@ -201,7 +248,10 @@
       </ul>
 
       <div>
-        <a class="waves-effect waves-light btn disabled start-game-btn" href="#">
+        <a
+          class="waves-effect waves-light btn disabled start-game-btn"
+          href="#"
+        >
           <i class="material-icons left">play_arrow</i> Start Game
         </a>
       </div>
@@ -213,10 +263,18 @@
       <h1>Station <span class="station-no">?</span>: Select player</h1>
 
       <div>
-        <a class="waves-effect waves-light btn-small quick-assign-btn" href="#" disabled="disabled">
+        <a
+          class="waves-effect waves-light btn-small quick-assign-btn"
+          href="#"
+          disabled="disabled"
+        >
           <i class="material-icons left">add_to_photos</i> Quick assign
         </a>
-        <a class="waves-effect waves-light btn-small assign-all-btn" href="#" disabled="disabled">
+        <a
+          class="waves-effect waves-light btn-small assign-all-btn"
+          href="#"
+          disabled="disabled"
+        >
           <i class="material-icons left">add_to_photos</i> Assign all
         </a>
       </div>
@@ -235,7 +293,11 @@
       </div>
 
       <div>
-        <a class="waves-effect waves-light btn-small next-station-btn" href="#" disabled="disabled">
+        <a
+          class="waves-effect waves-light btn-small next-station-btn"
+          href="#"
+          disabled="disabled"
+        >
           <i class="material-icons left">keyboard_arrow_right</i> Next station
         </a>
       </div>
@@ -244,36 +306,54 @@
 
     <!-- [BEGIN TEMPLATE] SET SCORE -->
     <template id="station-set-score-template">
-      <h1>Set score:<br />Station <span class="station-no">?</span> - <span class="player-name">???</span></h1>
+      <h1>
+        Set score:<br />Station <span class="station-no">?</span> -
+        <span class="player-name">???</span>
+      </h1>
 
       <div class="container" style="margin-top: 20px;">
         <div class="row">
           <div class="col s6 hit-draggable-container dragula-container">
-            <a class="btn-floating btn-large light-blue accent-4 hit" data-dnd="body-hit">
+            <a
+              class="btn-floating btn-large light-blue accent-4 hit"
+              data-dnd="body-hit"
+            >
               <span class="draggable-text-block">Body</span>
             </a>
           </div>
           <div class="col s6 turn-draggable-container dragula-container">
-            <a class="btn-floating btn-large grey darken-4 turn" data-dnd="first-turn">
+            <a
+              class="btn-floating btn-large grey darken-4 turn"
+              data-dnd="first-turn"
+            >
               <span class="draggable-text-block">1<sup>st</sup></span>
             </a>
           </div>
         </div>
         <div class="row">
           <div class="col s6 hit-draggable-container dragula-container">
-            <a class="btn-floating btn-large amber darken-4 hit" data-dnd="kill-hit">
+            <a
+              class="btn-floating btn-large amber darken-4 hit"
+              data-dnd="kill-hit"
+            >
               <span class="draggable-text-block">Kill</span>
             </a>
           </div>
           <div class="col s6 turn-draggable-container dragula-container">
-            <a class="btn-floating btn-large grey darken-1 turn" data-dnd="second-turn">
+            <a
+              class="btn-floating btn-large grey darken-1 turn"
+              data-dnd="second-turn"
+            >
               <span class="draggable-text-block">2<sup>nd</sup></span>
             </a>
           </div>
         </div>
         <div class="row">
           <div class="col s6 hit-draggable-container dragula-container">
-            <a class="btn-floating btn-large red darken-4 hit" data-dnd="center-kill-hit">
+            <a
+              class="btn-floating btn-large red darken-4 hit"
+              data-dnd="center-kill-hit"
+            >
               <span class="draggable-text-block">Center Kill</span>
             </a>
           </div>
@@ -285,7 +365,9 @@
         </div>
       </div>
 
-      <a class="btn-large brown darken-4 miss-btn" href="#" role="button">Miss</a>
+      <a class="btn-large brown darken-4 miss-btn" href="#" role="button"
+        >Miss</a
+      >
 
       <div class="modal score-modal">
         <div class="modal-content">
@@ -344,10 +426,12 @@
           </div>
           <div class="collapsible-body">
             <a class="waves-effect waves-light btn-large upload-json-btn">
-              <i class="material-icons left">cloud_upload</i> Upload JSON to Server
+              <i class="material-icons left">cloud_upload</i> Upload JSON to
+              Server
             </a>
             <a class="waves-effect waves-light btn-large import-server-db-btn">
-              <i class="material-icons left">save_alt</i> Import Database from Server
+              <i class="material-icons left">save_alt</i> Import Database from
+              Server
             </a>
           </div>
         </li>
@@ -374,7 +458,8 @@
           </div>
           <div class="collapsible-body">
             <a class="waves-effect waves-light btn-large red quit-btn">
-              <i class="material-icons left">not_interested</i> <b>Delete</b> Database
+              <i class="material-icons left">not_interested</i>
+              <b>Delete</b> Database
             </a>
           </div>
         </li>
@@ -395,7 +480,9 @@
       </table>
 
       <div style="margin-top: 15px;">
-        <a class="waves-effect waves-light btn" href="#main-menu">Back to main menu</a>
+        <a class="waves-effect waves-light btn" href="#main-menu"
+          >Back to main menu</a
+        >
       </div>
     </template>
     <!-- [END TEMPLATE] HALL OF FAME -->

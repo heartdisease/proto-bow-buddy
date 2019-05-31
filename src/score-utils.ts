@@ -39,13 +39,20 @@ export interface TotalScore {
 }
 
 export /*final*/ class ScoreUtils {
-  static async generateScoreTable(gid: number, stations: number): Promise<TotalScore> {
-    const totalScoreForGame: TotalScoreForGame = await Application.getStorage().getTotalScoreForGame(gid);
+  static async generateScoreTable(
+    gid: number,
+    stations: number
+  ): Promise<TotalScore> {
+    const totalScoreForGame: TotalScoreForGame = await Application.getStorage().getTotalScoreForGame(
+      gid
+    );
     const playerScores: PlayerScore[] = [];
 
     totalScoreForGame.players.forEach((player: Player) => {
       const scores = totalScoreForGame.scores.get(player.pid)!;
-      const totalScore = scores.map((score: string) => ScoreUtils.scoreToPoints(score)).reduce((a, b) => a + b, 0);
+      const totalScore = scores
+        .map((score: string) => ScoreUtils.scoreToPoints(score))
+        .reduce((a, b) => a + b, 0);
       const averageScore = ScoreUtils.averageScore(totalScore, stations);
 
       playerScores.push({
@@ -53,12 +60,24 @@ export /*final*/ class ScoreUtils {
         totalScore,
         averageScore,
         missCount: scores.filter((score: string) => score === 'miss').length,
-        bodyHitCount: scores.filter((score: string) => score.endsWith(':body-hit')).length,
-        killHitCount: scores.filter((score: string) => score.endsWith(':kill-hit')).length,
-        centerKillHitCount: scores.filter((score: string) => score.endsWith(':center-kill-hit')).length,
-        firstTurnCount: scores.filter((score: string) => score.startsWith('first-turn:')).length,
-        secondTurnCount: scores.filter((score: string) => score.startsWith('second-turn:')).length,
-        thirdTurnCount: scores.filter((score: string) => score.startsWith('third-turn:')).length
+        bodyHitCount: scores.filter((score: string) =>
+          score.endsWith(':body-hit')
+        ).length,
+        killHitCount: scores.filter((score: string) =>
+          score.endsWith(':kill-hit')
+        ).length,
+        centerKillHitCount: scores.filter((score: string) =>
+          score.endsWith(':center-kill-hit')
+        ).length,
+        firstTurnCount: scores.filter((score: string) =>
+          score.startsWith('first-turn:')
+        ).length,
+        secondTurnCount: scores.filter((score: string) =>
+          score.startsWith('second-turn:')
+        ).length,
+        thirdTurnCount: scores.filter((score: string) =>
+          score.startsWith('third-turn:')
+        ).length
       });
     });
     return { totalScoreForGame, playerScores };

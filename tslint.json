@@ -1,0 +1,20 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["angular-tslint-rules", "tslint-plugin-prettier", "tslint-config-prettier"],
+  "jsRules": {
+    "linebreak-style": [true, "LF"],
+    "max-line-length": {
+      "options": [80]
+    },
+    "quotemark": [true, "single", "backtick"]
+  },
+  "rules": {
+    "prettier": true,
+    "linebreak-style": [true, "LF"],
+    "max-line-length": {
+      "options": [80]
+    },
+    "quotemark": [true, "single", "backtick"]
+  },
+  "rulesDirectory": []
+}
