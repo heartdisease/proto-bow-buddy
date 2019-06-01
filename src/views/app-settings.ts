@@ -29,14 +29,6 @@ export class AppSettingsView extends BaseView {
     return 'App Settings';
   }
 
-  protected getTemplateLocator(): string {
-    return '#app-settings-template';
-  }
-
-  protected getViewClassName(): string {
-    return 'app-settings-view';
-  }
-
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.appSettingsCollapsibleElement = this.queryElement(
       '.app-settings-collapsible'
@@ -49,6 +41,14 @@ export class AppSettingsView extends BaseView {
 
   onHide(): void {
     M.Collapsible.getInstance(this.appSettingsCollapsibleElement!).destroy();
+  }
+
+  protected getTemplateLocator(): string {
+    return '#app-settings-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'app-settings-view';
   }
 
   private async initControls(): Promise<void> {
@@ -106,7 +106,6 @@ export class AppSettingsView extends BaseView {
           if (response.ok) {
             window.alert('Database successfully uploaded!');
           } else {
-            console.log(response.status + ' ' + response.statusText);
             window.alert('Failed to upload database!');
           }
         } catch (error) {
@@ -136,10 +135,9 @@ export class AppSettingsView extends BaseView {
               await this.getStorage().importDb(await response.json());
               window.alert('Database successfully uploaded!');
             } else {
-              console.log(response.status + ' ' + response.statusText);
-
               if (response.status === 404) {
                 window.alert(
+                  // tslint:disable-next-line:max-line-length
                   `Failed to import database: no database exists on server for user ${user}!`
                 );
               } else {

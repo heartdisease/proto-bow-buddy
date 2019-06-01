@@ -17,8 +17,8 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { Application } from './main';
 import { Player, TotalScoreForGame } from './db';
+import { Application } from './main';
 
 export interface PlayerScore {
   playerName: string;
@@ -43,6 +43,7 @@ export /*final*/ class ScoreUtils {
     gid: number,
     stations: number
   ): Promise<TotalScore> {
+    // tslint:disable-next-line:max-line-length
     const totalScoreForGame: TotalScoreForGame = await Application.getStorage().getTotalScoreForGame(
       gid
     );
@@ -80,6 +81,7 @@ export /*final*/ class ScoreUtils {
         ).length
       });
     });
+
     return { totalScoreForGame, playerScores };
   }
 

@@ -18,17 +18,17 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { DbAccess } from './db';
+import { AppSettingsView } from './views/app-settings';
 import { BaseView } from './views/base-view';
+import { FinalScoreView } from './views/final-score';
+import { HallOfFameView } from './views/hall-of-fame';
 import { MainMenuView } from './views/main-menu';
 import { NewGameView } from './views/new-game';
 import { StationSelectPlayerView } from './views/station-select-player';
 import { StationSetScoreView } from './views/station-set-score';
-import { FinalScoreView } from './views/final-score';
-import { HallOfFameView } from './views/hall-of-fame';
-import { AppSettingsView } from './views/app-settings';
 
-import './styles/main.scss';
 import '../node_modules/materialize-css/dist/css/materialize.min.css';
+import './styles/main.scss';
 
 interface Route {
   path: string;
@@ -36,7 +36,7 @@ interface Route {
 }
 
 export class Application {
-  private static readonly VERSION = '2.13.1';
+  private static readonly VERSION = '2.14.0';
   private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
   private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
   private static readonly ROUTES: Route[] = [
@@ -52,7 +52,6 @@ export class Application {
 
   private static storage?: DbAccess;
   private static currentView?: BaseView;
-
   static initApplication(): void {
     Application.updateWindowTitle('');
 
@@ -67,9 +66,10 @@ export class Application {
   }
 
   private static updateWindowTitle(viewTitle: string): void {
-    document.title = `BowBuddy ${Application.VERSION}${
-      viewTitle ? ' - ' + viewTitle : ''
-    }`;
+    const version = Application.VERSION;
+    const formattedViewTitle = viewTitle ? ` - ${viewTitle}` : '';
+
+    document.title = `BowBuddy ${version}${formattedViewTitle}`;
   }
 
   private static onHashChange(): void {
@@ -77,22 +77,25 @@ export class Application {
     const viewToken = params[0];
     const view = Application.createViewForToken(viewToken);
 
-    if (this.currentView) {
-      this.currentView.destroyView();
+    if (Application.currentView) {
+      Application.currentView.destroyView();
     }
-    this.currentView = view;
+    Application.currentView = view;
 
     Application.updateWindowTitle(view.getTitle());
     view.initView(Application.getUrlParams());
   }
 
   private static createViewForToken(viewToken: string): BaseView {
-    const route = Application.ROUTES.find(route => route.path === viewToken);
+    const route = Application.ROUTES.find(
+      appRoute => appRoute.path === viewToken
+    );
 
     if (route !== undefined) {
       return new route.view();
     }
     console.warn(`Unknown route: ${viewToken}`);
+
     return new MainMenuView();
   }
 
@@ -100,7 +103,7 @@ export class Application {
     string,
     string | number | boolean
   > {
-    const urlParams = new Map<string, string | number | boolean>();
+    const parsedUrlParams = new Map<string, string | number | boolean>();
 
     return window.location.hash
       ? window.location.hash
@@ -118,9 +121,10 @@ export class Application {
             } else {
               urlParams.set(key, value);
             }
+
             return urlParams;
-          }, urlParams)
-      : urlParams;
+          }, parsedUrlParams)
+      : parsedUrlParams;
   }
 }
 

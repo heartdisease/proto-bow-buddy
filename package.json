@@ -1,13 +1,14 @@
 {
   "name": "proto-bow-buddy",
-  "version": "2.13.1",
+  "version": "2.14.0",
   "description": "A mobile app for keeping track of your score in archery for 3D parcours.",
   "main": "index.html",
   "scripts": {
     "start": "http-server -c-1 dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --config webpack.dev.js --https --progress --content-base dist",
-    "lint": "tslint -c tslint.json 'src/**/*.ts' 'dist/sw.js' 'dist/index.html'",
+    "lint": "tslint -c tslint.json 'src/**/*.ts' 'dist/sw.js'",
+    "lint-fix": "tslint -c tslint.json --fix 'src/**/*.ts' 'dist/sw.js'",
     "prettier": "prettier --write 'src/**/*.ts' 'dist/sw.js' 'dist/index.html'",
     "browser": "google-chrome --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://localhost:8080 https://localhost:8080",
     "build": "webpack --config webpack.prod.js",

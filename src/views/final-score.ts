@@ -17,15 +17,41 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
+import { PlayerScore, ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
-import { Application } from '../main';
-import { ScoreUtils, PlayerScore } from '../score-utils';
 
 import '../styles/final-score.scss';
 
 export class FinalScoreView extends BaseView {
+  private static getDuration(starttime: string, endtime: string): string {
+    const startDate = new Date(starttime);
+    const endDate = new Date(endtime);
+    const diffInMs = endDate.getTime() - startDate.getTime();
+    let duration = '';
+
+    if (diffInMs < 0) {
+      throw new Error('Start time is after end time!');
+    }
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+
+    if (diffInHours >= 1) {
+      duration += `${diffInHours}h `;
+    }
+    duration += `${diffInMinutes - diffInHours * 60}m`;
+
+    return duration;
+  }
   getTitle(): string {
     return 'Final Score';
+  }
+
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+    this.init(parameters.get('gid') as number);
+  }
+
+  onHide(): void {
+    // nothing to do
   }
 
   protected getTemplateLocator(): string {
@@ -36,16 +62,13 @@ export class FinalScoreView extends BaseView {
     return 'final-score-view';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    this.init(parameters.get('gid') as number);
-  }
-
   private async init(gid: number): Promise<void> {
     // sets timestamp for field 'endtime'
     const [game, course] = await Promise.all([
       this.getStorage().finishGame(gid),
       this.getStorage().getCourseForGame(gid)
     ]);
+    // tslint:disable-next-line:prefer-template
     const courseLabel = `${course.place ? course.place + ' ' : ''}${
       course.name
     } (${course.stations} stations)`;
@@ -72,10 +95,7 @@ export class FinalScoreView extends BaseView {
     this.generateScoreTable(gid, course.stations);
   }
 
-  onHide(): void {
-    // nothing to do
-  }
-
+  // tslint:disable-next-line:prefer-function-over-method
   private async generateScoreChart(
     gid: number,
     stations: number
@@ -106,10 +126,10 @@ export class FinalScoreView extends BaseView {
       playerScoreEntry.appendChild(stationColumn);
       players
         .map(player => scores.get(player.pid)!)
-        .forEach(scores => {
+        .forEach(scoresForPlayer => {
           const scoreColumn = this.createElement(
             'td',
-            '' + ScoreUtils.scoreToPoints(scores[station - 1])
+            `${ScoreUtils.scoreToPoints(scoresForPlayer[station - 1])}`
           );
 
           playerScoreEntry.appendChild(scoreColumn);
@@ -168,10 +188,10 @@ export class FinalScoreView extends BaseView {
 
     playerScores.forEach(playerScore => {
       playerTotalScore.appendChild(
-        this.createElement('td', '' + playerScore.totalScore)
+        this.createElement('td', `${playerScore.totalScore}`)
       );
       playerAverageScore.appendChild(
-        this.createElement('td', '' + playerScore.averageScore)
+        this.createElement('td', `${playerScore.averageScore}`)
       );
 
       playerMissCount.appendChild(
@@ -266,7 +286,7 @@ export class FinalScoreView extends BaseView {
 
   private createLeaderBoardBadge(place: number): HTMLElement {
     if (place < 1) {
-      throw new Error('Invalid place: ' + place);
+      throw new Error(`Invalid place: ${place}`);
     }
 
     switch (place) {
@@ -299,24 +319,5 @@ export class FinalScoreView extends BaseView {
           'leaderboard-badge grey darken-4'
         );
     }
-  }
-
-  private static getDuration(starttime: string, endtime: string): string {
-    const startDate = new Date(starttime);
-    const endDate = new Date(endtime);
-    const diffInMs = endDate.getTime() - startDate.getTime();
-    let duration = '';
-
-    if (diffInMs < 0) {
-      throw new Error('Start time is after end time!');
-    }
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMinutes / 60);
-
-    if (diffInHours >= 1) {
-      duration += diffInHours + 'h ';
-    }
-    duration += diffInMinutes - diffInHours * 60 + 'm';
-    return duration;
   }
 }

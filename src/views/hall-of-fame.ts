@@ -26,20 +26,20 @@ export class HallOfFameView extends BaseView {
     return 'Hall of Fame';
   }
 
-  protected getTemplateLocator(): string {
-    return '#hall-of-fame-template';
-  }
-
-  protected getViewClassName(): string {
-    return 'hall-of-fame-view';
-  }
-
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.init();
   }
 
   onHide(): void {
     // nothing to do
+  }
+
+  protected getTemplateLocator(): string {
+    return '#hall-of-fame-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'hall-of-fame-view';
   }
 
   private async init(): Promise<void> {

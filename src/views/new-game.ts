@@ -17,8 +17,8 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
+import { Course, Player } from '../db';
 import { BaseView } from './base-view';
-import { Player, Course } from '../db';
 
 import '../styles/new-game.scss';
 
@@ -31,29 +31,8 @@ export class NewGameView extends BaseView {
   private playerSelectElement?: HTMLElement;
   private courseSelectElement?: HTMLElement;
 
-  private readonly addPlayerClickListener = async (event: Event) =>
-    this.onAddPlayerClick(event);
-  private readonly playerSelectionChangeListener = async (event: Event) =>
-    this.onPlayerSelectionChange(event);
-  private readonly courseSelectionChangeListener = async (event: Event) =>
-    this.onCourseSelectionChange(event);
-  private readonly setCourseClickListener = async (event: Event) =>
-    this.onSetCourseClick(event);
-  private readonly startGameClickListener = async (event: Event) =>
-    this.onStartGameClick(event);
-  private readonly playerInputListener = () => this.verifyPlayerInput();
-  private readonly courseInputListener = () => this.verifyCourseInput();
-
   getTitle(): string {
     return 'New Game';
-  }
-
-  protected getTemplateLocator(): string {
-    return '#new-game-template';
-  }
-
-  protected getViewClassName(): string {
-    return 'new-game-view';
   }
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
@@ -101,6 +80,27 @@ export class NewGameView extends BaseView {
     M.FormSelect.getInstance(this.courseSelectElement!).destroy();
   }
 
+  protected getTemplateLocator(): string {
+    return '#new-game-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'new-game-view';
+  }
+
+  private readonly addPlayerClickListener = async (event: Event) =>
+    this.onAddPlayerClick(event);
+  private readonly playerSelectionChangeListener = async (event: Event) =>
+    this.onPlayerSelectionChange(event);
+  private readonly courseSelectionChangeListener = async (event: Event) =>
+    this.onCourseSelectionChange(event);
+  private readonly setCourseClickListener = async (event: Event) =>
+    this.onSetCourseClick(event);
+  private readonly startGameClickListener = async (event: Event) =>
+    this.onStartGameClick(event);
+  private readonly playerInputListener = () => this.verifyPlayerInput();
+  private readonly courseInputListener = () => this.verifyCourseInput();
+
   private initControls(): void {
     M.Collapsible.init(this.collapsibleElement!, {});
 
@@ -109,7 +109,7 @@ export class NewGameView extends BaseView {
     this.registerStartButtonEventHandler();
   }
 
-  private async updatePlayerSelectionMenu(init: boolean = false) {
+  private async updatePlayerSelectionMenu(init = false): Promise<void> {
     const playerSelect = this.playerSelectElement!;
 
     if (!init) {
@@ -157,7 +157,7 @@ export class NewGameView extends BaseView {
     }
   }
 
-  private async updateCourseSelectionMenu(init: boolean = false) {
+  private async updateCourseSelectionMenu(init = false): Promise<void> {
     const courseSelect = this.courseSelectElement!;
 
     if (!init) {
@@ -332,12 +332,13 @@ export class NewGameView extends BaseView {
     if (value !== undefined) {
       option.value = value.toString();
     }
+
     return option;
   }
 
   /*** EVENT HANDLERS ***/
 
-  private async onAddPlayerClick(event: Event) {
+  private async onAddPlayerClick(event: Event): Promise<void> {
     event.preventDefault();
     this.queryInputElement('.add-player-btn').classList.add('disabled');
 
@@ -359,7 +360,7 @@ export class NewGameView extends BaseView {
     }
   }
 
-  private async onPlayerSelectionChange(event: Event) {
+  private async onPlayerSelectionChange(event: Event): Promise<void> {
     const pid = (event.target as HTMLSelectElement).value;
 
     if (pid === 'new') {
@@ -380,7 +381,7 @@ export class NewGameView extends BaseView {
     }
   }
 
-  private async onCourseSelectionChange(event: Event) {
+  private async onCourseSelectionChange(event: Event): Promise<void> {
     const cid = (event.target as HTMLSelectElement).value;
 
     if (cid === 'new') {
@@ -401,7 +402,7 @@ export class NewGameView extends BaseView {
     }
   }
 
-  private async onSetCourseClick(event: Event) {
+  private async onSetCourseClick(event: Event): Promise<void> {
     event.preventDefault();
     this.queryInputElement('.set-course-btn').classList.add('disabled');
 
@@ -430,7 +431,7 @@ export class NewGameView extends BaseView {
     }
   }
 
-  private async onStartGameClick(event: Event) {
+  private async onStartGameClick(event: Event): Promise<void> {
     event.preventDefault();
     this.queryElement('.start-game-btn').classList.add('disabled'); // disable button while async db action is running
 

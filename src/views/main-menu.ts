@@ -26,19 +26,19 @@ export class MainMenuView extends BaseView {
     return '';
   }
 
-  protected getTemplateLocator(): string {
-    return '#main-menu-template';
-  }
-
-  protected getViewClassName(): string {
-    return 'main-menu-view';
-  }
-
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.queryElement('.app-logo > h1').innerText = document.title;
   }
 
   onHide(): void {
     // nothing to do
+  }
+
+  protected getTemplateLocator(): string {
+    return '#main-menu-template';
+  }
+
+  protected getViewClassName(): string {
+    return 'main-menu-view';
   }
 }

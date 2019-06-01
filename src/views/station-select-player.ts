@@ -17,15 +17,43 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { BaseView } from './base-view';
 import { PlayerWithScore } from '../db';
 import { ScoreUtils } from '../score-utils';
+import { BaseView } from './base-view';
 
 import '../styles/station-select-player.scss';
 
 export class StationSelectPlayerView extends BaseView {
+  // TODO move into its own utility
+  private static hideIntermediateScore(hide?: boolean): boolean {
+    if (hide === undefined) {
+      const value = window.localStorage.getItem(
+        'bow-buddy-settings:hide-intermediate-score'
+      );
+
+      return value === 'true';
+    }
+    window.localStorage.setItem(
+      'bow-buddy-settings:hide-intermediate-score',
+      `${hide}`
+    );
+
+    return hide;
+  }
   getTitle(): string {
     return 'Choose Player';
+  }
+
+  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+    const gid = parameters.get('gid') as number;
+    const station = parameters.get('station') as number;
+
+    this.queryElement('.station-no').innerText = `${station}`;
+    this.init(gid, station);
+  }
+
+  onHide(): void {
+    // nothing to do
   }
 
   protected getTemplateLocator(): string {
@@ -34,18 +62,6 @@ export class StationSelectPlayerView extends BaseView {
 
   protected getViewClassName(): string {
     return 'station-select-player-view';
-  }
-
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    const gid = parameters.get('gid') as number;
-    const station = parameters.get('station') as number;
-
-    this.queryElement('.station-no').innerText = '' + station;
-    this.init(gid, station);
-  }
-
-  onHide(): void {
-    // nothing to do
   }
 
   private async init(gid: number, station: number): Promise<void> {
@@ -66,11 +82,13 @@ export class StationSelectPlayerView extends BaseView {
       } else {
         nextStationBtn.addEventListener('click', e => {
           e.preventDefault();
+          // tslint:disable-next-line:max-line-length
           window.location.href = `#station-select-player;gid=${gid};station=${station +
             1}`;
         });
       }
 
+      // tslint:disable-next-line:max-line-length
       showScoreSwitch.checked = !StationSelectPlayerView.hideIntermediateScore();
       showScoreSwitch.addEventListener('change', e => {
         StationSelectPlayerView.hideIntermediateScore(!showScoreSwitch.checked);
@@ -113,8 +131,10 @@ export class StationSelectPlayerView extends BaseView {
           .map(p => p.pid)
           .join('+');
 
+        // tslint:disable-next-line:max-line-length
         window.location.href = `#station-set-score;gid=${gid};pid=${firstPid};qa=${quickAssign};station=${station}`;
       } else {
+        // tslint:disable-next-line:max-line-length
         window.location.href = `#station-set-score;gid=${gid};pid=${firstPid};station=${station}`;
       }
     });
@@ -122,7 +142,7 @@ export class StationSelectPlayerView extends BaseView {
       const quickAssign = players.map(p => p.pid).join('+');
 
       e.preventDefault();
-      window.location.href = `#station-set-score;gid=${gid};qa=${quickAssign};aa=true;station=${station}`;
+      window.location.href = `#station-set-score;gid=${gid};qa=${quickAssign};aa=true;station=${station}`; // ts-lint:disable-line:max-line-length
     });
 
     for (const player of players) {
@@ -185,21 +205,7 @@ export class StationSelectPlayerView extends BaseView {
       scoreBadge.style.fontWeight = 'bold';
       playerEntry.appendChild(scoreBadge);
     }
-    return playerEntry;
-  }
 
-  // TODO move into its own utility
-  private static hideIntermediateScore(hide?: boolean): boolean {
-    if (hide === undefined) {
-      const value = window.localStorage.getItem(
-        'bow-buddy-settings:hide-intermediate-score'
-      );
-      return value === 'true';
-    }
-    window.localStorage.setItem(
-      'bow-buddy-settings:hide-intermediate-score',
-      '' + hide
-    );
-    return hide;
+    return playerEntry;
   }
 }

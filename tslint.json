@@ -1,20 +1,53 @@
 {
   "defaultSeverity": "error",
-  "extends": ["angular-tslint-rules", "tslint-plugin-prettier", "tslint-config-prettier"],
+  "extends": [
+    "angular-tslint-rules",
+    "tslint-plugin-prettier",
+    "tslint-config-prettier"
+  ],
   "jsRules": {
+    "prettier": true,
     "linebreak-style": [true, "LF"],
-    "max-line-length": {
-      "options": [80]
-    },
-    "quotemark": [true, "single", "backtick"]
+    "max-line-length": [
+      true,
+      { "limit": 80, "ignore-pattern": "^import |^export {(.*?)}|// " }
+    ],
+    "quotemark": [true, "single", "backtick"],
+    "no-console": [false, "log", "warning", "error"]
   },
   "rules": {
     "prettier": true,
     "linebreak-style": [true, "LF"],
-    "max-line-length": {
-      "options": [80]
+    "max-line-length": [
+      true,
+      { "limit": 80, "ignore-pattern": "^import |^export {(.*?)}|// " }
+    ],
+    "quotemark": [true, "single", "backtick"],
+    "comment-type": [true, "doc", "singleline", "multiline"],
+    "array-type": [true, "array-simple"],
+    "no-console": [false, "log", "warning", "error"],
+    "only-arrow-functions": [true, "allow-named-functions"],
+    "no-null-keyword": {
+      "options": true,
+      "severity": "warning"
     },
-    "quotemark": [true, "single", "backtick"]
+    "no-non-null-assertion": {
+      "options": true,
+      "severity": "warning"
+    },
+    "no-conditional-assignment": {
+      "options": [true],
+      "severity": "warning"
+    },
+    "no-import-side-effect": {
+      "options": [true, { "ignore-module": "(\\.html|\\.css)$" }],
+      "severity": "warning"
+    },
+    "prefer-function-over-method": {
+      "options": true,
+      "severity": "warning"
+    },
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": []
 }
