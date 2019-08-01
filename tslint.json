@@ -5,6 +5,7 @@
     "tslint-plugin-prettier",
     "tslint-config-prettier"
   ],
+  "rulesDirectory": [],
   "jsRules": {
     "prettier": true,
     "linebreak-style": [true, "LF"],
@@ -48,6 +49,5 @@
       "severity": "warning"
     },
     "object-literal-sort-keys": false
-  },
-  "rulesDirectory": []
+  }
 }

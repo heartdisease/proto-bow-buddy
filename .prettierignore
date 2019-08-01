@@ -1,0 +1,6 @@
+/dist/main.bundle.js
+/dist/main.css
+
+/node_modules/**
+
+package-lock.json

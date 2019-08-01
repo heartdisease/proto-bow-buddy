@@ -1,0 +1,16 @@
+{
+  "semi": true,
+  "useTabs": false,
+  "tabWidth": 2,
+  "proseWrap": "always",
+  "printWidth": 80,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "htmlWhitespaceSensitivity": "css",
+  "overrides": [
+    {
+      "files": [".prettierrc", ".stylelintrc"],
+      "options": { "parser": "json" }
+    }
+  ]
+}
