@@ -12,9 +12,9 @@ self.addEventListener('install', event => {
         '/main.css',
         '/site.webmanifest',
         '/icon.png',
-        '/favicon.ico'
+        '/favicon.ico',
       ]);
-    })
+    }),
   );
 });
 
@@ -23,14 +23,12 @@ async function fetchWithTimeout(request, timeoutInMs) {
   const timeout = setTimeout(() => {
     controller.abort();
     console.warn(
-      `Aborted request '${
-        request.url
-      }': request took longer than ${timeoutInMs}ms.`
+      `Aborted request '${request.url}': request took longer than ${timeoutInMs}ms.`,
     );
   }, timeout);
 
   return fetch(request, { signal: controller.signal }).finally(() =>
-    clearTimeout(timeoutInMs)
+    clearTimeout(timeoutInMs),
   );
 }
 
@@ -45,12 +43,10 @@ self.addEventListener('fetch', event => {
           return response;
         }
         console.log(
-          `Cache miss, need to load resource from server. (${
-            event.request.url
-          })`
+          `Cache miss, need to load resource from server. (${event.request.url})`,
         );
         return fetch(event.request);
       });
-    })
+    }),
   );
 });

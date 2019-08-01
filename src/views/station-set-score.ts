@@ -74,7 +74,7 @@ function navigateToNextPlayer(
   gid: number,
   station: number,
   nextPid: number,
-  remainingPids: number[]
+  remainingPids: number[],
 ): void {
   const qaParam =
     remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
@@ -84,14 +84,14 @@ function navigateToNextPlayer(
 function navigateNext(
   gid: number,
   station: number,
-  remainingPids: number[]
+  remainingPids: number[],
 ): void {
   if (remainingPids.length > 0) {
     navigateToNextPlayer(
       gid,
       station,
       remainingPids[0],
-      remainingPids.slice(1)
+      remainingPids.slice(1),
     );
   } else {
     navigateToPlayerSelection(gid, station);
@@ -137,12 +137,12 @@ export class StationSetScoreView extends BaseView {
     pid: number,
     remainingPids: number[],
     station: number,
-    assignAll: boolean
+    assignAll: boolean,
   ): void {
     const drake = dragula(
       [
         ...this.queryElements('.hit-draggable-container'),
-        ...this.queryElements('.turn-draggable-container')
+        ...this.queryElements('.turn-draggable-container'),
       ],
       {
         copy: true,
@@ -152,8 +152,8 @@ export class StationSetScoreView extends BaseView {
           (origin.classList.contains('hit') &&
             target.classList.contains('turn-draggable-container')) ||
           (origin.classList.contains('turn') &&
-            target.classList.contains('hit-draggable-container'))
-      }
+            target.classList.contains('hit-draggable-container')),
+      },
     );
 
     drake
@@ -189,7 +189,7 @@ export class StationSetScoreView extends BaseView {
     pid: number,
     remainingPids: number[],
     station: number,
-    assignAll: boolean
+    assignAll: boolean,
   ): Promise<void> {
     this.scoreModalElement = this.queryElement('.score-modal')!;
 
@@ -198,9 +198,9 @@ export class StationSetScoreView extends BaseView {
     this.queryElement('.station-no').innerText = `${station}`;
 
     if (assignAll) {
-      this.queryElement('span.player-name').innerText = `All players (${
-        remainingPids.length
-      })`;
+      this.queryElement(
+        'span.player-name',
+      ).innerText = `All players (${remainingPids.length})`;
     } else {
       const player = await Application.getStorage().getPlayer(pid);
       this.queryElement('span.player-name').innerText = player.name;
@@ -216,7 +216,7 @@ export class StationSetScoreView extends BaseView {
     remainingPids: number[],
     assignAll: boolean,
     hit?: string,
-    turn?: string
+    turn?: string,
   ): Promise<void> {
     const before = Date.now();
     const miss = hit === undefined || turn === undefined;
@@ -249,7 +249,7 @@ export class StationSetScoreView extends BaseView {
         } else {
           window.setTimeout(
             () => navigateToPlayerSelection(gid, station),
-            StationSetScoreView.NAVIGATION_DELAY - timeDiff
+            StationSetScoreView.NAVIGATION_DELAY - timeDiff,
           );
         }
       } else {
@@ -262,7 +262,7 @@ export class StationSetScoreView extends BaseView {
         } else {
           window.setTimeout(
             () => navigateNext(gid, station, remainingPids),
-            StationSetScoreView.NAVIGATION_DELAY - timeDiff
+            StationSetScoreView.NAVIGATION_DELAY - timeDiff,
           );
         }
       }

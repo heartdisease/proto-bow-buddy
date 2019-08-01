@@ -40,7 +40,7 @@ export class NewGameView extends BaseView {
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');
     const newCourseNoOfStations = this.queryElement(
-      '.new-course-no-of-stations'
+      '.new-course-no-of-stations',
     );
     const setCourseBtn = this.queryElement('.set-course-btn');
 
@@ -62,7 +62,7 @@ export class NewGameView extends BaseView {
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');
     const newCourseNoOfStations = this.queryElement(
-      '.new-course-no-of-stations'
+      '.new-course-no-of-stations',
     );
     const setCourseBtn = this.queryElement('.set-course-btn');
 
@@ -71,7 +71,7 @@ export class NewGameView extends BaseView {
     newCourseName.removeEventListener('keyup', this.courseInputListener);
     newCourseNoOfStations.removeEventListener(
       'keyup',
-      this.courseInputListener
+      this.courseInputListener,
     );
     setCourseBtn.removeEventListener('click', this.setCourseClickListener);
 
@@ -115,7 +115,7 @@ export class NewGameView extends BaseView {
     if (!init) {
       playerSelect.removeEventListener(
         'change',
-        this.playerSelectionChangeListener
+        this.playerSelectionChangeListener,
       ); // deregister handler first, because invalid option is default selection
       M.FormSelect.getInstance(playerSelect).destroy();
     }
@@ -137,13 +137,13 @@ export class NewGameView extends BaseView {
       players
         .filter(player =>
           this.configuredPlayers.every(
-            configuredPlayer => configuredPlayer.pid !== player.pid
-          )
+            configuredPlayer => configuredPlayer.pid !== player.pid,
+          ),
         )
         .forEach(player =>
           playerSelectFragment.appendChild(
-            this.createOptionElement(player.name, player.pid)
-          )
+            this.createOptionElement(player.name, player.pid),
+          ),
         );
 
       // re-init widget
@@ -163,7 +163,7 @@ export class NewGameView extends BaseView {
     if (!init) {
       courseSelect.removeEventListener(
         'change',
-        this.courseSelectionChangeListener
+        this.courseSelectionChangeListener,
       ); // deregister handler first, because invalid option is default selection
       M.FormSelect.getInstance(courseSelect).destroy();
     }
@@ -186,14 +186,14 @@ export class NewGameView extends BaseView {
         .filter(
           course =>
             this.configuredCourse === undefined ||
-            this.configuredCourse.cid !== course.cid
+            this.configuredCourse.cid !== course.cid,
         )
         .forEach(course => {
           courseSelectFragment.appendChild(
             this.createOptionElement(
               `${course.name} (${course.stations})`,
-              course.cid
-            )
+              course.cid,
+            ),
           );
         });
 
@@ -213,7 +213,7 @@ export class NewGameView extends BaseView {
 
     playerSelect.removeEventListener(
       'change',
-      this.playerSelectionChangeListener
+      this.playerSelectionChangeListener,
     );
     playerSelect.addEventListener('change', this.playerSelectionChangeListener);
   }
@@ -223,7 +223,7 @@ export class NewGameView extends BaseView {
 
     courseSelect.removeEventListener(
       'change',
-      this.courseSelectionChangeListener
+      this.courseSelectionChangeListener,
     );
     courseSelect.addEventListener('change', this.courseSelectionChangeListener);
   }
@@ -231,7 +231,7 @@ export class NewGameView extends BaseView {
   private registerStartButtonEventHandler(): void {
     this.queryElement('.start-game-btn').addEventListener(
       'click',
-      this.startGameClickListener
+      this.startGameClickListener,
     );
   }
 
@@ -271,7 +271,7 @@ export class NewGameView extends BaseView {
     courseEntry.appendChild(this.createElement('td', course.name));
     courseEntry.appendChild(this.createElement('td', course.place || '-'));
     courseEntry.appendChild(
-      this.createElement('td', course.stations.toString())
+      this.createElement('td', course.stations.toString()),
     );
 
     courseEntries.appendChild(courseEntry);
@@ -325,7 +325,7 @@ export class NewGameView extends BaseView {
 
   private createOptionElement(
     content: string,
-    value?: string | number
+    value?: string | number,
   ): HTMLOptionElement {
     const option = this.createElement('option', content) as HTMLOptionElement;
 
@@ -375,7 +375,7 @@ export class NewGameView extends BaseView {
         this.updatePlayerSelectionMenu();
       } catch (error) {
         console.error(
-          `Failed to load player with pid ${pid}: ${error.message}`
+          `Failed to load player with pid ${pid}: ${error.message}`,
         );
       }
     }
@@ -396,7 +396,7 @@ export class NewGameView extends BaseView {
         this.updateCourseSelectionMenu();
       } catch (error) {
         console.error(
-          `Failed to load course with cid ${cid}: ${error.message}`
+          `Failed to load course with cid ${cid}: ${error.message}`,
         );
       }
     }
@@ -418,7 +418,7 @@ export class NewGameView extends BaseView {
         courseName,
         '',
         '',
-        noOfStations
+        noOfStations,
       );
 
       this.addCourseToTable(course);
@@ -440,7 +440,7 @@ export class NewGameView extends BaseView {
     const pids: number[] = [];
 
     for (const playerEntry of this.queryElements(
-      '.player-entries > tr[data-pid]'
+      '.player-entries > tr[data-pid]',
     )) {
       pids.push(+playerEntry.dataset.pid!);
     }

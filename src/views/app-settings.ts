@@ -31,10 +31,10 @@ export class AppSettingsView extends BaseView {
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.appSettingsCollapsibleElement = this.queryElement(
-      '.app-settings-collapsible'
+      '.app-settings-collapsible',
     )!;
     this.textarea = this.queryElement(
-      '.app-settings-collapsible textarea'
+      '.app-settings-collapsible textarea',
     ) as HTMLTextAreaElement;
     this.initControls();
   }
@@ -72,8 +72,8 @@ export class AppSettingsView extends BaseView {
               console.error(`Failed to export database: ${error.message}`);
             }
           }
-        }
-      }
+        },
+      },
     );
 
     this.initServerSyncControls();
@@ -89,7 +89,7 @@ export class AppSettingsView extends BaseView {
 
       if (
         window.confirm(
-          'Do you want to upload the entire database to the server?'
+          'Do you want to upload the entire database to the server?',
         )
       ) {
         const user = window.prompt('Username:') || 'anonymous';
@@ -100,7 +100,7 @@ export class AppSettingsView extends BaseView {
           const response = await this.uploadDatabaseToServer(
             user,
             password,
-            dbObject
+            dbObject,
           );
 
           if (response.ok) {
@@ -110,7 +110,7 @@ export class AppSettingsView extends BaseView {
           }
         } catch (error) {
           console.error(
-            `Failed to export database to server: ${error.message}`
+            `Failed to export database to server: ${error.message}`,
           );
         }
       }
@@ -123,7 +123,7 @@ export class AppSettingsView extends BaseView {
 
         if (
           window.confirm(
-            'Do you want to import the entire database from the server?'
+            'Do you want to import the entire database from the server?',
           )
         ) {
           const user = window.prompt('Username:') || 'anonymous';
@@ -138,7 +138,7 @@ export class AppSettingsView extends BaseView {
               if (response.status === 404) {
                 window.alert(
                   // tslint:disable-next-line:max-line-length
-                  `Failed to import database: no database exists on server for user ${user}!`
+                  `Failed to import database: no database exists on server for user ${user}!`,
                 );
               } else {
                 window.alert('Failed to import database!');
@@ -146,11 +146,11 @@ export class AppSettingsView extends BaseView {
             }
           } catch (error) {
             console.error(
-              `Failed to import database from server: ${error.message}`
+              `Failed to import database from server: ${error.message}`,
             );
           }
         }
-      }
+      },
     );
   }
 
@@ -169,7 +169,7 @@ export class AppSettingsView extends BaseView {
         } catch (e) {
           console.error(e.message);
         }
-      }
+      },
     );
 
     this.queryElement('.update-db-btn').addEventListener(
@@ -179,7 +179,7 @@ export class AppSettingsView extends BaseView {
 
         if (
           window.confirm(
-            'Do you want to rewrite the entire database with input JSON?'
+            'Do you want to rewrite the entire database with input JSON?',
           )
         ) {
           try {
@@ -189,7 +189,7 @@ export class AppSettingsView extends BaseView {
             window.alert(`Failed to import database: ${error.message}`);
           }
         }
-      }
+      },
     );
   }
 
@@ -215,7 +215,7 @@ export class AppSettingsView extends BaseView {
   private async uploadDatabaseToServer(
     user: string,
     password: string,
-    dbObject: any
+    dbObject: any,
   ): Promise<Response> {
     const dbDump = JSON.stringify(dbObject);
 
@@ -223,11 +223,11 @@ export class AppSettingsView extends BaseView {
       method: 'POST',
       cache: 'no-cache',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(
-        dbDump
-      )}`
+        dbDump,
+      )}`,
     });
   }
 }

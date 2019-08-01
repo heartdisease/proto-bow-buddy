@@ -66,7 +66,7 @@ export class FinalScoreView extends BaseView {
     // sets timestamp for field 'endtime'
     const [game, course] = await Promise.all([
       this.getStorage().finishGame(gid),
-      this.getStorage().getCourseForGame(gid)
+      this.getStorage().getCourseForGame(gid),
     ]);
     // tslint:disable-next-line:prefer-template
     const courseLabel = `${course.place ? course.place + ' ' : ''}${
@@ -79,16 +79,16 @@ export class FinalScoreView extends BaseView {
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false
+      hour12: false,
     });
     const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false
+      hour12: false,
     });
 
     this.queryElement(
-      '.course-duration'
+      '.course-duration',
     ).innerHTML = `${duration}<br/>(${from} - ${to})`;
     this.queryElement('.course-label').innerText = courseLabel;
     this.generateScoreChart(gid, course.stations);
@@ -98,14 +98,14 @@ export class FinalScoreView extends BaseView {
   // tslint:disable-next-line:prefer-function-over-method
   private async generateScoreChart(
     gid: number,
-    stations: number
+    stations: number,
   ): Promise<void> {
     return Promise.resolve(); // TODO implement score chart with chartist.js
   }
 
   private async generateScoreTable(
     gid: number,
-    stations: number
+    stations: number,
   ): Promise<void> {
     const totalScore = await ScoreUtils.generateScoreTable(gid, stations);
     const players = totalScore.totalScoreForGame.players;
@@ -115,7 +115,7 @@ export class FinalScoreView extends BaseView {
     const playerHeaderRow = this.queryElement('.player-header-row');
 
     players.forEach(player =>
-      playerHeaderRow.appendChild(this.createElement('th', player.name))
+      playerHeaderRow.appendChild(this.createElement('th', player.name)),
     );
 
     for (let station = 1; station <= stations; station++) {
@@ -129,7 +129,7 @@ export class FinalScoreView extends BaseView {
         .forEach(scoresForPlayer => {
           const scoreColumn = this.createElement(
             'td',
-            `${ScoreUtils.scoreToPoints(scoresForPlayer[station - 1])}`
+            `${ScoreUtils.scoreToPoints(scoresForPlayer[station - 1])}`,
           );
 
           playerScoreEntry.appendChild(scoreColumn);
@@ -143,7 +143,7 @@ export class FinalScoreView extends BaseView {
 
   private sumUpScore(
     playerScoreEntries: HTMLElement,
-    playerScores: PlayerScore[]
+    playerScores: PlayerScore[],
   ): void {
     const playerTotalScore = document.createElement('tr');
     const playerAverageScore = document.createElement('tr');
@@ -174,7 +174,7 @@ export class FinalScoreView extends BaseView {
 
     playerCenterKillHitCount.style.fontStyle = 'italic';
     playerCenterKillHitCount.appendChild(
-      this.createElement('td', 'Center Kill:')
+      this.createElement('td', 'Center Kill:'),
     );
 
     playerFirstTurnCount.style.fontStyle = 'italic';
@@ -188,37 +188,37 @@ export class FinalScoreView extends BaseView {
 
     playerScores.forEach(playerScore => {
       playerTotalScore.appendChild(
-        this.createElement('td', `${playerScore.totalScore}`)
+        this.createElement('td', `${playerScore.totalScore}`),
       );
       playerAverageScore.appendChild(
-        this.createElement('td', `${playerScore.averageScore}`)
+        this.createElement('td', `${playerScore.averageScore}`),
       );
 
       playerMissCount.appendChild(
-        this.createElement('td', `${playerScore.missCount}&times;`, true)
+        this.createElement('td', `${playerScore.missCount}&times;`, true),
       );
       playerBodyHitCount.appendChild(
-        this.createElement('td', `${playerScore.bodyHitCount}&times;`, true)
+        this.createElement('td', `${playerScore.bodyHitCount}&times;`, true),
       );
       playerKillHitCount.appendChild(
-        this.createElement('td', `${playerScore.killHitCount}&times;`, true)
+        this.createElement('td', `${playerScore.killHitCount}&times;`, true),
       );
       playerCenterKillHitCount.appendChild(
         this.createElement(
           'td',
           `${playerScore.centerKillHitCount}&times;`,
-          true
-        )
+          true,
+        ),
       );
 
       playerFirstTurnCount.appendChild(
-        this.createElement('td', `${playerScore.firstTurnCount}&times;`, true)
+        this.createElement('td', `${playerScore.firstTurnCount}&times;`, true),
       );
       playerSecondTurnCount.appendChild(
-        this.createElement('td', `${playerScore.secondTurnCount}&times;`, true)
+        this.createElement('td', `${playerScore.secondTurnCount}&times;`, true),
       );
       playerThirdTurnCount.appendChild(
-        this.createElement('td', `${playerScore.thirdTurnCount}&times;`, true)
+        this.createElement('td', `${playerScore.thirdTurnCount}&times;`, true),
       );
     });
 
@@ -242,38 +242,36 @@ export class FinalScoreView extends BaseView {
       .sort((a, b) => b.totalScore - a.totalScore)
       .forEach((playerScore, index) =>
         leaderboard.appendChild(
-          this.createLeaderBoardEntry(playerScore, index + 1)
-        )
+          this.createLeaderBoardEntry(playerScore, index + 1),
+        ),
       );
   }
 
   private createLeaderBoardEntry(
     playerScore: PlayerScore,
-    place: number
+    place: number,
   ): HTMLElement {
     const entry = this.createElement(
       'li',
       null,
       false,
-      'collection-item avatar'
+      'collection-item avatar',
     );
     const playerName = this.createElement(
       'span',
       playerScore.playerName,
       false,
-      'title'
+      'title',
     );
     const totalScore = this.createElement(
       'p',
-      `<b>Total score</b>: ${playerScore.totalScore} (Average: ${
-        playerScore.averageScore
-      })`,
-      true
+      `<b>Total score</b>: ${playerScore.totalScore} (Average: ${playerScore.averageScore})`,
+      true,
     );
     const missCount = this.createElement(
       'p',
       `<b>Miss</b>: ${playerScore.missCount}&times;`,
-      true
+      true,
     );
 
     entry.appendChild(this.createLeaderBoardBadge(place));
@@ -295,28 +293,28 @@ export class FinalScoreView extends BaseView {
           'div',
           '<span>1<sup>st</sup></span>',
           true,
-          'leaderboard-badge first-place amber accent-3'
+          'leaderboard-badge first-place amber accent-3',
         );
       case 2:
         return this.createElement(
           'div',
           '<span>2<sup>nd</sup></span>',
           true,
-          'leaderboard-badge second-place blue-grey lighten-3'
+          'leaderboard-badge second-place blue-grey lighten-3',
         );
       case 3:
         return this.createElement(
           'div',
           '<span>3<sup>rd</sup></span>',
           true,
-          'leaderboard-badge third-place deep-orange darken-3'
+          'leaderboard-badge third-place deep-orange darken-3',
         );
       default:
         return this.createElement(
           'div',
           `<span>${place}<sup>th</sup></span>`,
           true,
-          'leaderboard-badge grey darken-4'
+          'leaderboard-badge grey darken-4',
         );
     }
   }

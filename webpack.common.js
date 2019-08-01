@@ -8,51 +8,51 @@ const DESTINATION = path.resolve(__dirname, 'dist');
 module.exports = {
   context: SRC_ROOT,
   entry: {
-    main: './main.ts'
+    main: './main.ts',
   },
   output: {
     filename: '[name].bundle.js',
-    path: DESTINATION
+    path: DESTINATION,
   },
   resolve: {
     extensions: ['.ts', '.js', '.scss', '.css'],
-    modules: [SRC_ROOT, SRC_ROOT + '/styles', 'node_modules']
+    modules: [SRC_ROOT, SRC_ROOT + '/styles', 'node_modules'],
   },
   module: {
     rules: [
       {
         test: /\.ts$/,
         exclude: [/node_modules/],
-        use: 'ts-loader'
+        use: 'ts-loader',
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader']
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.scss$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader
+            loader: MiniCssExtractPlugin.loader,
           },
           {
-            loader: 'css-loader'
+            loader: 'css-loader',
           },
           {
             loader: 'sass-loader',
             options: {
               implementation: require('dart-sass'),
-              fiber: Fiber
-            }
-          }
-        ]
-      }
-    ]
+              fiber: Fiber,
+            },
+          },
+        ],
+      },
+    ],
   },
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
-      chunkFilename: '[id].css'
-    })
-  ]
+      chunkFilename: '[id].css',
+    }),
+  ],
 };

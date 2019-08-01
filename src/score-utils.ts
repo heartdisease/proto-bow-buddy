@@ -41,11 +41,11 @@ export interface TotalScore {
 export /*final*/ class ScoreUtils {
   static async generateScoreTable(
     gid: number,
-    stations: number
+    stations: number,
   ): Promise<TotalScore> {
     // tslint:disable-next-line:max-line-length
     const totalScoreForGame: TotalScoreForGame = await Application.getStorage().getTotalScoreForGame(
-      gid
+      gid,
     );
     const playerScores: PlayerScore[] = [];
 
@@ -62,23 +62,23 @@ export /*final*/ class ScoreUtils {
         averageScore,
         missCount: scores.filter((score: string) => score === 'miss').length,
         bodyHitCount: scores.filter((score: string) =>
-          score.endsWith(':body-hit')
+          score.endsWith(':body-hit'),
         ).length,
         killHitCount: scores.filter((score: string) =>
-          score.endsWith(':kill-hit')
+          score.endsWith(':kill-hit'),
         ).length,
         centerKillHitCount: scores.filter((score: string) =>
-          score.endsWith(':center-kill-hit')
+          score.endsWith(':center-kill-hit'),
         ).length,
         firstTurnCount: scores.filter((score: string) =>
-          score.startsWith('first-turn:')
+          score.startsWith('first-turn:'),
         ).length,
         secondTurnCount: scores.filter((score: string) =>
-          score.startsWith('second-turn:')
+          score.startsWith('second-turn:'),
         ).length,
         thirdTurnCount: scores.filter((score: string) =>
-          score.startsWith('third-turn:')
-        ).length
+          score.startsWith('third-turn:'),
+        ).length,
       });
     });
 

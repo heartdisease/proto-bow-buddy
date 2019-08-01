@@ -49,7 +49,7 @@ export class HallOfFameView extends BaseView {
     // TODO filter out unfinished games (should we automatically clean up unfinished games?)
     for (const game of games.sort(
       (a, b) =>
-        new Date(b.starttime).getTime() - new Date(a.starttime).getTime()
+        new Date(b.starttime).getTime() - new Date(a.starttime).getTime(),
     )) {
       const course = await this.getStorage().getCourseForGame(game.gid);
       const from = new Date(game.starttime).toLocaleDateString('de-AT', {
@@ -58,21 +58,19 @@ export class HallOfFameView extends BaseView {
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false
+        hour12: false,
       });
       const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false
+        hour12: false,
       });
-      const linkLabel = `${course.name} (${
-        course.stations
-      })<br/>[${from} - ${to}]`;
+      const linkLabel = `${course.name} (${course.stations})<br/>[${from} - ${to}]`;
       const row = this.createElement('tr', null);
       const cell = this.createElement(
         'td',
         `<a href="#final-score;gid=${game.gid}">${linkLabel}</a>`,
-        true
+        true,
       );
 
       row.appendChild(cell);

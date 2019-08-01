@@ -28,14 +28,14 @@ export class StationSelectPlayerView extends BaseView {
   private static hideIntermediateScore(hide?: boolean): boolean {
     if (hide === undefined) {
       const value = window.localStorage.getItem(
-        'bow-buddy-settings:hide-intermediate-score'
+        'bow-buddy-settings:hide-intermediate-score',
       );
 
       return value === 'true';
     }
     window.localStorage.setItem(
       'bow-buddy-settings:hide-intermediate-score',
-      `${hide}`
+      `${hide}`,
     );
 
     return hide;
@@ -69,7 +69,7 @@ export class StationSelectPlayerView extends BaseView {
       const course = await this.getStorage().getCourseForGame(gid);
       const nextStationBtn = this.queryElement('.next-station-btn');
       const showScoreSwitch = this.queryElement(
-        '.hide-score-switch input[type=checkbox]'
+        '.hide-score-switch input[type=checkbox]',
       ) as HTMLInputElement;
 
       if (station >= course.stations) {
@@ -98,9 +98,7 @@ export class StationSelectPlayerView extends BaseView {
       this.initPlayerButtons(gid, station);
     } catch (error) {
       console.error(
-        `Failed to init view (gid: ${gid}, station: ${station}): ${
-          error.message
-        }`
+        `Failed to init view (gid: ${gid}, station: ${station}): ${error.message}`,
       );
     }
   }
@@ -108,7 +106,7 @@ export class StationSelectPlayerView extends BaseView {
   private async initPlayerButtons(gid: number, station: number): Promise<void> {
     const [players, totalScoreForGame] = await Promise.all([
       this.getStorage().getPlayersWithScore(gid, station),
-      this.getStorage().getTotalScoreForGame(gid)
+      this.getStorage().getTotalScoreForGame(gid),
     ]);
 
     if (players.length === 0) {
@@ -117,7 +115,7 @@ export class StationSelectPlayerView extends BaseView {
 
     const playerSelectionList = this.queryElement('.player-selection-list');
     const playersWithScore = players.filter(
-      player => player.score !== undefined
+      player => player.score !== undefined,
     ).length;
 
     this.queryElement('.quick-assign-btn').addEventListener('click', e => {
@@ -152,11 +150,11 @@ export class StationSelectPlayerView extends BaseView {
         : [];
       const totalScore = scorePoints.reduce(
         (a, b) => a + b,
-        scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1] // exclude score of current station
+        scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1], // exclude score of current station
       );
 
       playerSelectionList.appendChild(
-        this.createPlayerButton(gid, station, totalScore, player)
+        this.createPlayerButton(gid, station, totalScore, player),
       );
     }
 
@@ -173,11 +171,11 @@ export class StationSelectPlayerView extends BaseView {
     gid: number,
     station: number,
     totalScore: number,
-    player: PlayerWithScore
+    player: PlayerWithScore,
   ): HTMLElement {
     const averageScore = ScoreUtils.averageScore(
       totalScore,
-      Math.max(1, station - 1)
+      Math.max(1, station - 1),
     );
     const playerEntry = this.createElement(
       'a',
@@ -185,11 +183,11 @@ export class StationSelectPlayerView extends BaseView {
         ? `${player.name} (${totalScore}) [${averageScore} avg] `
         : player.name,
       false,
-      'collection-item'
+      'collection-item',
     );
     playerEntry.setAttribute(
       'href',
-      `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`
+      `#station-set-score;gid=${gid};pid=${player.pid};station=${station}`,
     );
 
     if (player.score) {
@@ -199,7 +197,7 @@ export class StationSelectPlayerView extends BaseView {
         'span',
         `${scoreDisplayName}&nbsp;&nbsp;&nbsp;(+${scorePoints})`,
         true,
-        'badge new blue'
+        'badge new blue',
       );
 
       scoreBadge.style.fontWeight = 'bold';

@@ -9,7 +9,7 @@
     "dev": "webpack-dev-server --config webpack.dev.js --https --progress --content-base dist",
     "lint": "tslint -c tslint.json \"src/**/*.ts\" \"dist/sw.js\"",
     "lint:fix": "npm run tslint -- --fix",
-    "prettier": "prettier \"./**/*.{ts,js,scss,css,html,md,json,php}\"",
+    "prettier": "prettier \"./**/*.{ts,js,scss,css,html,md,json}\"",
     "prettier:fix": "npm run prettier -- --write",
     "browser": "google-chrome --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://localhost:8080 https://localhost:8080",
     "build": "webpack --config webpack.prod.js",

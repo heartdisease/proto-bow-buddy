@@ -65,12 +65,12 @@ export class DbWrapper {
 
   async transaction(
     objectStores: string | string[],
-    writeAccess = false
+    writeAccess = false,
   ): Promise<any> {
     const db = await this.requestDb();
     const transaction = db.transaction(
       objectStores,
-      writeAccess ? 'readwrite' : 'readonly'
+      writeAccess ? 'readwrite' : 'readonly',
     );
 
     return Array.isArray(objectStores)
@@ -148,7 +148,7 @@ export class DbWrapper {
 
           const playerStore = db.createObjectStore('players', {
             keyPath: 'pid',
-            autoIncrement: true
+            autoIncrement: true,
           });
           playerStore.createIndex('pid', 'pid', { unique: true });
           playerStore.createIndex('name', 'name', { unique: true });
@@ -156,34 +156,34 @@ export class DbWrapper {
 
           const courseStore = db.createObjectStore('courses', {
             keyPath: 'cid',
-            autoIncrement: true
+            autoIncrement: true,
           });
           courseStore.createIndex('cid', 'cid', { unique: true });
           courseStore.createIndex('name', 'name', { unique: false });
           courseStore.createIndex('place', 'place', { unique: false });
           courseStore.createIndex('geolocation', 'geolocation', {
-            unique: false
+            unique: false,
           });
           courseStore.createIndex('stations', 'stations', { unique: false });
 
           const gameStore = db.createObjectStore('games', {
             keyPath: 'gid',
-            autoIncrement: true
+            autoIncrement: true,
           });
           gameStore.createIndex('gid', 'gid', { unique: true });
           gameStore.createIndex('cid', 'cid', { unique: false });
           gameStore.createIndex('pids', 'pids', {
             unique: false,
-            multiEntry: true
+            multiEntry: true,
           });
           gameStore.createIndex('starttime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
           gameStore.createIndex('endtime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
 
           const scoreStore = db.createObjectStore('scores', {
-            keyPath: ['gid', 'pid', 'station']
+            keyPath: ['gid', 'pid', 'station'],
           });
           scoreStore.createIndex('sid', ['gid', 'pid', 'station'], {
-            unique: true
+            unique: true,
           }); // compound key path
           scoreStore.createIndex('gid', 'gid', { unique: false });
           scoreStore.createIndex('pid', 'pid', { unique: false });
@@ -233,7 +233,7 @@ export class DbAccess {
 
   async getPlayersWithScore(
     gid: number,
-    station: number
+    station: number,
   ): Promise<PlayerWithScore[]> {
     try {
       const players = await this.getPlayersForGame(gid);
@@ -249,11 +249,11 @@ export class DbAccess {
         const score = await this.fetchById(scoreObjectStore, 'sid', [
           gid,
           player.pid,
-          station
+          station,
         ]);
 
         playersWithScore.push(
-          score && score.score ? { ...player, score: score.score } : player
+          score && score.score ? { ...player, score: score.score } : player,
         );
       }
 
@@ -286,7 +286,7 @@ export class DbAccess {
       return this.fetchById(courseObjectStore, 'cid', cid);
     } catch (error) {
       throw new Error(
-        `Failed to fetch course with cid ${cid}: ${error.message}`
+        `Failed to fetch course with cid ${cid}: ${error.message}`,
       );
     }
   }
@@ -309,7 +309,7 @@ export class DbAccess {
       return this.fetchById(objectStores.courses, 'cid', game.cid);
     } catch (error) {
       throw new Error(
-        `Failed to fetch course for game with gid ${gid}: ${error.message}`
+        `Failed to fetch course for game with gid ${gid}: ${error.message}`,
       );
     }
   }
@@ -318,7 +318,7 @@ export class DbAccess {
     name: string,
     place: string,
     geolocation: string,
-    stations: number
+    stations: number,
   ): Promise<Course> {
     try {
       const courseObjectStore = await this.db().transaction('courses', true);
@@ -332,7 +332,7 @@ export class DbAccess {
       });
     } catch (error) {
       throw new Error(
-        `Failed to add course ${name} (${stations}): ${error.message}`
+        `Failed to add course ${name} (${stations}): ${error.message}`,
       );
     }
   }
@@ -361,14 +361,14 @@ export class DbAccess {
     cid: number,
     pids: number[],
     starttime?: string,
-    endtime?: string
+    endtime?: string,
   ): Promise<Game> {
     try {
       const data = {
         cid,
         pids,
         starttime: starttime || new Date().toISOString(),
-        endtime: endtime || null
+        endtime: endtime || null,
       };
       const gameObjectStore = await this.db().transaction('games', true);
       const request = gameObjectStore.add(data);
@@ -377,13 +377,13 @@ export class DbAccess {
         request.onsuccess = (event: any) =>
           resolve({
             gid: event.target.result,
-            ...data
+            ...data,
           });
         request.onerror = reject;
       });
     } catch (error) {
       throw new Error(
-        `Failed to fetch course with cid ${cid}: ${error.message}`
+        `Failed to fetch course with cid ${cid}: ${error.message}`,
       );
     }
   }
@@ -405,7 +405,7 @@ export class DbAccess {
       });
     } catch (error) {
       throw new Error(
-        `Failed to finish game with gid ${gid}: ${error.message}`
+        `Failed to finish game with gid ${gid}: ${error.message}`,
       );
     }
   }
@@ -414,7 +414,7 @@ export class DbAccess {
     gid: number,
     pid: number,
     station: number,
-    score: string
+    score: string,
   ): Promise<Score> {
     try {
       const scoreObjectStore = await this.db().transaction('scores', true);
@@ -428,9 +428,7 @@ export class DbAccess {
     } catch (error) {
       throw new Error(
         // tslint:disable-next-line:max-line-length
-        `Failed to set score for gid: ${gid}, pid: ${pid}, station: ${station}: ${
-          error.message
-        }`
+        `Failed to set score for gid: ${gid}, pid: ${pid}, station: ${station}: ${error.message}`,
       );
     }
   }
@@ -442,7 +440,7 @@ export class DbAccess {
       const players = await this.getPlayersForGame(gid);
       const totalScore: TotalScoreForGame = {
         players,
-        scores: new Map()
+        scores: new Map(),
       };
 
       players.forEach(player => totalScore.scores.set(player.pid, []));
@@ -458,7 +456,7 @@ export class DbAccess {
       return totalScore;
     } catch (error) {
       throw new Error(
-        `Failed to fetch course with gid ${gid}: ${error.message}`
+        `Failed to fetch course with gid ${gid}: ${error.message}`,
       );
     }
   }
@@ -515,7 +513,7 @@ export class DbAccess {
       });
     } catch (error) {
       throw new Error(
-        `Failed to import database from object: ${error.message}`
+        `Failed to import database from object: ${error.message}`,
       );
     }
   }
@@ -533,13 +531,13 @@ export class DbAccess {
         objectStores.players,
         IDBKeyRange.bound(
           Math.min.apply(null, game.pids),
-          Math.max.apply(null, game.pids)
+          Math.max.apply(null, game.pids),
         ),
-        player => game.pids.indexOf(player.pid) !== -1
+        player => game.pids.indexOf(player.pid) !== -1,
       );
     } catch (error) {
       throw new Error(
-        `Failed to fetch all players for game with gid ${gid}: ${error.message}`
+        `Failed to fetch all players for game with gid ${gid}: ${error.message}`,
       );
     }
   }
@@ -547,7 +545,7 @@ export class DbAccess {
   private fetchAll(
     objectStore: IDBObjectStore,
     keyRange?: IDBKeyRange,
-    filter?: (o: any) => boolean
+    filter?: (o: any) => boolean,
   ): Promise<any[]> {
     return new Promise<any[]>((resolve, reject) => {
       const cursorRequest = objectStore.openCursor(keyRange);
@@ -592,7 +590,7 @@ export class DbAccess {
   private fetchById(
     objectStore: IDBObjectStore,
     indexName: string,
-    keyPath: number | number[]
+    keyPath: number | number[],
   ): Promise<any> {
     return new Promise((resolve, reject) => {
       const index: IDBIndex = objectStore.index(indexName);
@@ -607,7 +605,7 @@ export class DbAccess {
     objectStore: IDBObjectStore,
     indexName: string,
     keyPath: number,
-    update: (record: any) => boolean
+    update: (record: any) => boolean,
   ): Promise<any> {
     return new Promise((resolve, reject) => {
       const index = objectStore.index(indexName);

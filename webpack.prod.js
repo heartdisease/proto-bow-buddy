@@ -15,17 +15,17 @@ module.exports = merge(common, {
         sourceMap: true,
         terserOptions: {
           output: {
-            comments: false
-          }
-        }
+            comments: false,
+          },
+        },
       }),
       new OptimizeCSSAssetsPlugin({
         cssProcessorOptions: {
           map: {
-            inline: false // generates CSS source maps
-          }
-        }
-      })
-    ]
-  }
+            inline: false, // generates CSS source maps
+          },
+        },
+      }),
+    ],
+  },
 });

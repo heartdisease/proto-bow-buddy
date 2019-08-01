@@ -8,7 +8,15 @@
     "inlineSources": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "lib": ["es2015.core", "es2015.collection", "es2015.iterable", "es2015.promise", "es2015", "dom", "dom.iterable"],
+    "lib": [
+      "es2015.core",
+      "es2015.collection",
+      "es2015.iterable",
+      "es2015.promise",
+      "es2015",
+      "dom",
+      "dom.iterable"
+    ],
     "baseUrl": ".",
     "paths": {
       "jquery": ["node_modules/jquery/dist/jquery"],

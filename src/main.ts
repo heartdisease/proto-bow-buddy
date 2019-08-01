@@ -47,7 +47,7 @@ export class Application {
     { path: '#station-set-score', view: StationSetScoreView },
     { path: '#final-score', view: FinalScoreView },
     { path: '#app-settings', view: AppSettingsView },
-    { path: '#hall-of-fame', view: HallOfFameView }
+    { path: '#hall-of-fame', view: HallOfFameView },
   ];
 
   private static storage?: DbAccess;
@@ -88,7 +88,7 @@ export class Application {
 
   private static createViewForToken(viewToken: string): BaseView {
     const route = Application.ROUTES.find(
-      appRoute => appRoute.path === viewToken
+      appRoute => appRoute.path === viewToken,
     );
 
     if (route !== undefined) {

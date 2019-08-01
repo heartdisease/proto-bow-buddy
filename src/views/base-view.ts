@@ -27,7 +27,7 @@ export abstract class BaseView {
    * Never override this method!
    */
   /*final*/ initView(
-    parameters: ReadonlyMap<string, string | number | boolean>
+    parameters: ReadonlyMap<string, string | number | boolean>,
   ): void {
     this.loadTemplate();
     this.onReveal(parameters);
@@ -84,7 +84,7 @@ export abstract class BaseView {
         this.queryElements(selector),
         (element: HTMLElement) => {
           element.style.display = 'none';
-        }
+        },
       );
     }
   }
@@ -100,7 +100,7 @@ export abstract class BaseView {
         this.queryElements(selector),
         (element: HTMLElement) => {
           element.style.display = '';
-        }
+        },
       );
     }
   }
@@ -112,7 +112,7 @@ export abstract class BaseView {
     tagName: string,
     content: string | null,
     html = false,
-    className?: string
+    className?: string,
   ): HTMLElement {
     const el = document.createElement(tagName);
 
@@ -143,7 +143,7 @@ export abstract class BaseView {
   }
 
   protected abstract onReveal(
-    parameters: ReadonlyMap<string, string | number | boolean>
+    parameters: ReadonlyMap<string, string | number | boolean>,
   ): void;
 
   protected abstract onHide(): void;
@@ -154,7 +154,7 @@ export abstract class BaseView {
 
   private loadTemplate(): void {
     const template = document.querySelector(
-      this.getTemplateLocator()
+      this.getTemplateLocator(),
     ) as HTMLTemplateElement;
 
     this.viewContainer =
