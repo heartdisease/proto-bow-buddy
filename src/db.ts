@@ -222,13 +222,13 @@ export class DbAccess {
   async getPlayers(): Promise<Player[]> {
     const playerObjectStore = await this.db().transaction('players');
 
-    return this.fetchAll(playerObjectStore);
+    return fetchAll(playerObjectStore);
   }
 
   async getPlayer(pid: number): Promise<Player> {
     const playerObjectStore = await this.db().transaction('players');
 
-    return this.fetchById(playerObjectStore, 'pid', pid);
+    return fetchById(playerObjectStore, 'pid', pid);
   }
 
   async getPlayersWithScore(
@@ -246,7 +246,7 @@ export class DbAccess {
       const playersWithScore: PlayerWithScore[] = [];
 
       for (const player of players) {
-        const score = await this.fetchById(scoreObjectStore, 'sid', [
+        const score = await fetchById(scoreObjectStore, 'sid', [
           gid,
           player.pid,
           station,
@@ -283,7 +283,7 @@ export class DbAccess {
     try {
       const courseObjectStore = await this.db().transaction('courses');
 
-      return this.fetchById(courseObjectStore, 'cid', cid);
+      return fetchById(courseObjectStore, 'cid', cid);
     } catch (error) {
       throw new Error(
         `Failed to fetch course with cid ${cid}: ${error.message}`,
@@ -295,7 +295,7 @@ export class DbAccess {
     try {
       const courseObjectStore = await this.db().transaction('courses');
 
-      return this.fetchAll(courseObjectStore);
+      return fetchAll(courseObjectStore);
     } catch (error) {
       throw new Error(`Failed to fetch all courses: ${error.message}`);
     }
@@ -304,9 +304,9 @@ export class DbAccess {
   async getCourseForGame(gid: number): Promise<Course> {
     try {
       const objectStores = await this.db().transaction(['courses', 'games']);
-      const game = await this.fetchById(objectStores.games, 'gid', gid);
+      const game = await fetchById(objectStores.games, 'gid', gid);
 
-      return this.fetchById(objectStores.courses, 'cid', game.cid);
+      return fetchById(objectStores.courses, 'cid', game.cid);
     } catch (error) {
       throw new Error(
         `Failed to fetch course for game with gid ${gid}: ${error.message}`,
@@ -341,7 +341,7 @@ export class DbAccess {
     try {
       const gameObjectStore = await this.db().transaction('games');
 
-      return this.fetchAll(gameObjectStore);
+      return fetchAll(gameObjectStore);
     } catch (error) {
       throw new Error(`Failed to fetch all games: ${error.message}`);
     }
@@ -351,7 +351,7 @@ export class DbAccess {
     try {
       const gameObjectStore = await this.db().transaction('games');
 
-      return this.fetchById(gameObjectStore, 'gid', gid);
+      return fetchById(gameObjectStore, 'gid', gid);
     } catch (error) {
       throw new Error(`Failed to fetch game with gid ${gid}: ${error.message}`);
     }
@@ -393,7 +393,7 @@ export class DbAccess {
     try {
       const gameObjectStore = await this.db().transaction('games', true);
 
-      return this.updateRecord(gameObjectStore, 'gid', gid, game => {
+      return updateRecord(gameObjectStore, 'gid', gid, game => {
         // change timestamp only if it has not already been set!
         if (!game.endtime) {
           game.endtime = new Date().toISOString();
@@ -427,7 +427,6 @@ export class DbAccess {
       });
     } catch (error) {
       throw new Error(
-        // tslint:disable-next-line:max-line-length
         `Failed to set score for gid: ${gid}, pid: ${pid}, station: ${station}: ${error.message}`,
       );
     }
@@ -436,7 +435,7 @@ export class DbAccess {
   async getTotalScoreForGame(gid: number): Promise<TotalScoreForGame> {
     try {
       const scoreObjectStore = await this.db().transaction('scores');
-      const scores = await this.fetchAll(scoreObjectStore);
+      const scores = await fetchAll(scoreObjectStore);
       const players = await this.getPlayersForGame(gid);
       const totalScore: TotalScoreForGame = {
         players,
@@ -470,7 +469,7 @@ export class DbAccess {
       const objectStores = await dbRef.transaction(objectStoreNames);
 
       for (const objectStoreName of objectStoreNames) {
-        const records = await this.fetchAll(objectStores[objectStoreName]);
+        const records = await fetchAll(objectStores[objectStoreName]);
 
         dbObject[objectStoreName] = records;
       }
@@ -500,9 +499,12 @@ export class DbAccess {
             const addRequest = objectStores[objectStoreName].add(dataRecord);
 
             addRequest.onsuccess = (e: Event) => {
+              recordsAdded++;
+              objectStoresCompleted++;
+
               if (
-                (recordsAdded += 1) === dataRecords.length &&
-                (objectStoresCompleted += 1) === objectStoreNames.length
+                recordsAdded === dataRecords.length &&
+                objectStoresCompleted === objectStoreNames.length
               ) {
                 resolve();
               }
@@ -518,16 +520,16 @@ export class DbAccess {
     }
   }
 
-  erase(): Promise<any> {
+  async erase(): Promise<any> {
     return this.db().erase();
   }
 
   private async getPlayersForGame(gid: number): Promise<Player[]> {
     try {
       const objectStores = await this.db().transaction(['games', 'players']);
-      const game = await this.fetchById(objectStores.games, 'gid', gid);
+      const game = await fetchById(objectStores.games, 'gid', gid);
 
-      return this.fetchAll(
+      return fetchAll(
         objectStores.players,
         IDBKeyRange.bound(
           Math.min.apply(null, game.pids),
@@ -542,102 +544,101 @@ export class DbAccess {
     }
   }
 
-  private fetchAll(
-    objectStore: IDBObjectStore,
-    keyRange?: IDBKeyRange,
-    filter?: (o: any) => boolean,
-  ): Promise<any[]> {
-    return new Promise<any[]>((resolve, reject) => {
-      const cursorRequest = objectStore.openCursor(keyRange);
-
-      if (filter !== undefined && keyRange !== undefined) {
-        const filteredDataObjects: any[] = [];
-
-        cursorRequest.onsuccess = (event: any) => {
-          const cursor = cursorRequest.result;
-
-          if (cursor) {
-            const dataObject = cursor.value;
-
-            if (filter(dataObject)) {
-              filteredDataObjects.push(dataObject);
-            }
-            cursor.continue();
-          } else {
-            resolve(filteredDataObjects);
-          }
-        };
-      } else {
-        const cursorRequest2 = objectStore.openCursor();
-        const dataObjects: any[] = [];
-
-        cursorRequest2.onsuccess = (event: Event) => {
-          const cursor = cursorRequest2.result;
-
-          if (cursor) {
-            dataObjects.push(cursor.value);
-            cursor.continue();
-          } else {
-            resolve(dataObjects);
-          }
-        };
-      }
-
-      cursorRequest.onerror = reject;
-    });
+  private db(): DbWrapper {
+    if (this.dbWrapper === undefined) {
+      this.dbWrapper = new DbWrapper();
+    }
+    return this.dbWrapper;
   }
+}
 
-  private fetchById(
-    objectStore: IDBObjectStore,
-    indexName: string,
-    keyPath: number | number[],
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const index: IDBIndex = objectStore.index(indexName);
-      const request: IDBRequest = index.get(keyPath);
+async function fetchAll(
+  objectStore: IDBObjectStore,
+  keyRange?: IDBKeyRange,
+  filter?: (o: any) => boolean,
+): Promise<any[]> {
+  return new Promise<any[]>((resolve, reject) => {
+    const cursorRequest = objectStore.openCursor(keyRange);
 
-      request.onsuccess = (event: any) => resolve(request.result);
-      request.onerror = reject;
-    });
-  }
-
-  private updateRecord(
-    objectStore: IDBObjectStore,
-    indexName: string,
-    keyPath: number,
-    update: (record: any) => boolean,
-  ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const index = objectStore.index(indexName);
-      const cursorRequest = index.openCursor(keyPath);
+    if (filter !== undefined && keyRange !== undefined) {
+      const filteredDataObjects: any[] = [];
 
       cursorRequest.onsuccess = (event: any) => {
         const cursor = cursorRequest.result;
 
         if (cursor) {
-          const dataRecord = cursor.value;
+          const dataObject = cursor.value;
 
-          if (update(dataRecord)) {
-            const updateRequest = cursor.update(dataRecord);
-
-            updateRequest.onsuccess = () => resolve(dataRecord);
-            updateRequest.onerror = reject;
-          } else {
-            resolve(dataRecord);
+          if (filter(dataObject)) {
+            filteredDataObjects.push(dataObject);
           }
+          cursor.continue();
         } else {
-          reject(new Error('Cannot find record'));
+          resolve(filteredDataObjects);
         }
       };
-      cursorRequest.onerror = reject;
-    });
-  }
+    } else {
+      const cursorRequest2 = objectStore.openCursor();
+      const dataObjects: any[] = [];
 
-  private db(): DbWrapper {
-    if (this.dbWrapper === undefined) {
-      this.dbWrapper = new DbWrapper();
+      cursorRequest2.onsuccess = (event: Event) => {
+        const cursor = cursorRequest2.result;
+
+        if (cursor) {
+          dataObjects.push(cursor.value);
+          cursor.continue();
+        } else {
+          resolve(dataObjects);
+        }
+      };
     }
 
-    return this.dbWrapper;
-  }
+    cursorRequest.onerror = reject;
+  });
+}
+
+async function fetchById(
+  objectStore: IDBObjectStore,
+  indexName: string,
+  keyPath: number | number[],
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const index: IDBIndex = objectStore.index(indexName);
+    const request: IDBRequest = index.get(keyPath);
+
+    request.onsuccess = (event: any) => resolve(request.result);
+    request.onerror = reject;
+  });
+}
+
+async function updateRecord(
+  objectStore: IDBObjectStore,
+  indexName: string,
+  keyPath: number,
+  update: (record: any) => boolean,
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const index = objectStore.index(indexName);
+    const cursorRequest = index.openCursor(keyPath);
+
+    cursorRequest.onsuccess = (event: any) => {
+      const cursor = cursorRequest.result;
+
+      if (cursor) {
+        const dataRecord = cursor.value;
+
+        if (update(dataRecord)) {
+          const updateRequest = cursor.update(dataRecord);
+
+          updateRequest.onsuccess = () => resolve(dataRecord);
+          updateRequest.onerror = reject;
+        } else {
+          resolve(dataRecord);
+        }
+      } else {
+        reject(new Error('Cannot find record'));
+      }
+    };
+    cursorRequest.onerror = reject;
+  });
 }

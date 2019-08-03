@@ -19,11 +19,11 @@
  */
 import { BaseView } from './base-view';
 
-import '../styles/app-settings.scss';
+import '../styles/app-settings.scss'; // tslint:disable-line:no-import-side-effect
 
 export class AppSettingsView extends BaseView {
-  private appSettingsCollapsibleElement?: Element;
-  private textarea?: HTMLTextAreaElement;
+  private appSettingsCollapsibleElement: Element;
+  private textarea: HTMLTextAreaElement;
 
   getTitle(): string {
     return 'App Settings';
@@ -32,7 +32,7 @@ export class AppSettingsView extends BaseView {
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.appSettingsCollapsibleElement = this.queryElement(
       '.app-settings-collapsible',
-    )!;
+    );
     this.textarea = this.queryElement(
       '.app-settings-collapsible textarea',
     ) as HTMLTextAreaElement;
@@ -40,7 +40,7 @@ export class AppSettingsView extends BaseView {
   }
 
   onHide(): void {
-    M.Collapsible.getInstance(this.appSettingsCollapsibleElement!).destroy();
+    M.Collapsible.getInstance(this.appSettingsCollapsibleElement).destroy();
   }
 
   protected getTemplateLocator(): string {
@@ -51,30 +51,27 @@ export class AppSettingsView extends BaseView {
     return 'app-settings-view';
   }
 
-  private async initControls(): Promise<void> {
-    const collapsible = M.Collapsible.init(
-      this.appSettingsCollapsibleElement!,
-      {
-        onOpenStart: (el: HTMLLIElement) => {
-          if (el.classList.contains('import-export-json-collapsible')) {
-            this.textarea!.value = '';
-          }
-        },
-        onOpenEnd: async (el: HTMLLIElement) => {
-          if (el.classList.contains('import-export-json-collapsible')) {
-            try {
-              const dbObject = await this.getStorage().dump();
-              const dbDump = JSON.stringify(dbObject);
-
-              this.textarea!.value = dbDump;
-              this.textarea!.select();
-            } catch (error) {
-              console.error(`Failed to export database: ${error.message}`);
-            }
-          }
-        },
+  private initControls(): void {
+    const collapsible = M.Collapsible.init(this.appSettingsCollapsibleElement, {
+      onOpenStart: (el: HTMLLIElement) => {
+        if (el.classList.contains('import-export-json-collapsible')) {
+          this.textarea.value = '';
+        }
       },
-    );
+      onOpenEnd: async (el: HTMLLIElement) => {
+        if (el.classList.contains('import-export-json-collapsible')) {
+          try {
+            const dbObject = await this.getStorage().dump();
+            const dbDump = JSON.stringify(dbObject);
+
+            this.textarea.value = dbDump;
+            this.textarea.select();
+          } catch (error) {
+            console.error(`Failed to export database: ${error.message}`);
+          }
+        }
+      },
+    });
 
     this.initServerSyncControls();
     this.initImportExportControls();
@@ -97,7 +94,7 @@ export class AppSettingsView extends BaseView {
 
         try {
           const dbObject = await this.getStorage().dump();
-          const response = await this.uploadDatabaseToServer(
+          const response = await uploadDatabaseToServer(
             user,
             password,
             dbObject,
@@ -129,7 +126,7 @@ export class AppSettingsView extends BaseView {
           const user = window.prompt('Username:') || 'anonymous';
 
           try {
-            const response = await this.fetchDatabaseFromServer(user);
+            const response = await fetchDatabaseFromServer(user);
 
             if (response.ok) {
               await this.getStorage().importDb(await response.json());
@@ -137,7 +134,6 @@ export class AppSettingsView extends BaseView {
             } else {
               if (response.status === 404) {
                 window.alert(
-                  // tslint:disable-next-line:max-line-length
                   `Failed to import database: no database exists on server for user ${user}!`,
                 );
               } else {
@@ -154,13 +150,13 @@ export class AppSettingsView extends BaseView {
     );
   }
 
-  private async initImportExportControls(): Promise<void> {
+  private initImportExportControls(): void {
     this.queryElement('.copy-json-btn').addEventListener(
       'click',
       (e: Event) => {
         e.preventDefault();
 
-        this.textarea!.select();
+        this.textarea.select();
 
         try {
           if (!document.execCommand('copy')) {
@@ -183,7 +179,7 @@ export class AppSettingsView extends BaseView {
           )
         ) {
           try {
-            await this.getStorage().importDb(JSON.parse(this.textarea!.value));
+            await this.getStorage().importDb(JSON.parse(this.textarea.value));
             window.alert('Database successfully imported!');
           } catch (error) {
             window.alert(`Failed to import database: ${error.message}`);
@@ -207,27 +203,25 @@ export class AppSettingsView extends BaseView {
       }
     });
   }
+}
 
-  private async fetchDatabaseFromServer(user: string): Promise<Response> {
-    return fetch(`./sync/${user}/latest.json`, { cache: 'no-cache' });
-  }
+async function fetchDatabaseFromServer(user: string): Promise<Response> {
+  return fetch(`./sync/${user}/latest.json`, { cache: 'no-cache' });
+}
 
-  private async uploadDatabaseToServer(
-    user: string,
-    password: string,
-    dbObject: any,
-  ): Promise<Response> {
-    const dbDump = JSON.stringify(dbObject);
+async function uploadDatabaseToServer(
+  user: string,
+  password: string,
+  dbObject: any,
+): Promise<Response> {
+  const dbDump = JSON.stringify(dbObject);
 
-    return fetch(`sync.php?user=${user}`, {
-      method: 'POST',
-      cache: 'no-cache',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(
-        dbDump,
-      )}`,
-    });
-  }
+  return fetch(`sync.php?user=${user}`, {
+    method: 'POST',
+    cache: 'no-cache',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `pw=${encodeURIComponent(password)}&db=${encodeURIComponent(dbDump)}`,
+  });
 }

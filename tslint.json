@@ -9,45 +9,38 @@
   "jsRules": {
     "prettier": true,
     "linebreak-style": [true, "LF"],
-    "max-line-length": [
-      true,
-      { "limit": 80, "ignore-pattern": "^import |^export {(.*?)}|// " }
-    ],
     "quotemark": [true, "single", "backtick"],
     "no-console": [false, "log", "warning", "error"]
   },
   "rules": {
     "prettier": true,
     "linebreak-style": [true, "LF"],
-    "max-line-length": [
-      true,
-      { "limit": 80, "ignore-pattern": "^import |^export {(.*?)}|// " }
-    ],
     "quotemark": [true, "single", "backtick"],
     "comment-type": [true, "doc", "singleline", "multiline"],
     "array-type": [true, "array-simple"],
     "no-console": [false, "log", "warning", "error"],
     "only-arrow-functions": [true, "allow-named-functions"],
-    "no-null-keyword": {
-      "options": true,
-      "severity": "warning"
-    },
-    "no-non-null-assertion": {
-      "options": true,
-      "severity": "warning"
-    },
-    "no-conditional-assignment": {
+    "max-file-line-count": [true, 1000],
+    "member-ordering": [false],
+    "newline-before-return": [false],
+    "no-null-keyword": [false],
+    "no-non-null-assertion": [true],
+    "no-conditional-assignment": [true],
+    "ordered-imports": [false],
+    "no-import-side-effect": [true, { "ignore-module": "(\\.html|\\.css)$" }],
+    "prefer-function-over-method": [true, "allow-public", "allow-protected"],
+    "object-literal-sort-keys": false,
+    "no-floating-promises": {
       "options": [true],
       "severity": "warning"
     },
-    "no-import-side-effect": {
-      "options": [true, { "ignore-module": "(\\.html|\\.css)$" }],
+    "no-void-expression": {
+      "options": [true],
       "severity": "warning"
     },
-    "prefer-function-over-method": {
-      "options": true,
+    "strict-boolean-expressions": {
+      "options": [true],
       "severity": "warning"
-    },
-    "object-literal-sort-keys": false
+    }
   }
 }

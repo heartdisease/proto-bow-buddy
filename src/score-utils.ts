@@ -43,14 +43,13 @@ export /*final*/ class ScoreUtils {
     gid: number,
     stations: number,
   ): Promise<TotalScore> {
-    // tslint:disable-next-line:max-line-length
     const totalScoreForGame: TotalScoreForGame = await Application.getStorage().getTotalScoreForGame(
       gid,
     );
     const playerScores: PlayerScore[] = [];
 
     totalScoreForGame.players.forEach((player: Player) => {
-      const scores = totalScoreForGame.scores.get(player.pid)!;
+      const scores = totalScoreForGame.scores.get(player.pid)!; // tslint:disable-line:no-non-null-assertion
       const totalScore = scores
         .map((score: string) => ScoreUtils.scoreToPoints(score))
         .reduce((a, b) => a + b, 0);

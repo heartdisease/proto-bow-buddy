@@ -20,7 +20,7 @@
 import { PlayerScore, ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
 
-import '../styles/final-score.scss';
+import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effect
 
 export class FinalScoreView extends BaseView {
   private static getDuration(starttime: string, endtime: string): string {
@@ -47,7 +47,7 @@ export class FinalScoreView extends BaseView {
   }
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    this.init(parameters.get('gid') as number);
+    this.init(parameters.get('gid') as number).catch(e => console.error(e));
   }
 
   onHide(): void {
@@ -91,8 +91,11 @@ export class FinalScoreView extends BaseView {
       '.course-duration',
     ).innerHTML = `${duration}<br/>(${from} - ${to})`;
     this.queryElement('.course-label').innerText = courseLabel;
-    this.generateScoreChart(gid, course.stations);
-    this.generateScoreTable(gid, course.stations);
+
+    await Promise.all([
+      this.generateScoreChart(gid, course.stations),
+      this.generateScoreTable(gid, course.stations),
+    ]);
   }
 
   // tslint:disable-next-line:prefer-function-over-method
@@ -125,7 +128,7 @@ export class FinalScoreView extends BaseView {
       stationColumn.style.fontStyle = 'italic';
       playerScoreEntry.appendChild(stationColumn);
       players
-        .map(player => scores.get(player.pid)!)
+        .map(player => scores.get(player.pid)!) // tslint:disable-line:no-non-null-assertion
         .forEach(scoresForPlayer => {
           const scoreColumn = this.createElement(
             'td',

@@ -18,8 +18,9 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
+import { Game } from '../db';
 
-import '../styles/hall-of-fame.scss';
+import '../styles/hall-of-fame.scss'; // tslint:disable-line:no-import-side-effect
 
 export class HallOfFameView extends BaseView {
   getTitle(): string {
@@ -27,7 +28,7 @@ export class HallOfFameView extends BaseView {
   }
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    this.init();
+    this.init().catch(e => console.error(e));
   }
 
   onHide(): void {
@@ -44,13 +45,13 @@ export class HallOfFameView extends BaseView {
 
   private async init(): Promise<void> {
     const tbody = this.queryElement('tbody.game-entries');
-    const games = await this.getStorage().getGames();
+    const games = (await this.getStorage().getGames()).sort(
+      (a: Game, b: Game): number =>
+        new Date(b.starttime).getTime() - new Date(a.starttime).getTime(),
+    );
 
     // TODO filter out unfinished games (should we automatically clean up unfinished games?)
-    for (const game of games.sort(
-      (a, b) =>
-        new Date(b.starttime).getTime() - new Date(a.starttime).getTime(),
-    )) {
+    for (const game of games) {
       const course = await this.getStorage().getCourseForGame(game.gid);
       const from = new Date(game.starttime).toLocaleDateString('de-AT', {
         year: 'numeric',

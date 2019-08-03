@@ -20,16 +20,29 @@
 import { Course, Player } from '../db';
 import { BaseView } from './base-view';
 
-import '../styles/new-game.scss';
+import '../styles/new-game.scss'; // tslint:disable-line:no-import-side-effect
 
 export class NewGameView extends BaseView {
   private existingPlayers: Player[] = [];
   private existingCourses: Course[] = [];
-  private configuredPlayers: Player[] = [];
+  private readonly configuredPlayers: Player[] = [];
   private configuredCourse: Course;
-  private collapsibleElement?: HTMLElement;
-  private playerSelectElement?: HTMLElement;
-  private courseSelectElement?: HTMLElement;
+  private collapsibleElement: HTMLElement;
+  private playerSelectElement: HTMLElement;
+  private courseSelectElement: HTMLElement;
+
+  private readonly addPlayerClickListener = async (event: Event) =>
+    this.onAddPlayerClick(event);
+  private readonly playerSelectionChangeListener = async (event: Event) =>
+    this.onPlayerSelectionChange(event);
+  private readonly courseSelectionChangeListener = async (event: Event) =>
+    this.onCourseSelectionChange(event);
+  private readonly setCourseClickListener = async (event: Event) =>
+    this.onSetCourseClick(event);
+  private readonly startGameClickListener = async (event: Event) =>
+    this.onStartGameClick(event);
+  private readonly playerInputListener = () => this.verifyPlayerInput();
+  private readonly courseInputListener = () => this.verifyCourseInput();
 
   getTitle(): string {
     return 'New Game';
@@ -75,9 +88,9 @@ export class NewGameView extends BaseView {
     );
     setCourseBtn.removeEventListener('click', this.setCourseClickListener);
 
-    M.Collapsible.getInstance(this.collapsibleElement!).destroy();
-    M.FormSelect.getInstance(this.playerSelectElement!).destroy();
-    M.FormSelect.getInstance(this.courseSelectElement!).destroy();
+    M.Collapsible.getInstance(this.collapsibleElement).destroy();
+    M.FormSelect.getInstance(this.playerSelectElement).destroy();
+    M.FormSelect.getInstance(this.courseSelectElement).destroy();
   }
 
   protected getTemplateLocator(): string {
@@ -88,29 +101,19 @@ export class NewGameView extends BaseView {
     return 'new-game-view';
   }
 
-  private readonly addPlayerClickListener = async (event: Event) =>
-    this.onAddPlayerClick(event);
-  private readonly playerSelectionChangeListener = async (event: Event) =>
-    this.onPlayerSelectionChange(event);
-  private readonly courseSelectionChangeListener = async (event: Event) =>
-    this.onCourseSelectionChange(event);
-  private readonly setCourseClickListener = async (event: Event) =>
-    this.onSetCourseClick(event);
-  private readonly startGameClickListener = async (event: Event) =>
-    this.onStartGameClick(event);
-  private readonly playerInputListener = () => this.verifyPlayerInput();
-  private readonly courseInputListener = () => this.verifyCourseInput();
-
   private initControls(): void {
-    M.Collapsible.init(this.collapsibleElement!, {});
+    M.Collapsible.init(this.collapsibleElement, {});
 
-    this.updatePlayerSelectionMenu(true);
-    this.updateCourseSelectionMenu(true);
-    this.registerStartButtonEventHandler();
+    Promise.all([
+      this.updatePlayerSelectionMenu(true),
+      this.updateCourseSelectionMenu(true),
+    ])
+      .then(_ => this.registerStartButtonEventHandler())
+      .catch(e => console.error(e));
   }
 
   private async updatePlayerSelectionMenu(init = false): Promise<void> {
-    const playerSelect = this.playerSelectElement!;
+    const playerSelect = this.playerSelectElement;
 
     if (!init) {
       playerSelect.removeEventListener(
@@ -158,7 +161,7 @@ export class NewGameView extends BaseView {
   }
 
   private async updateCourseSelectionMenu(init = false): Promise<void> {
-    const courseSelect = this.courseSelectElement!;
+    const courseSelect = this.courseSelectElement;
 
     if (!init) {
       courseSelect.removeEventListener(
@@ -209,7 +212,7 @@ export class NewGameView extends BaseView {
   }
 
   private registerPlayerSelectEventHandlers(): void {
-    const playerSelect = this.playerSelectElement!;
+    const playerSelect = this.playerSelectElement;
 
     playerSelect.removeEventListener(
       'change',
@@ -219,7 +222,7 @@ export class NewGameView extends BaseView {
   }
 
   private registerCourseSelectEventHandlers(): void {
-    const courseSelect = this.courseSelectElement!;
+    const courseSelect = this.courseSelectElement;
 
     courseSelect.removeEventListener(
       'change',
@@ -356,7 +359,7 @@ export class NewGameView extends BaseView {
       this.hideElement('.add-player-container');
       this.showElement('.select-player-container');
     } catch (error) {
-      console.error(`Failed to add player ${playerName}: ${error.message}`);
+      throw new Error(`Failed to add player ${playerName}: ${error.message}`);
     }
   }
 
@@ -372,9 +375,9 @@ export class NewGameView extends BaseView {
         const player = await this.getStorage().getPlayer(+pid);
 
         this.addPlayerToTable(player);
-        this.updatePlayerSelectionMenu();
+        await this.updatePlayerSelectionMenu();
       } catch (error) {
-        console.error(
+        throw new Error(
           `Failed to load player with pid ${pid}: ${error.message}`,
         );
       }
@@ -393,9 +396,9 @@ export class NewGameView extends BaseView {
         const course = await this.getStorage().getCourse(+cid);
 
         this.addCourseToTable(course);
-        this.updateCourseSelectionMenu();
+        await this.updateCourseSelectionMenu();
       } catch (error) {
-        console.error(
+        throw new Error(
           `Failed to load course with cid ${cid}: ${error.message}`,
         );
       }
@@ -427,7 +430,7 @@ export class NewGameView extends BaseView {
       this.hideElement('.add-course-container');
       this.showElement('.select-course-container');
     } catch (error) {
-      console.log(`Failed to add course '${courseName}': ${error.message}`);
+      throw new Error(`Failed to add course '${courseName}': ${error.message}`);
     }
   }
 
@@ -435,6 +438,7 @@ export class NewGameView extends BaseView {
     event.preventDefault();
     this.queryElement('.start-game-btn').classList.add('disabled'); // disable button while async db action is running
 
+    // tslint:disable-next-line:no-non-null-assertion
     const cid = +this.queryElement('.course-entries > tr[data-cid]').dataset
       .cid!;
     const pids: number[] = [];
@@ -442,7 +446,7 @@ export class NewGameView extends BaseView {
     for (const playerEntry of this.queryElements(
       '.player-entries > tr[data-pid]',
     )) {
-      pids.push(+playerEntry.dataset.pid!);
+      pids.push(+playerEntry.dataset.pid!); // tslint:disable-line:no-non-null-assertion
     }
 
     try {
@@ -450,7 +454,7 @@ export class NewGameView extends BaseView {
 
       window.location.href = `#station-select-player;gid=${game.gid};station=1`;
     } catch (error) {
-      console.error(`Failed to add new game: ${error.message}`);
+      throw new Error(`Failed to add new game: ${error.message}`);
     }
   }
 }

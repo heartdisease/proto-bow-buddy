@@ -21,7 +21,7 @@ import { DbAccess } from '../db';
 import { Application } from '../main';
 
 export abstract class BaseView {
-  private viewContainer?: HTMLElement;
+  private viewContainer: HTMLElement;
 
   /**
    * Never override this method!
@@ -54,23 +54,26 @@ export abstract class BaseView {
    * Never override this method!
    */
   protected /*final*/ getViewContainer(): HTMLElement {
-    return this.viewContainer!;
+    return this.viewContainer;
   }
 
   /**
    * Never override this method!
    */
   protected /*final*/ queryElement(selector: string): HTMLElement {
-    return this.viewContainer!.querySelector(selector) as HTMLElement;
+    const el = this.viewContainer.querySelector(selector); // tslint:disable-line:no-non-null-assertion
+
+    if (el === null) {
+      throw new Error(`No element found for selector '${selector}'`);
+    }
+    return el as HTMLElement;
   }
 
   /**
    * Never override this method!
    */
   protected /*final*/ queryElements(selector: string): NodeListOf<HTMLElement> {
-    return this.viewContainer!.querySelectorAll(selector) as NodeListOf<
-      HTMLElement
-    >;
+    return this.viewContainer.querySelectorAll(selector);
   }
 
   /**
@@ -137,6 +140,7 @@ export abstract class BaseView {
   protected /*final*/ removeChildren(element: HTMLElement): void {
     let child;
 
+    // tslint:disable-next-line:no-conditional-assignment
     while ((child = element.firstChild)) {
       element.removeChild(child);
     }

@@ -21,25 +21,9 @@ import { PlayerWithScore } from '../db';
 import { ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
 
-import '../styles/station-select-player.scss';
+import '../styles/station-select-player.scss'; // tslint:disable-line:no-import-side-effect
 
 export class StationSelectPlayerView extends BaseView {
-  // TODO move into its own utility
-  private static hideIntermediateScore(hide?: boolean): boolean {
-    if (hide === undefined) {
-      const value = window.localStorage.getItem(
-        'bow-buddy-settings:hide-intermediate-score',
-      );
-
-      return value === 'true';
-    }
-    window.localStorage.setItem(
-      'bow-buddy-settings:hide-intermediate-score',
-      `${hide}`,
-    );
-
-    return hide;
-  }
   getTitle(): string {
     return 'Choose Player';
   }
@@ -49,7 +33,7 @@ export class StationSelectPlayerView extends BaseView {
     const station = parameters.get('station') as number;
 
     this.queryElement('.station-no').innerText = `${station}`;
-    this.init(gid, station);
+    this.init(gid, station).catch(e => console.error(e));
   }
 
   onHide(): void {
@@ -82,22 +66,21 @@ export class StationSelectPlayerView extends BaseView {
       } else {
         nextStationBtn.addEventListener('click', e => {
           e.preventDefault();
-          // tslint:disable-next-line:max-line-length
+
           window.location.href = `#station-select-player;gid=${gid};station=${station +
             1}`;
         });
       }
 
-      // tslint:disable-next-line:max-line-length
-      showScoreSwitch.checked = !StationSelectPlayerView.hideIntermediateScore();
+      showScoreSwitch.checked = !hideIntermediateScore();
       showScoreSwitch.addEventListener('change', e => {
-        StationSelectPlayerView.hideIntermediateScore(!showScoreSwitch.checked);
+        hideIntermediateScore(!showScoreSwitch.checked);
         window.location.reload();
       });
 
-      this.initPlayerButtons(gid, station);
+      return this.initPlayerButtons(gid, station);
     } catch (error) {
-      console.error(
+      throw new Error(
         `Failed to init view (gid: ${gid}, station: ${station}): ${error.message}`,
       );
     }
@@ -129,10 +112,8 @@ export class StationSelectPlayerView extends BaseView {
           .map(p => p.pid)
           .join('+');
 
-        // tslint:disable-next-line:max-line-length
         window.location.href = `#station-set-score;gid=${gid};pid=${firstPid};qa=${quickAssign};station=${station}`;
       } else {
-        // tslint:disable-next-line:max-line-length
         window.location.href = `#station-set-score;gid=${gid};pid=${firstPid};station=${station}`;
       }
     });
@@ -179,7 +160,7 @@ export class StationSelectPlayerView extends BaseView {
     );
     const playerEntry = this.createElement(
       'a',
-      totalScore > 0 && !StationSelectPlayerView.hideIntermediateScore()
+      totalScore > 0 && !hideIntermediateScore()
         ? `${player.name} (${totalScore}) [${averageScore} avg] `
         : player.name,
       false,
@@ -206,4 +187,21 @@ export class StationSelectPlayerView extends BaseView {
 
     return playerEntry;
   }
+}
+
+// TODO move into its own utility
+function hideIntermediateScore(hide?: boolean): boolean {
+  if (hide === undefined) {
+    const value = window.localStorage.getItem(
+      'bow-buddy-settings:hide-intermediate-score',
+    );
+
+    return value === 'true';
+  }
+  window.localStorage.setItem(
+    'bow-buddy-settings:hide-intermediate-score',
+    `${hide}`,
+  );
+
+  return hide;
 }

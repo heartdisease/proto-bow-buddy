@@ -28,7 +28,7 @@ import { StationSelectPlayerView } from './views/station-select-player';
 import { StationSetScoreView } from './views/station-set-score';
 
 import '../node_modules/materialize-css/dist/css/materialize.min.css';
-import './styles/main.scss';
+import './styles/main.scss'; // tslint:disable-line:no-import-side-effect
 
 interface Route {
   path: string;
@@ -36,7 +36,7 @@ interface Route {
 }
 
 export class Application {
-  private static readonly VERSION = '2.14.0';
+  private static readonly VERSION = '2.14.1';
   private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
   private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
   private static readonly ROUTES: Route[] = [
@@ -57,12 +57,14 @@ export class Application {
 
     console.info('Application starting...');
 
-    window.addEventListener('hashchange', e => Application.onHashChange());
+    window.addEventListener('hashchange', e => {
+      Application.onHashChange();
+    });
     Application.onHashChange();
   }
 
   static getStorage(): DbAccess {
-    return Application.storage || (Application.storage = new DbAccess());
+    return Application.storage || (Application.storage = new DbAccess()); // tslint:disable-line:strict-boolean-expressions
   }
 
   private static updateWindowTitle(viewTitle: string): void {

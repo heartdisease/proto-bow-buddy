@@ -18,90 +18,17 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import * as dragula from 'dragula';
-import 'materialize-css';
+import 'materialize-css'; // tslint:disable-line:no-import-side-effect
 import { Application } from '../main';
 import { BaseView } from './base-view';
 
 import '../../node_modules/dragula/dist/dragula.min.css';
-import '../styles/station-set-score.scss';
-
-function getHitButton(hit: string): string {
-  switch (hit) {
-    case 'body-hit':
-      // tslint:disable-next-line:max-line-length
-      return '<a class="btn-floating btn-large light-blue accent-4 hit"><span class="draggable-text-block">Body</span></a>';
-    case 'kill-hit':
-      // tslint:disable-next-line:max-line-length
-      return '<a class="btn-floating btn-large amber darken-4 hit"><span class="draggable-text-block">Kill</span></a>';
-    case 'center-kill-hit':
-      // tslint:disable-next-line:max-line-length
-      return '<a class="btn-floating btn-large red darken-4 hit"><span class="draggable-text-block">Center Kill</span></a>';
-    default:
-      throw new Error(`Invalid hit: ${hit}`);
-  }
-}
-
-function getTurnButton(turn: string): string {
-  switch (turn) {
-    case 'first-turn':
-      // tslint:disable-next-line:max-line-length
-      return '<a class="btn-floating btn-large grey darken-4 turn"><span class="draggable-text-block">1<sup>st</sup></span></a>';
-    case 'second-turn':
-      // tslint:disable-next-line:max-line-length
-      return '<a class="btn-floating btn-large grey darken-1 turn"><span class="draggable-text-block">2<sup>nd</sup></span></a>';
-    case 'third-turn':
-      // tslint:disable-next-line:max-line-length
-      return '<a class="btn-floating btn-large grey turn"><span class="draggable-text-block">3<sup>rd</sup></span></a>';
-    default:
-      throw new Error(`Invalid turn: ${turn}`);
-  }
-}
-
-function getDndSibling(origin: HTMLElement, target: HTMLElement): HTMLElement {
-  for (const el of target.childNodes) {
-    if (el.nodeType === Node.ELEMENT_NODE && el !== origin) {
-      return el as HTMLElement;
-    }
-  }
-  throw new Error('No sibling found in target element');
-}
-
-function navigateToPlayerSelection(gid: number, station: number): void {
-  window.location.href = `#station-select-player;gid=${gid};station=${station}`;
-}
-
-function navigateToNextPlayer(
-  gid: number,
-  station: number,
-  nextPid: number,
-  remainingPids: number[],
-): void {
-  const qaParam =
-    remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
-  window.location.href = `#station-set-score;gid=${gid};pid=${nextPid}${qaParam};station=${station}`; // ts-lint:disable-line:max-line-length
-}
-
-function navigateNext(
-  gid: number,
-  station: number,
-  remainingPids: number[],
-): void {
-  if (remainingPids.length > 0) {
-    navigateToNextPlayer(
-      gid,
-      station,
-      remainingPids[0],
-      remainingPids.slice(1),
-    );
-  } else {
-    navigateToPlayerSelection(gid, station);
-  }
-}
+import '../styles/station-set-score.scss'; // tslint:disable-line:no-import-side-effect
 
 export class StationSetScoreView extends BaseView {
   private static readonly NAVIGATION_DELAY = 350;
 
-  private scoreModalElement?: Element;
+  private scoreModalElement: Element;
 
   getTitle(): string {
     return 'Assign Score';
@@ -116,12 +43,14 @@ export class StationSetScoreView extends BaseView {
       : [];
     const station = parameters.get('station') as number;
 
-    this.init(gid, pid, remainingPids, station, assignAll);
+    this.init(gid, pid, remainingPids, station, assignAll).catch(e =>
+      console.error(e),
+    );
   }
 
   onHide(): void {
-    M.Modal.getInstance(this.scoreModalElement!).close();
-    M.Modal.getInstance(this.scoreModalElement!).destroy();
+    M.Modal.getInstance(this.scoreModalElement).close();
+    M.Modal.getInstance(this.scoreModalElement).destroy();
   }
 
   protected getTemplateLocator(): string {
@@ -191,7 +120,7 @@ export class StationSetScoreView extends BaseView {
     station: number,
     assignAll: boolean,
   ): Promise<void> {
-    this.scoreModalElement = this.queryElement('.score-modal')!;
+    this.scoreModalElement = this.queryElement('.score-modal');
 
     M.Modal.init(this.scoreModalElement, {});
 
@@ -227,11 +156,11 @@ export class StationSetScoreView extends BaseView {
       this.queryElement('.modal-hit-score').innerHTML =
         '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>'; // ts-lint:disable-line:max-line-length
     } else {
-      this.queryElement('.modal-hit-score').innerHTML = getHitButton(hit!);
-      this.queryElement('.modal-turn-score').innerHTML = getTurnButton(turn!);
+      this.queryElement('.modal-hit-score').innerHTML = getHitButton(hit!); // tslint:disable-line:no-non-null-assertion
+      this.queryElement('.modal-turn-score').innerHTML = getTurnButton(turn!); // tslint:disable-line:no-non-null-assertion
     }
 
-    M.Modal.getInstance(this.scoreModalElement!).open();
+    M.Modal.getInstance(this.scoreModalElement).open();
 
     try {
       if (assignAll) {
@@ -270,5 +199,72 @@ export class StationSetScoreView extends BaseView {
       console.error(`Failed to persist score: ${e.message}`);
       navigateToPlayerSelection(gid, station);
     }
+  }
+}
+
+function getHitButton(hit: string): string {
+  switch (hit) {
+    case 'body-hit':
+      return '<a class="btn-floating btn-large light-blue accent-4 hit"><span class="draggable-text-block">Body</span></a>';
+    case 'kill-hit':
+      return '<a class="btn-floating btn-large amber darken-4 hit"><span class="draggable-text-block">Kill</span></a>';
+    case 'center-kill-hit':
+      return '<a class="btn-floating btn-large red darken-4 hit"><span class="draggable-text-block">Center Kill</span></a>';
+    default:
+      throw new Error(`Invalid hit: ${hit}`);
+  }
+}
+
+function getTurnButton(turn: string): string {
+  switch (turn) {
+    case 'first-turn':
+      return '<a class="btn-floating btn-large grey darken-4 turn"><span class="draggable-text-block">1<sup>st</sup></span></a>';
+    case 'second-turn':
+      return '<a class="btn-floating btn-large grey darken-1 turn"><span class="draggable-text-block">2<sup>nd</sup></span></a>';
+    case 'third-turn':
+      return '<a class="btn-floating btn-large grey turn"><span class="draggable-text-block">3<sup>rd</sup></span></a>';
+    default:
+      throw new Error(`Invalid turn: ${turn}`);
+  }
+}
+
+function getDndSibling(origin: HTMLElement, target: HTMLElement): HTMLElement {
+  for (const el of target.childNodes) {
+    if (el.nodeType === Node.ELEMENT_NODE && el !== origin) {
+      return el as HTMLElement;
+    }
+  }
+  throw new Error('No sibling found in target element');
+}
+
+function navigateToPlayerSelection(gid: number, station: number): void {
+  window.location.href = `#station-select-player;gid=${gid};station=${station}`;
+}
+
+function navigateToNextPlayer(
+  gid: number,
+  station: number,
+  nextPid: number,
+  remainingPids: number[],
+): void {
+  const qaParam =
+    remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
+  window.location.href = `#station-set-score;gid=${gid};pid=${nextPid}${qaParam};station=${station}`; // ts-lint:disable-line:max-line-length
+}
+
+function navigateNext(
+  gid: number,
+  station: number,
+  remainingPids: number[],
+): void {
+  if (remainingPids.length > 0) {
+    navigateToNextPlayer(
+      gid,
+      station,
+      remainingPids[0],
+      remainingPids.slice(1),
+    );
+  } else {
+    navigateToPlayerSelection(gid, station);
   }
 }

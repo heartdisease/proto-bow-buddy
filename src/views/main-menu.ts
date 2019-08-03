@@ -19,7 +19,7 @@
  */
 import { BaseView } from './base-view';
 
-import '../styles/main-menu.scss';
+import '../styles/main-menu.scss'; // tslint:disable-line:no-import-side-effect
 
 export class MainMenuView extends BaseView {
   getTitle(): string {
