@@ -17,204 +17,15 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-export interface Player {
-  readonly pid: number;
-  name: string;
-  email: string;
-}
 
-export interface PlayerWithScore extends Player {
-  readonly score?: string;
-}
-
-export interface Course {
-  readonly cid: number;
-  name: string;
-  place: string;
-  geolocation: string;
-  stations: number;
-}
-
-export interface Game {
-  readonly gid: number;
-  readonly cid: number;
-  readonly pids: number[];
-  starttime: string; // new Date().toISOString() = ISO 8601 (UTC)
-  endtime: string; // new Date().toISOString() = ISO 8601 (UTC)
-}
-
-export interface Score {
-  readonly sid: number;
-  readonly gid: number;
-  readonly pid: number;
-  station: number;
-  score: string; // format: 'first-turn:body-hit' OR 'miss'
-}
-
-export interface TotalScoreForGame {
-  readonly players: Player[];
-  readonly scores: Map<number, string[]>;
-}
-
-/**
- * Do not call any of these functions after calling erase() or close()!
- */
-export class DbWrapper {
-  private dbConnected = false;
-  private dbPromise?: Promise<any>;
-
-  async transaction(
-    objectStores: string | string[],
-    writeAccess = false,
-  ): Promise<any> {
-    const db = await this.requestDb();
-    const transaction = db.transaction(
-      objectStores,
-      writeAccess ? 'readwrite' : 'readonly',
-    );
-
-    return Array.isArray(objectStores)
-      ? objectStores.reduce((map: any, objectStore: string) => {
-          map[objectStore] = transaction.objectStore(objectStore);
-
-          return map;
-        }, {})
-      : transaction.objectStore(objectStores);
-  }
-
-  async objectStoreNames(): Promise<string[]> {
-    try {
-      const db = await this.requestDb();
-
-      return Array.prototype.slice.call(db.objectStoreNames);
-    } catch (error) {
-      throw new Error(`Failed to close database: ${error.message}`);
-    }
-  }
-
-  async erase(): Promise<Event> {
-    try {
-      await this.close();
-
-      return new Promise((resolve, reject) => {
-        (function tryDeleteDb(): void {
-          console.info('We now try to erase the db...');
-          const deletionRequest = window.indexedDB.deleteDatabase('BowBuddyDb');
-
-          deletionRequest.onsuccess = (e: Event) => {
-            console.info('deletionRequest.onsuccess');
-            resolve(e);
-          };
-          deletionRequest.onblocked = () => {
-            console.info('deletionRequest.onblocked');
-            window.setTimeout(tryDeleteDb, 50); // try again indefinitely
-          };
-          deletionRequest.onerror = (e: Event) => {
-            console.info('deletionRequest.onerror');
-            reject(e);
-          };
-        })();
-      });
-    } catch (error) {
-      throw new Error(`Failed to erase database: ${error.message}`);
-    }
-  }
-
-  async close(): Promise<void> {
-    try {
-      // TODO check if db is even open before calling requestDb()
-      const db = await this.requestDb();
-
-      // reset db handle promise
-      this.dbPromise = undefined;
-      this.dbConnected = false;
-      db.close();
-    } catch (error) {
-      console.log(`Failed to close database: ${error.message}`);
-    }
-  }
-
-  private async requestDb(): Promise<IDBDatabase> {
-    if (this.dbPromise !== undefined) {
-      this.dbPromise = new Promise((resolve, reject) => {
-        const dbRequest = window.indexedDB.open('BowBuddyDb', 1);
-
-        // TODO make IndexedDB code run with Firefox
-        dbRequest.onupgradeneeded = (event: any) => {
-          console.log('dbRequest.onupgradeneeded');
-
-          const request = event.target as IDBRequest;
-          const db = request.result;
-
-          const playerStore = db.createObjectStore('players', {
-            keyPath: 'pid',
-            autoIncrement: true,
-          });
-          playerStore.createIndex('pid', 'pid', { unique: true });
-          playerStore.createIndex('name', 'name', { unique: true });
-          playerStore.createIndex('email', 'email', { unique: false });
-
-          const courseStore = db.createObjectStore('courses', {
-            keyPath: 'cid',
-            autoIncrement: true,
-          });
-          courseStore.createIndex('cid', 'cid', { unique: true });
-          courseStore.createIndex('name', 'name', { unique: false });
-          courseStore.createIndex('place', 'place', { unique: false });
-          courseStore.createIndex('geolocation', 'geolocation', {
-            unique: false,
-          });
-          courseStore.createIndex('stations', 'stations', { unique: false });
-
-          const gameStore = db.createObjectStore('games', {
-            keyPath: 'gid',
-            autoIncrement: true,
-          });
-          gameStore.createIndex('gid', 'gid', { unique: true });
-          gameStore.createIndex('cid', 'cid', { unique: false });
-          gameStore.createIndex('pids', 'pids', {
-            unique: false,
-            multiEntry: true,
-          });
-          gameStore.createIndex('starttime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
-          gameStore.createIndex('endtime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
-
-          const scoreStore = db.createObjectStore('scores', {
-            keyPath: ['gid', 'pid', 'station'],
-          });
-          scoreStore.createIndex('sid', ['gid', 'pid', 'station'], {
-            unique: true,
-          }); // compound key path
-          scoreStore.createIndex('gid', 'gid', { unique: false });
-          scoreStore.createIndex('pid', 'pid', { unique: false });
-          scoreStore.createIndex('station', 'station', { unique: false });
-          scoreStore.createIndex('score', 'score', { unique: false }); // string format: 'first-turn:body-hit' OR 'miss'
-        };
-        dbRequest.onsuccess = (event: Event) => {
-          console.log('dbRequest.onsuccess');
-
-          if (!this.dbConnected) {
-            const request = event.target as IDBRequest;
-            this.dbConnected = true;
-            resolve(request.result);
-          }
-        };
-        dbRequest.onerror = (event: Event) => {
-          console.log('dbRequest.onerror');
-
-          if (!this.dbConnected) {
-            window.alert('This app does not work without IndexedDB enabled!');
-            reject(event);
-          }
-          this.dbPromise = undefined;
-          this.dbConnected = false;
-        };
-      });
-    }
-
-    return this.dbPromise;
-  }
-}
+import {
+  Player,
+  PlayerWithScore,
+  Course,
+  Game,
+  Score,
+  TotalScoreForGame,
+} from './data-types';
 
 export class DbAccess {
   private dbWrapper?: DbWrapper;
@@ -488,7 +299,6 @@ export class DbAccess {
       const objectStores = await this.db().transaction(objectStoreNames, true);
 
       let objectStoresCompleted = 0;
-      const steps = 2;
 
       return new Promise((resolve, reject) => {
         for (const objectStoreName of objectStoreNames) {
@@ -549,6 +359,166 @@ export class DbAccess {
       this.dbWrapper = new DbWrapper();
     }
     return this.dbWrapper;
+  }
+}
+
+/**
+ * Do not call any of these functions after calling erase() or close()!
+ */
+class DbWrapper {
+  private dbConnected = false;
+  private dbPromise?: Promise<IDBDatabase>;
+
+  async transaction(
+    objectStores: string | string[],
+    writeAccess = false,
+  ): Promise<any> {
+    const db = await this.requestDb();
+    const transaction = db.transaction(
+      objectStores,
+      writeAccess ? 'readwrite' : 'readonly',
+    );
+
+    return Array.isArray(objectStores)
+      ? objectStores.reduce((map: any, objectStore: string) => {
+          map[objectStore] = transaction.objectStore(objectStore);
+
+          return map;
+        }, {})
+      : transaction.objectStore(objectStores);
+  }
+
+  async objectStoreNames(): Promise<string[]> {
+    try {
+      const db = await this.requestDb();
+
+      return Array.prototype.slice.call(db.objectStoreNames);
+    } catch (error) {
+      throw new Error(`Failed to close database: ${error.message}`);
+    }
+  }
+
+  async erase(): Promise<Event> {
+    try {
+      await this.close();
+
+      return new Promise((resolve, reject) => {
+        (function tryDeleteDb(): void {
+          console.info('We now try to erase the db...');
+          const deletionRequest = window.indexedDB.deleteDatabase('BowBuddyDb');
+
+          deletionRequest.onsuccess = (e: Event) => {
+            console.info('deletionRequest.onsuccess');
+            resolve(e);
+          };
+          deletionRequest.onblocked = () => {
+            console.info('deletionRequest.onblocked');
+            window.setTimeout(tryDeleteDb, 50); // try again indefinitely
+          };
+          deletionRequest.onerror = (e: Event) => {
+            console.info('deletionRequest.onerror');
+            reject(e);
+          };
+        })();
+      });
+    } catch (error) {
+      throw new Error(`Failed to erase database: ${error.message}`);
+    }
+  }
+
+  async close(): Promise<void> {
+    try {
+      // TODO check if db is even open before calling requestDb()
+      const db = await this.requestDb();
+
+      // reset db handle promise
+      this.dbPromise = undefined;
+      this.dbConnected = false;
+      db.close();
+    } catch (error) {
+      console.log(`Failed to close database: ${error.message}`);
+    }
+  }
+
+  private async requestDb(): Promise<IDBDatabase> {
+    if (this.dbPromise === undefined) {
+      this.dbPromise = new Promise((resolve, reject) => {
+        const dbRequest = window.indexedDB.open('BowBuddyDb', 1);
+
+        // TODO make IndexedDB code run with Firefox
+        dbRequest.onupgradeneeded = (event: any) => {
+          console.log('dbRequest.onupgradeneeded');
+
+          const request = event.target as IDBRequest;
+          const db = request.result;
+
+          const playerStore = db.createObjectStore('players', {
+            keyPath: 'pid',
+            autoIncrement: true,
+          });
+          playerStore.createIndex('pid', 'pid', { unique: true });
+          playerStore.createIndex('name', 'name', { unique: true });
+          playerStore.createIndex('email', 'email', { unique: false });
+
+          const courseStore = db.createObjectStore('courses', {
+            keyPath: 'cid',
+            autoIncrement: true,
+          });
+          courseStore.createIndex('cid', 'cid', { unique: true });
+          courseStore.createIndex('name', 'name', { unique: false });
+          courseStore.createIndex('place', 'place', { unique: false });
+          courseStore.createIndex('geolocation', 'geolocation', {
+            unique: false,
+          });
+          courseStore.createIndex('stations', 'stations', { unique: false });
+
+          const gameStore = db.createObjectStore('games', {
+            keyPath: 'gid',
+            autoIncrement: true,
+          });
+          gameStore.createIndex('gid', 'gid', { unique: true });
+          gameStore.createIndex('cid', 'cid', { unique: false });
+          gameStore.createIndex('pids', 'pids', {
+            unique: false,
+            multiEntry: true,
+          });
+          gameStore.createIndex('starttime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+          gameStore.createIndex('endtime', 'date', { unique: true }); // new Date().toISOString() = ISO 8601 (UTC)
+
+          const scoreStore = db.createObjectStore('scores', {
+            keyPath: ['gid', 'pid', 'station'],
+          });
+          scoreStore.createIndex('sid', ['gid', 'pid', 'station'], {
+            unique: true,
+          }); // compound key path
+          scoreStore.createIndex('gid', 'gid', { unique: false });
+          scoreStore.createIndex('pid', 'pid', { unique: false });
+          scoreStore.createIndex('station', 'station', { unique: false });
+          scoreStore.createIndex('score', 'score', { unique: false }); // string format: 'first-turn:body-hit' OR 'miss'
+        };
+        dbRequest.onsuccess = (event: Event) => {
+          console.log('dbRequest.onsuccess');
+
+          if (!this.dbConnected) {
+            const request = event.target as IDBRequest;
+            this.dbConnected = true;
+            resolve(request.result);
+          }
+        };
+        dbRequest.onerror = (event: Event) => {
+          console.log('dbRequest.onerror');
+
+          if (!this.dbConnected) {
+            window.alert('This app does not work without IndexedDB enabled!');
+            reject(event);
+          }
+          this.dbPromise = undefined;
+          this.dbConnected = false;
+        };
+      });
+    }
+
+    return this.dbPromise;
   }
 }
 

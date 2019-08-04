@@ -18,7 +18,7 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
-import { Game } from '../db';
+import { Game, Course } from '../data-types';
 
 import '../styles/hall-of-fame.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -53,29 +53,44 @@ export class HallOfFameView extends BaseView {
     // TODO filter out unfinished games (should we automatically clean up unfinished games?)
     for (const game of games) {
       const course = await this.getStorage().getCourseForGame(game.gid);
-      const from = new Date(game.starttime).toLocaleDateString('de-AT', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-      const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-      const linkLabel = `${course.name} (${course.stations})<br/>[${from} - ${to}]`;
       const row = this.createElement('tr', null);
       const cell = this.createElement(
         'td',
-        `<a href="#final-score;gid=${game.gid}">${linkLabel}</a>`,
+        await this.createCellContent(game, course),
         true,
       );
 
       row.appendChild(cell);
       tbody.appendChild(row);
     }
+  }
+
+  private async createCellContent(game: Game, course: Course): Promise<string> {
+    const from = new Date(game.starttime).toLocaleDateString('de-AT', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const to = new Date(game.endtime).toLocaleTimeString('de-AT', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const linkLabel = `${course.name} (${course.stations})<br/>[${from} - ${to}]`;
+    const lastRegisteredStation = await this.getStorage().getPlayersWithScore(
+      game.gid,
+      course.stations,
+    );
+
+    if (
+      lastRegisteredStation.filter(player => player.score !== undefined)
+        .length !== game.pids.length
+    ) {
+      return `${linkLabel} <a href="#station-select-player;gid=${game.gid};station=1">(resume game)</a>`;
+    }
+    return `<a href="#final-score;gid=${game.gid}">${linkLabel}</a>`;
   }
 }

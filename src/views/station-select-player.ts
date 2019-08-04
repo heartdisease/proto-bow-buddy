@@ -17,7 +17,7 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { PlayerWithScore } from '../db';
+import { PlayerWithScore } from '../data-types';
 import { ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
 
@@ -126,11 +126,12 @@ export class StationSelectPlayerView extends BaseView {
 
     for (const player of players) {
       const scores = totalScoreForGame.scores.get(player.pid);
-      const scorePoints = scores
-        ? scores.map(score => ScoreUtils.scoreToPoints(score))
-        : [];
+      const scorePoints =
+        scores !== undefined
+          ? scores.map(score => ScoreUtils.scoreToPoints(score))
+          : [];
       const totalScore = scorePoints.reduce(
-        (a, b) => a + b,
+        (a: number, b: number) => a + b,
         scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1], // exclude score of current station
       );
 

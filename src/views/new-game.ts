@@ -17,7 +17,7 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { Course, Player } from '../db';
+import { Course, Player } from '../data-types';
 import { BaseView } from './base-view';
 
 import '../styles/new-game.scss'; // tslint:disable-line:no-import-side-effect

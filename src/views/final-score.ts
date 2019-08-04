@@ -19,6 +19,7 @@
  */
 import { PlayerScore, ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
+import { Player } from '../data-types';
 
 import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -117,9 +118,9 @@ export class FinalScoreView extends BaseView {
     const playerScoreEntries = this.queryElement('.player-score-entries');
     const playerHeaderRow = this.queryElement('.player-header-row');
 
-    players.forEach(player =>
-      playerHeaderRow.appendChild(this.createElement('th', player.name)),
-    );
+    for (const player of players) {
+      playerHeaderRow.appendChild(this.createElement('th', player.name));
+    }
 
     for (let station = 1; station <= stations; station++) {
       const playerScoreEntry = document.createElement('tr');
@@ -128,7 +129,7 @@ export class FinalScoreView extends BaseView {
       stationColumn.style.fontStyle = 'italic';
       playerScoreEntry.appendChild(stationColumn);
       players
-        .map(player => scores.get(player.pid)!) // tslint:disable-line:no-non-null-assertion
+        .map((player: Player) => scores.get(player.pid)!) // tslint:disable-line:no-non-null-assertion
         .forEach(scoresForPlayer => {
           const scoreColumn = this.createElement(
             'td',

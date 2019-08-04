@@ -17,7 +17,7 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { Player, TotalScoreForGame } from './db';
+import { Player, TotalScoreForGame } from './data-types';
 import { Application } from './main';
 
 export interface PlayerScore {
@@ -52,7 +52,7 @@ export /*final*/ class ScoreUtils {
       const scores = totalScoreForGame.scores.get(player.pid)!; // tslint:disable-line:no-non-null-assertion
       const totalScore = scores
         .map((score: string) => ScoreUtils.scoreToPoints(score))
-        .reduce((a, b) => a + b, 0);
+        .reduce((a: number, b: number) => a + b, 0);
       const averageScore = ScoreUtils.averageScore(totalScore, stations);
 
       playerScores.push({
