@@ -19,6 +19,7 @@
  */
 import { DbAccess } from '../db';
 import { Application } from '../main';
+import { Router } from '../router';
 
 export abstract class BaseView {
   private viewContainer: HTMLElement;
@@ -42,6 +43,13 @@ export abstract class BaseView {
   }
 
   abstract getTitle(): string;
+
+  /**
+   * Never override this method!
+   */
+  protected /*final*/ getRouter(): Router {
+    return Application.getRouter();
+  }
 
   /**
    * Never override this method!

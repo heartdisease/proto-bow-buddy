@@ -452,7 +452,10 @@ export class NewGameView extends BaseView {
     try {
       const game = await this.getStorage().addGame(cid, pids);
 
-      window.location.href = `#station-select-player;gid=${game.gid};station=1`;
+      this.getRouter().navigateTo(`#station-select-player`, {
+        gid: game.gid,
+        station: 1,
+      });
     } catch (error) {
       throw new Error(`Failed to add new game: ${error.message}`);
     }

@@ -98,7 +98,15 @@ export class StationSetScoreView extends BaseView {
           : getDndSibling(origin, target).dataset.dnd;
 
         origin.classList.add('ex-moved');
-        this.logScore(gid, pid, station, remainingPids, assignAll, hit, turn);
+        this.logScore(
+          gid,
+          pid,
+          station,
+          remainingPids,
+          assignAll,
+          hit,
+          turn,
+        ).catch(e => console.error(e));
       })
       .on('over', (el: HTMLElement, container: HTMLElement) => {
         container.classList.add('ex-over');
@@ -109,7 +117,9 @@ export class StationSetScoreView extends BaseView {
 
     this.queryElement('.miss-btn').addEventListener('click', e => {
       e.preventDefault();
-      this.logScore(gid, pid, station, remainingPids, assignAll);
+      this.logScore(gid, pid, station, remainingPids, assignAll).catch(e =>
+        console.error(e),
+      );
     });
   }
 
@@ -154,7 +164,7 @@ export class StationSetScoreView extends BaseView {
 
     if (miss) {
       this.queryElement('.modal-hit-score').innerHTML =
-        '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>'; // ts-lint:disable-line:max-line-length
+        '<a class="btn btn-default btn-lg miss-btn" href="#" role="button">Miss</a>';
     } else {
       this.queryElement('.modal-hit-score').innerHTML = getHitButton(hit!); // tslint:disable-line:no-non-null-assertion
       this.queryElement('.modal-turn-score').innerHTML = getTurnButton(turn!); // tslint:disable-line:no-non-null-assertion
@@ -174,10 +184,10 @@ export class StationSetScoreView extends BaseView {
         const timeDiff = Date.now() - before;
 
         if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
-          navigateToPlayerSelection(gid, station);
+          this.navigateToPlayerSelection(gid, station);
         } else {
           window.setTimeout(
-            () => navigateToPlayerSelection(gid, station),
+            () => this.navigateToPlayerSelection(gid, station),
             StationSetScoreView.NAVIGATION_DELAY - timeDiff,
           );
         }
@@ -187,17 +197,57 @@ export class StationSetScoreView extends BaseView {
         const timeDiff = Date.now() - before;
 
         if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
-          navigateNext(gid, station, remainingPids);
+          this.navigateNext(gid, station, remainingPids);
         } else {
           window.setTimeout(
-            () => navigateNext(gid, station, remainingPids),
+            () => this.navigateNext(gid, station, remainingPids),
             StationSetScoreView.NAVIGATION_DELAY - timeDiff,
           );
         }
       }
     } catch (e) {
       console.error(`Failed to persist score: ${e.message}`);
-      navigateToPlayerSelection(gid, station);
+      this.navigateToPlayerSelection(gid, station);
+    }
+  }
+
+  private navigateToPlayerSelection(gid: number, station: number): void {
+    this.getRouter().navigateTo(`#station-select-player`, { gid, station });
+  }
+
+  private navigateToNextPlayer(
+    gid: number,
+    station: number,
+    nextPid: number,
+    remainingPids: number[],
+  ): void {
+    const params: { [key: string]: string | number | boolean } = {
+      gid,
+      pid: nextPid,
+      station,
+    };
+
+    if (remainingPids.length > 0) {
+      // tslint:disable-next-line:no-string-literal
+      params['qa'] = remainingPids.join('+'); // qa = 'quick assign'
+    }
+    this.getRouter().navigateTo(`#station-set-score`, params);
+  }
+
+  private navigateNext(
+    gid: number,
+    station: number,
+    remainingPids: number[],
+  ): void {
+    if (remainingPids.length > 0) {
+      this.navigateToNextPlayer(
+        gid,
+        station,
+        remainingPids[0],
+        remainingPids.slice(1),
+      );
+    } else {
+      this.navigateToPlayerSelection(gid, station);
     }
   }
 }
@@ -235,36 +285,4 @@ function getDndSibling(origin: HTMLElement, target: HTMLElement): HTMLElement {
     }
   }
   throw new Error('No sibling found in target element');
-}
-
-function navigateToPlayerSelection(gid: number, station: number): void {
-  window.location.href = `#station-select-player;gid=${gid};station=${station}`;
-}
-
-function navigateToNextPlayer(
-  gid: number,
-  station: number,
-  nextPid: number,
-  remainingPids: number[],
-): void {
-  const qaParam =
-    remainingPids.length > 0 ? `;qa=${remainingPids.join('+')}` : ''; // qa = 'quick assign'
-  window.location.href = `#station-set-score;gid=${gid};pid=${nextPid}${qaParam};station=${station}`; // ts-lint:disable-line:max-line-length
-}
-
-function navigateNext(
-  gid: number,
-  station: number,
-  remainingPids: number[],
-): void {
-  if (remainingPids.length > 0) {
-    navigateToNextPlayer(
-      gid,
-      station,
-      remainingPids[0],
-      remainingPids.slice(1),
-    );
-  } else {
-    navigateToPlayerSelection(gid, station);
-  }
 }

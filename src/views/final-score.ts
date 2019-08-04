@@ -43,6 +43,7 @@ export class FinalScoreView extends BaseView {
 
     return duration;
   }
+
   getTitle(): string {
     return 'Final Score';
   }
@@ -92,6 +93,11 @@ export class FinalScoreView extends BaseView {
       '.course-duration',
     ).innerHTML = `${duration}<br/>(${from} - ${to})`;
     this.queryElement('.course-label').innerText = courseLabel;
+
+    this.queryElement('.main-menu-btn').addEventListener('click', e => {
+      e.preventDefault();
+      this.getRouter().navigateTo('#main-menu');
+    });
 
     await Promise.all([
       this.generateScoreChart(gid, course.stations),

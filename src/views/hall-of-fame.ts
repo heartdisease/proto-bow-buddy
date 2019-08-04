@@ -29,6 +29,10 @@ export class HallOfFameView extends BaseView {
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
     this.init().catch(e => console.error(e));
+    this.queryElement('.main-menu-btn').addEventListener('click', e => {
+      e.preventDefault();
+      this.getRouter().navigateTo('#main-menu');
+    });
   }
 
   onHide(): void {

@@ -18,115 +18,40 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { DbAccess } from './db';
-import { AppSettingsView } from './views/app-settings';
-import { BaseView } from './views/base-view';
-import { FinalScoreView } from './views/final-score';
-import { HallOfFameView } from './views/hall-of-fame';
-import { MainMenuView } from './views/main-menu';
-import { NewGameView } from './views/new-game';
-import { StationSelectPlayerView } from './views/station-select-player';
-import { StationSetScoreView } from './views/station-set-score';
 
 import '../node_modules/materialize-css/dist/css/materialize.min.css';
 import './styles/main.scss'; // tslint:disable-line:no-import-side-effect
-
-interface Route {
-  path: string;
-  view: new () => BaseView;
-}
+import { Router } from './router';
 
 export class Application {
-  private static readonly VERSION = '2.15.0';
-  private static readonly NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
-  private static readonly BOOLEAN_PATTERN = /^(?:true|false)$/i;
-  private static readonly ROUTES: Route[] = [
-    { path: '', view: MainMenuView },
-    { path: '#main-menu', view: MainMenuView },
-    { path: '#new-game', view: NewGameView },
-    { path: '#station-select-player', view: StationSelectPlayerView },
-    { path: '#station-set-score', view: StationSetScoreView },
-    { path: '#final-score', view: FinalScoreView },
-    { path: '#app-settings', view: AppSettingsView },
-    { path: '#hall-of-fame', view: HallOfFameView },
-  ];
+  private static readonly VERSION = '2.16.0';
 
-  private static storage?: DbAccess;
-  private static currentView?: BaseView;
+  private static router: Router;
+  private static storage: DbAccess;
+
   static initApplication(): void {
     Application.updateWindowTitle('');
+    Application.router = new Router();
+    Application.storage = new DbAccess();
 
     console.info('Application starting...');
 
-    window.addEventListener('hashchange', e => {
-      Application.onHashChange();
-    });
-    Application.onHashChange();
+    Application.router.registerHandlers();
+  }
+
+  static getRouter(): Router {
+    return Application.router;
   }
 
   static getStorage(): DbAccess {
-    return Application.storage || (Application.storage = new DbAccess()); // tslint:disable-line:strict-boolean-expressions
+    return Application.storage;
   }
 
-  private static updateWindowTitle(viewTitle: string): void {
+  static updateWindowTitle(viewTitle: string): void {
     const version = Application.VERSION;
-    const formattedViewTitle = viewTitle ? ` - ${viewTitle}` : '';
+    const formattedViewTitle = viewTitle.length > 0 ? ` - ${viewTitle}` : '';
 
     document.title = `BowBuddy ${version}${formattedViewTitle}`;
-  }
-
-  private static onHashChange(): void {
-    const params = window.location.hash.split(';');
-    const viewToken = params[0];
-    const view = Application.createViewForToken(viewToken);
-
-    if (Application.currentView) {
-      Application.currentView.destroyView();
-    }
-    Application.currentView = view;
-
-    Application.updateWindowTitle(view.getTitle());
-    view.initView(Application.getUrlParams());
-  }
-
-  private static createViewForToken(viewToken: string): BaseView {
-    const route = Application.ROUTES.find(
-      appRoute => appRoute.path === viewToken,
-    );
-
-    if (route !== undefined) {
-      return new route.view();
-    }
-    console.warn(`Unknown route: ${viewToken}`);
-
-    return new MainMenuView();
-  }
-
-  private static getUrlParams(): ReadonlyMap<
-    string,
-    string | number | boolean
-  > {
-    const parsedUrlParams = new Map<string, string | number | boolean>();
-
-    return window.location.hash
-      ? window.location.hash
-          .substring(1) // omit the # at the beginning
-          .split(';')
-          .map(keyValueStr => keyValueStr.split('='))
-          .reduce((urlParams, keyValuePair) => {
-            const key = keyValuePair[0];
-            const value = keyValuePair[1];
-
-            if (Application.BOOLEAN_PATTERN.test(value)) {
-              urlParams.set(key, value.toLowerCase() === 'true');
-            } else if (Application.NUMBER_PATTERN.test(value)) {
-              urlParams.set(key, +value);
-            } else {
-              urlParams.set(key, value);
-            }
-
-            return urlParams;
-          }, parsedUrlParams)
-      : parsedUrlParams;
   }
 }
 

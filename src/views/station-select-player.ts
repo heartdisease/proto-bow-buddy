@@ -61,14 +61,16 @@ export class StationSelectPlayerView extends BaseView {
           '<i class="material-icons left">check</i> Show total score';
         nextStationBtn.addEventListener('click', e => {
           e.preventDefault();
-          window.location.href = `#final-score;gid=${gid}`;
+          this.getRouter().navigateTo(`#final-score`, { gid });
         });
       } else {
         nextStationBtn.addEventListener('click', e => {
           e.preventDefault();
 
-          window.location.href = `#station-select-player;gid=${gid};station=${station +
-            1}`;
+          this.getRouter().navigateTo(`#station-select-player`, {
+            gid,
+            station: station + 1,
+          });
         });
       }
 
@@ -112,16 +114,30 @@ export class StationSelectPlayerView extends BaseView {
           .map(p => p.pid)
           .join('+');
 
-        window.location.href = `#station-set-score;gid=${gid};pid=${firstPid};qa=${quickAssign};station=${station}`;
+        this.getRouter().navigateTo(`#station-set-score`, {
+          gid,
+          pid: firstPid,
+          qa: quickAssign,
+          station,
+        });
       } else {
-        window.location.href = `#station-set-score;gid=${gid};pid=${firstPid};station=${station}`;
+        this.getRouter().navigateTo(`#station-set-score`, {
+          gid,
+          pid: firstPid,
+          station,
+        });
       }
     });
     this.queryElement('.assign-all-btn').addEventListener('click', e => {
       const quickAssign = players.map(p => p.pid).join('+');
 
       e.preventDefault();
-      window.location.href = `#station-set-score;gid=${gid};qa=${quickAssign};aa=true;station=${station}`; // ts-lint:disable-line:max-line-length
+      this.getRouter().navigateTo(`#station-set-score`, {
+        gid,
+        qa: quickAssign,
+        aa: true,
+        station,
+      });
     });
 
     for (const player of players) {
