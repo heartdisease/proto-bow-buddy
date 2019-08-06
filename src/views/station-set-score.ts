@@ -212,7 +212,11 @@ export class StationSetScoreView extends BaseView {
   }
 
   private navigateToPlayerSelection(gid: number, station: number): void {
-    this.getRouter().navigateTo(`#station-select-player`, { gid, station });
+    this.getRouter().navigateTo(
+      `#station-select-player`,
+      { gid, station },
+      true,
+    );
   }
 
   private navigateToNextPlayer(
@@ -231,7 +235,7 @@ export class StationSetScoreView extends BaseView {
       // tslint:disable-next-line:no-string-literal
       params['qa'] = remainingPids.join('+'); // qa = 'quick assign'
     }
-    this.getRouter().navigateTo(`#station-set-score`, params);
+    this.getRouter().navigateTo(`#station-set-score`, params, true);
   }
 
   private navigateNext(

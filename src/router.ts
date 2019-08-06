@@ -37,13 +37,8 @@ export class Router {
     }
 
     window.addEventListener('hashchange', (e: HashChangeEvent) => {
-      console.info(e);
       this.onHashChange();
     });
-    // window.addEventListener('popstate', (e: PopStateEvent) => {
-    //   console.info(e);
-    //   this.onHashChange(e.state);
-    // });
 
     this.handlersRegistered = true;
 
@@ -53,6 +48,7 @@ export class Router {
   navigateTo(
     path: string,
     params?: { [key: string]: string | number | boolean },
+    replaceState = false,
   ): void {
     let url = path;
 
@@ -64,8 +60,11 @@ export class Router {
       }
     }
 
-    console.log(`navigateTo: ${path}`, params);
-    window.history.pushState(params || {}, '', url); // tslint:disable-line:strict-boolean-expressions
+    if (replaceState) {
+      window.history.replaceState(params || {}, '', url); // tslint:disable-line:strict-boolean-expressions
+    } else {
+      window.history.pushState(params || {}, '', url); // tslint:disable-line:strict-boolean-expressions
+    }
     this.onHashChange(params);
   }
 
