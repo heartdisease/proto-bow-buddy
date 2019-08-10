@@ -19,6 +19,7 @@
  */
 import { BaseView } from './base-view';
 import { Game, Course } from '../data-types';
+import { defaultPromiseErrorHandler } from '../utils';
 
 import '../styles/hall-of-fame.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -28,7 +29,7 @@ export class HallOfFameView extends BaseView {
   }
 
   onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    this.init().catch(e => console.error(e));
+    this.init().catch(defaultPromiseErrorHandler);
     this.queryElement('.main-menu-btn').addEventListener('click', e => {
       e.preventDefault();
       this.getRouter().navigateTo('#main-menu');

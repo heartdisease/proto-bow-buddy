@@ -19,6 +19,7 @@
  */
 import { Course, Player } from '../data-types';
 import { BaseView } from './base-view';
+import { defaultPromiseErrorHandler } from '../utils';
 
 import '../styles/new-game.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -109,7 +110,7 @@ export class NewGameView extends BaseView {
       this.updateCourseSelectionMenu(true),
     ])
       .then(_ => this.registerStartButtonEventHandler())
-      .catch(e => console.error(e));
+      .catch(defaultPromiseErrorHandler);
   }
 
   private async updatePlayerSelectionMenu(init = false): Promise<void> {

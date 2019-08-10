@@ -20,6 +20,7 @@
 import { PlayerWithScore } from '../data-types';
 import { ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
+import { defaultPromiseErrorHandler } from '../utils';
 
 import '../styles/station-select-player.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -33,7 +34,7 @@ export class StationSelectPlayerView extends BaseView {
     const station = parameters.get('station') as number;
 
     this.queryElement('.station-no').innerText = `${station}`;
-    this.init(gid, station).catch(e => console.error(e));
+    this.init(gid, station).catch(defaultPromiseErrorHandler);
   }
 
   onHide(): void {

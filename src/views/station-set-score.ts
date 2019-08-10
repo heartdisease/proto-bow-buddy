@@ -21,6 +21,7 @@ import * as dragula from 'dragula';
 import 'materialize-css'; // tslint:disable-line:no-import-side-effect
 import { Application } from '../main';
 import { BaseView } from './base-view';
+import { defaultPromiseErrorHandler } from '../utils';
 
 import '../../node_modules/dragula/dist/dragula.min.css';
 import '../styles/station-set-score.scss'; // tslint:disable-line:no-import-side-effect
@@ -43,8 +44,8 @@ export class StationSetScoreView extends BaseView {
       : [];
     const station = parameters.get('station') as number;
 
-    this.init(gid, pid, remainingPids, station, assignAll).catch(e =>
-      console.error(e),
+    this.init(gid, pid, remainingPids, station, assignAll).catch(
+      defaultPromiseErrorHandler,
     );
   }
 
@@ -106,7 +107,7 @@ export class StationSetScoreView extends BaseView {
           assignAll,
           hit,
           turn,
-        ).catch(e => console.error(e));
+        ).catch(defaultPromiseErrorHandler);
       })
       .on('over', (el: HTMLElement, container: HTMLElement) => {
         container.classList.add('ex-over');
@@ -117,8 +118,8 @@ export class StationSetScoreView extends BaseView {
 
     this.queryElement('.miss-btn').addEventListener('click', e => {
       e.preventDefault();
-      this.logScore(gid, pid, station, remainingPids, assignAll).catch(e =>
-        console.error(e),
+      this.logScore(gid, pid, station, remainingPids, assignAll).catch(
+        defaultPromiseErrorHandler,
       );
     });
   }
