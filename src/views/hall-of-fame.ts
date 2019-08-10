@@ -20,6 +20,7 @@
 import { BaseView } from './base-view';
 import { Game, Course } from '../data-types';
 import { defaultPromiseErrorHandler } from '../utils';
+import { UrlParameters } from '../router';
 
 import '../styles/hall-of-fame.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -28,7 +29,7 @@ export class HallOfFameView extends BaseView {
     return 'Hall of Fame';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+  onReveal(parameters: Readonly<UrlParameters>): void {
     this.init().catch(defaultPromiseErrorHandler);
     this.queryElement('.main-menu-btn').addEventListener('click', e => {
       e.preventDefault();
@@ -94,7 +95,7 @@ export class HallOfFameView extends BaseView {
       lastRegisteredStation.filter(player => player.score !== undefined)
         .length !== game.pids.length
     ) {
-      return `${linkLabel} <a href="#station-select-player;gid=${game.gid};station=1">(resume game)</a>`;
+      return `${linkLabel} <a href="#station-select-player;gid=${game.gid};station=-1">(resume game)</a>`;
     }
     return `<a href="#final-score;gid=${game.gid}">${linkLabel}</a>`;
   }

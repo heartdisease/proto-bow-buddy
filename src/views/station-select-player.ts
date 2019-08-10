@@ -20,6 +20,7 @@
 import { PlayerWithScore } from '../data-types';
 import { ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
+import { UrlParameters } from '../router';
 import { defaultPromiseErrorHandler } from '../utils';
 
 import '../styles/station-select-player.scss'; // tslint:disable-line:no-import-side-effect
@@ -29,9 +30,9 @@ export class StationSelectPlayerView extends BaseView {
     return 'Choose Player';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    const gid = parameters.get('gid') as number;
-    const station = parameters.get('station') as number;
+  onReveal(parameters: Readonly<UrlParameters>): void {
+    const gid = parameters.gid as number;
+    const station = parameters.station as number;
 
     this.queryElement('.station-no').innerText = `${station}`;
     this.init(gid, station).catch(defaultPromiseErrorHandler);

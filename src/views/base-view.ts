@@ -19,7 +19,7 @@
  */
 import { DbAccess } from '../db';
 import { Application } from '../main';
-import { Router } from '../router';
+import { Router, UrlParameters } from '../router';
 
 export abstract class BaseView {
   private viewContainer: HTMLElement;
@@ -27,9 +27,7 @@ export abstract class BaseView {
   /**
    * Never override this method!
    */
-  /*final*/ initView(
-    parameters: ReadonlyMap<string, string | number | boolean>,
-  ): void {
+  /*final*/ initView(parameters: Readonly<UrlParameters>): void {
     this.loadTemplate();
     this.onReveal(parameters);
   }
@@ -127,7 +125,7 @@ export abstract class BaseView {
   ): HTMLElement {
     const el = document.createElement(tagName);
 
-    if (content) {
+    if (content !== null) {
       if (html) {
         el.innerHTML = content;
       } else {
@@ -135,7 +133,7 @@ export abstract class BaseView {
       }
     }
 
-    if (className) {
+    if (className !== undefined) {
       el.className = className;
     }
 
@@ -149,14 +147,12 @@ export abstract class BaseView {
     let child;
 
     // tslint:disable-next-line:no-conditional-assignment
-    while ((child = element.firstChild)) {
+    while ((child = element.firstChild) !== null) {
       element.removeChild(child);
     }
   }
 
-  protected abstract onReveal(
-    parameters: ReadonlyMap<string, string | number | boolean>,
-  ): void;
+  protected abstract onReveal(parameters: Readonly<UrlParameters>): void;
 
   protected abstract onHide(): void;
 

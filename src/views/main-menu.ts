@@ -18,6 +18,7 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
+import { UrlParameters } from '../router';
 
 import '../styles/main-menu.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -26,7 +27,7 @@ export class MainMenuView extends BaseView {
     return '';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+  onReveal(parameters: Readonly<UrlParameters>): void {
     this.queryElement('.app-logo > h1').innerText = document.title;
   }
 

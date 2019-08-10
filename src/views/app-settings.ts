@@ -18,6 +18,7 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { BaseView } from './base-view';
+import { UrlParameters } from '../router';
 
 import '../styles/app-settings.scss'; // tslint:disable-line:no-import-side-effect
 
@@ -29,7 +30,7 @@ export class AppSettingsView extends BaseView {
     return 'App Settings';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+  onReveal(parameters: Readonly<UrlParameters>): void {
     this.appSettingsCollapsibleElement = this.queryElement(
       '.app-settings-collapsible',
     );

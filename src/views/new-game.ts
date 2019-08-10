@@ -19,6 +19,7 @@
  */
 import { Course, Player } from '../data-types';
 import { BaseView } from './base-view';
+import { UrlParameters } from '../router';
 import { defaultPromiseErrorHandler } from '../utils';
 
 import '../styles/new-game.scss'; // tslint:disable-line:no-import-side-effect
@@ -49,7 +50,7 @@ export class NewGameView extends BaseView {
     return 'New Game';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
+  onReveal(parameters: Readonly<UrlParameters>): void {
     const newPlayerName = this.queryElement('.new-player-name');
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');

@@ -20,6 +20,7 @@
 import { PlayerScore, ScoreUtils } from '../score-utils';
 import { BaseView } from './base-view';
 import { Player } from '../data-types';
+import { UrlParameters } from '../router';
 import { defaultPromiseErrorHandler } from '../utils';
 
 import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effect
@@ -49,10 +50,8 @@ export class FinalScoreView extends BaseView {
     return 'Final Score';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    this.init(parameters.get('gid') as number).catch(
-      defaultPromiseErrorHandler,
-    );
+  onReveal(parameters: Readonly<UrlParameters>): void {
+    this.init(parameters.gid as number).catch(defaultPromiseErrorHandler);
   }
 
   onHide(): void {

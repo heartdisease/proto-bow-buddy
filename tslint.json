@@ -30,6 +30,7 @@
     "no-import-side-effect": [true, { "ignore-module": "(\\.html|\\.css)$" }],
     "prefer-function-over-method": [true, "allow-public", "allow-protected"],
     "object-literal-sort-keys": false,
+    "prefer-conditional-expression": false,
     "no-floating-promises": {
       "options": [true],
       "severity": "warning"

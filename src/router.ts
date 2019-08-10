@@ -13,6 +13,10 @@ export interface Route {
   view: new () => BaseView;
 }
 
+export interface UrlParameters {
+  [key: string]: string | number | boolean;
+}
+
 export const ROUTES: Route[] = [
   { path: '', view: MainMenuView },
   { path: '#main-menu', view: MainMenuView },
@@ -45,11 +49,7 @@ export class Router {
     this.onHashChange();
   }
 
-  navigateTo(
-    path: string,
-    params?: { [key: string]: string | number | boolean },
-    replaceState = false,
-  ): void {
+  navigateTo(path: string, params?: UrlParameters, replaceState = false): void {
     let url = path;
 
     if (params !== undefined) {
@@ -68,9 +68,7 @@ export class Router {
     this.onHashChange(params);
   }
 
-  private onHashChange(params?: {
-    [key: string]: string | number | boolean;
-  }): void {
+  private onHashChange(params?: UrlParameters): void {
     const urlParams = window.location.hash.split(';');
     const viewToken = urlParams[0];
     const view = createViewForToken(viewToken);
@@ -82,22 +80,9 @@ export class Router {
 
     Application.updateWindowTitle(view.getTitle());
     view.initView(
-      params !== undefined ? asReadonlyMap(params) : getUrlParams(),
+      Object.freeze(params !== undefined ? params : getUrlParams()),
     );
   }
-}
-
-function asReadonlyMap(params: {
-  [key: string]: string | number | boolean;
-}): ReadonlyMap<string, string | number | boolean> {
-  const urlParams = new Map<string, string | number | boolean>();
-
-  for (const key in params) {
-    if (params.hasOwnProperty(key)) {
-      urlParams.set(key, params[key]);
-    }
-  }
-  return urlParams;
 }
 
 function createViewForToken(viewToken: string): BaseView {
@@ -111,24 +96,24 @@ function createViewForToken(viewToken: string): BaseView {
   return new MainMenuView();
 }
 
-function getUrlParams(): ReadonlyMap<string, string | number | boolean> {
-  const parsedUrlParams = new Map<string, string | number | boolean>();
+function getUrlParams(): Readonly<UrlParameters> {
+  const parsedUrlParams: UrlParameters = {};
 
   return window.location.hash.length > 0
     ? window.location.hash
         .substring(1) // omit the # at the beginning
         .split(';')
         .map(keyValueStr => keyValueStr.split('='))
-        .reduce((urlParams, keyValuePair) => {
+        .reduce((urlParams: UrlParameters, keyValuePair: [string, string]) => {
           const key = keyValuePair[0];
           const value = keyValuePair[1];
 
           if (BOOLEAN_PATTERN.test(value)) {
-            urlParams.set(key, value.toLowerCase() === 'true');
+            urlParams[key] = value.toLowerCase() === 'true';
           } else if (NUMBER_PATTERN.test(value)) {
-            urlParams.set(key, +value);
+            urlParams[key] = +value;
           } else {
-            urlParams.set(key, value);
+            urlParams[key] = value;
           }
 
           return urlParams;

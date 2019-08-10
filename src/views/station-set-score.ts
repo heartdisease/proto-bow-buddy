@@ -22,6 +22,7 @@ import 'materialize-css'; // tslint:disable-line:no-import-side-effect
 import { Application } from '../main';
 import { BaseView } from './base-view';
 import { defaultPromiseErrorHandler } from '../utils';
+import { UrlParameters } from '../router';
 
 import '../../node_modules/dragula/dist/dragula.min.css';
 import '../styles/station-set-score.scss'; // tslint:disable-line:no-import-side-effect
@@ -35,18 +36,26 @@ export class StationSetScoreView extends BaseView {
     return 'Assign Score';
   }
 
-  onReveal(parameters: ReadonlyMap<string, string | number | boolean>): void {
-    const assignAll = parameters.has('aa') && (parameters.get('aa') as boolean);
-    const gid = parameters.get('gid') as number;
-    const pid = assignAll ? -1 : (parameters.get('pid') as number);
-    const remainingPids: number[] = parameters.has('qa')
-      ? `${parameters.get('qa')}`.split('+').map(s => +s)
+  onReveal(parameters: Readonly<UrlParameters>): void {
+    const assignAll = parameters.aa === true;
+    const gid = parameters.gid as number;
+    const pid = assignAll ? -1 : (parameters.pid as number);
+    const remainingPids: number[] = parameters.hasOwnProperty('qa')
+      ? (parameters.qa as string).split('+').map(s => +s)
       : [];
-    const station = parameters.get('station') as number;
+    const station = parameters.station as number;
 
-    this.init(gid, pid, remainingPids, station, assignAll).catch(
-      defaultPromiseErrorHandler,
-    );
+    if (station > 0) {
+      this.init(gid, pid, remainingPids, station, assignAll).catch(
+        defaultPromiseErrorHandler,
+      );
+    } else if (station === -1) {
+      this.init(gid, pid, remainingPids, 1, assignAll).catch(
+        defaultPromiseErrorHandler,
+      );
+    } else {
+      console.error(`Invalid station index: ${station}`);
+    }
   }
 
   onHide(): void {
