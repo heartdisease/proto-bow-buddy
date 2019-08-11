@@ -38,125 +38,118 @@ export interface TotalScore {
   playerScores: PlayerScore[];
 }
 
-export /*final*/ class ScoreUtils {
-  static async generateScoreTable(
-    gid: number,
-    stations: number,
-  ): Promise<TotalScore> {
-    const totalScoreForGame: TotalScoreForGame = await Application.getStorage().getTotalScoreForGame(
-      gid,
-    );
-    const playerScores: PlayerScore[] = [];
+export function generateScoreTable(
+  totalScoreForGame: TotalScoreForGame,
+  gid: number,
+  stations: number,
+): TotalScore {
+  const playerScores = totalScoreForGame.players.map(player => {
+    const scores = totalScoreForGame.scores.get(player.pid)!; // tslint:disable-line:no-non-null-assertion
+    const totalScore = scores
+      .map(scoreToPoints)
+      .reduce((a: number, b: number) => a + b, 0);
 
-    totalScoreForGame.players.forEach((player: Player) => {
-      const scores = totalScoreForGame.scores.get(player.pid)!; // tslint:disable-line:no-non-null-assertion
-      const totalScore = scores
-        .map((score: string) => ScoreUtils.scoreToPoints(score))
-        .reduce((a: number, b: number) => a + b, 0);
-      const averageScore = ScoreUtils.averageScore(totalScore, stations);
+    return {
+      playerName: player.name,
+      totalScore,
+      averageScore: averageScore(totalScore, stations),
+      missCount: scores.filter((score: string) => score === 'miss').length,
+      bodyHitCount: scores.filter((score: string) =>
+        score.endsWith(':body-hit'),
+      ).length,
+      killHitCount: scores.filter((score: string) =>
+        score.endsWith(':kill-hit'),
+      ).length,
+      centerKillHitCount: scores.filter((score: string) =>
+        score.endsWith(':center-kill-hit'),
+      ).length,
+      firstTurnCount: scores.filter((score: string) =>
+        score.startsWith('first-turn:'),
+      ).length,
+      secondTurnCount: scores.filter((score: string) =>
+        score.startsWith('second-turn:'),
+      ).length,
+      thirdTurnCount: scores.filter((score: string) =>
+        score.startsWith('third-turn:'),
+      ).length,
+    };
+  });
 
-      playerScores.push({
-        playerName: player.name,
-        totalScore,
-        averageScore,
-        missCount: scores.filter((score: string) => score === 'miss').length,
-        bodyHitCount: scores.filter((score: string) =>
-          score.endsWith(':body-hit'),
-        ).length,
-        killHitCount: scores.filter((score: string) =>
-          score.endsWith(':kill-hit'),
-        ).length,
-        centerKillHitCount: scores.filter((score: string) =>
-          score.endsWith(':center-kill-hit'),
-        ).length,
-        firstTurnCount: scores.filter((score: string) =>
-          score.startsWith('first-turn:'),
-        ).length,
-        secondTurnCount: scores.filter((score: string) =>
-          score.startsWith('second-turn:'),
-        ).length,
-        thirdTurnCount: scores.filter((score: string) =>
-          score.startsWith('third-turn:'),
-        ).length,
-      });
-    });
+  return { totalScoreForGame, playerScores };
+}
 
-    return { totalScoreForGame, playerScores };
+export function scoreToPoints(score: string): number {
+  if (score === 'miss' || score === 'undefined-score') {
+    return 0;
   }
 
-  static scoreToPoints(score: string): number {
-    if (score === 'miss' || score === 'undefined-score') {
-      return 0;
-    }
+  const scoreParts = score.split(':');
+  let penalty;
 
-    const scoreParts = score.split(':');
-    let penalty;
+  switch (scoreParts[0]) {
+    case 'first-turn':
+      penalty = 0;
+      break;
+    case 'second-turn':
+      penalty = 1;
+      break;
+    case 'third-turn':
+      penalty = 2;
+      break;
+    default:
+      throw new Error(`Invalid score format '${score}'`);
+  }
+  switch (scoreParts[1]) {
+    case 'body-hit':
+      return 16 - penalty * 6;
+    case 'kill-hit':
+      return 18 - penalty * 6;
+    case 'center-kill-hit':
+      return 20 - penalty * 6;
+    default:
+      throw new Error(`Invalid score format '${score}'`);
+  }
+}
 
-    switch (scoreParts[0]) {
-      case 'first-turn':
-        penalty = 0;
-        break;
-      case 'second-turn':
-        penalty = 1;
-        break;
-      case 'third-turn':
-        penalty = 2;
-        break;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
-    switch (scoreParts[1]) {
-      case 'body-hit':
-        return 16 - penalty * 6;
-      case 'kill-hit':
-        return 18 - penalty * 6;
-      case 'center-kill-hit':
-        return 20 - penalty * 6;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
+export function scoreToDisplayName(score: string): string {
+  if (score === 'miss') {
+    return 'Miss';
   }
 
-  static scoreToDisplayName(score: string): string {
-    if (score === 'miss') {
-      return 'Miss';
-    }
+  const scoreParts = score.split(':');
+  let scoreLabel;
 
-    const scoreParts = score.split(':');
-    let scoreLabel;
-
-    switch (scoreParts[0]) {
-      case 'first-turn':
-        scoreLabel = '1<sup>st</sup>';
-        break;
-      case 'second-turn':
-        scoreLabel = '2<sup>nd</sup>';
-        break;
-      case 'third-turn':
-        scoreLabel = '3<sup>rd</sup>';
-        break;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
-    scoreLabel += ' - ';
-    switch (scoreParts[1]) {
-      case 'body-hit':
-        scoreLabel += 'Body';
-        break;
-      case 'kill-hit':
-        scoreLabel += 'Kill';
-        break;
-      case 'center-kill-hit':
-        scoreLabel += 'Center Kill';
-        break;
-      default:
-        throw new Error(`Invalid score format '${score}'`);
-    }
-
-    return scoreLabel;
+  switch (scoreParts[0]) {
+    case 'first-turn':
+      scoreLabel = '1<sup>st</sup>';
+      break;
+    case 'second-turn':
+      scoreLabel = '2<sup>nd</sup>';
+      break;
+    case 'third-turn':
+      scoreLabel = '3<sup>rd</sup>';
+      break;
+    default:
+      throw new Error(`Invalid score format '${score}'`);
+  }
+  scoreLabel += ' - ';
+  switch (scoreParts[1]) {
+    case 'body-hit':
+      scoreLabel += 'Body';
+      break;
+    case 'kill-hit':
+      scoreLabel += 'Kill';
+      break;
+    case 'center-kill-hit':
+      scoreLabel += 'Center Kill';
+      break;
+    default:
+      throw new Error(`Invalid score format '${score}'`);
   }
 
-  static averageScore(totalScore: number, stations: number): number {
-    return Math.round((totalScore / stations) * 10) / 10; // TODO make configurable whether to round to 1 or 2 decimals;
-  }
+  return scoreLabel;
+}
+
+export function averageScore(totalScore: number, stations: number): number {
+  return Math.round((totalScore / stations) * 10) / 10; // TODO make configurable whether to round to 1 or 2 decimals;
 }

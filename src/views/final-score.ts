@@ -17,7 +17,7 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { PlayerScore, ScoreUtils } from '../score-utils';
+import { PlayerScore, generateScoreTable, scoreToPoints } from '../score-utils';
 import { BaseView } from './base-view';
 import { Player } from '../data-types';
 import { UrlParameters } from '../router';
@@ -119,7 +119,11 @@ export class FinalScoreView extends BaseView {
     gid: number,
     stations: number,
   ): Promise<void> {
-    const totalScore = await ScoreUtils.generateScoreTable(gid, stations);
+    const totalScore = generateScoreTable(
+      await this.getStorage().getTotalScoreForGame(gid),
+      gid,
+      stations,
+    );
     const players = totalScore.totalScoreForGame.players;
     const scores = totalScore.totalScoreForGame.scores;
     const playerScores = totalScore.playerScores;
@@ -141,7 +145,7 @@ export class FinalScoreView extends BaseView {
         .forEach(scoresForPlayer => {
           const scoreColumn = this.createElement(
             'td',
-            `${ScoreUtils.scoreToPoints(scoresForPlayer[station - 1])}`,
+            `${scoreToPoints(scoresForPlayer[station - 1])}`,
           );
 
           playerScoreEntry.appendChild(scoreColumn);

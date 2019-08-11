@@ -18,7 +18,11 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { PlayerWithScore } from '../data-types';
-import { ScoreUtils } from '../score-utils';
+import {
+  scoreToPoints,
+  scoreToDisplayName,
+  averageScore,
+} from '../score-utils';
 import { BaseView } from './base-view';
 import { UrlParameters } from '../router';
 import { defaultPromiseErrorHandler } from '../utils';
@@ -31,11 +35,9 @@ export class StationSelectPlayerView extends BaseView {
   }
 
   onReveal(parameters: Readonly<UrlParameters>): void {
-    const gid = parameters.gid as number;
-    const station = parameters.station as number;
-
-    this.queryElement('.station-no').innerText = `${station}`;
-    this.init(gid, station).catch(defaultPromiseErrorHandler);
+    this.init(parameters.gid as number, parameters.station as number).catch(
+      defaultPromiseErrorHandler,
+    );
   }
 
   onHide(): void {
@@ -51,6 +53,17 @@ export class StationSelectPlayerView extends BaseView {
   }
 
   private async init(gid: number, station: number): Promise<void> {
+    if (station === -1) {
+      this.getRouter().navigateTo(
+        '#station-select-player',
+        { gid, station: await this.getStorage().getLatestStationForGame(gid) },
+        true,
+      );
+      return Promise.resolve();
+    }
+
+    this.queryElement('.station-no').innerText = `${station}`;
+
     try {
       const course = await this.getStorage().getCourseForGame(gid);
       const nextStationBtn = this.queryElement('.next-station-btn');
@@ -144,10 +157,7 @@ export class StationSelectPlayerView extends BaseView {
 
     for (const player of players) {
       const scores = totalScoreForGame.scores.get(player.pid);
-      const scorePoints =
-        scores !== undefined
-          ? scores.map(score => ScoreUtils.scoreToPoints(score))
-          : [];
+      const scorePoints = scores !== undefined ? scores.map(scoreToPoints) : [];
       const totalScore = scorePoints.reduce(
         (a: number, b: number) => a + b,
         scorePoints.length < station ? 0 : -scorePoints[scorePoints.length - 1], // exclude score of current station
@@ -173,14 +183,11 @@ export class StationSelectPlayerView extends BaseView {
     totalScore: number,
     player: PlayerWithScore,
   ): HTMLElement {
-    const averageScore = ScoreUtils.averageScore(
-      totalScore,
-      Math.max(1, station - 1),
-    );
+    const avgScore = averageScore(totalScore, Math.max(1, station - 1));
     const playerEntry = this.createElement(
       'a',
       totalScore > 0 && !hideIntermediateScore()
-        ? `${player.name} (${totalScore}) [${averageScore} avg] `
+        ? `${player.name} (${totalScore}) [${avgScore} avg] `
         : player.name,
       false,
       'collection-item',
@@ -191,8 +198,8 @@ export class StationSelectPlayerView extends BaseView {
     );
 
     if (player.score) {
-      const scoreDisplayName = ScoreUtils.scoreToDisplayName(player.score);
-      const scorePoints = ScoreUtils.scoreToPoints(player.score);
+      const scoreDisplayName = scoreToDisplayName(player.score);
+      const scorePoints = scoreToPoints(player.score);
       const scoreBadge = this.createElement(
         'span',
         `${scoreDisplayName}&nbsp;&nbsp;&nbsp;(+${scorePoints})`,

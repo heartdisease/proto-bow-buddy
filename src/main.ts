@@ -24,7 +24,7 @@ import './styles/main.scss'; // tslint:disable-line:no-import-side-effect
 import { Router } from './router';
 
 export class Application {
-  private static readonly VERSION = '2.17.0';
+  private static readonly VERSION = '2.18.0';
 
   private static router: Router;
   private static storage: DbAccess;

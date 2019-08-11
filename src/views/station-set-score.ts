@@ -169,7 +169,6 @@ export class StationSetScoreView extends BaseView {
   ): Promise<void> {
     const before = Date.now();
     const miss = hit === undefined || turn === undefined;
-    const storage = Application.getStorage();
     const score = miss ? 'miss' : `${turn}:${hit}`;
 
     if (miss) {
@@ -187,7 +186,9 @@ export class StationSetScoreView extends BaseView {
         const persistScores = [];
 
         for (const rpid of remainingPids) {
-          persistScores.push(storage.setScore(gid, rpid, station, score));
+          persistScores.push(
+            this.getStorage().setScore(gid, rpid, station, score),
+          );
         }
         await Promise.all(persistScores);
 
@@ -202,7 +203,7 @@ export class StationSetScoreView extends BaseView {
           );
         }
       } else {
-        await storage.setScore(gid, pid, station, score);
+        await this.getStorage().setScore(gid, pid, station, score);
 
         const timeDiff = Date.now() - before;
 
@@ -235,7 +236,7 @@ export class StationSetScoreView extends BaseView {
     nextPid: number,
     remainingPids: number[],
   ): void {
-    const params: { [key: string]: string | number | boolean } = {
+    const params: UrlParameters = {
       gid,
       pid: nextPid,
       station,

@@ -266,7 +266,29 @@ export class DbAccess {
       return totalScore;
     } catch (error) {
       throw new Error(
-        `Failed to fetch course with gid ${gid}: ${error.message}`,
+        `Failed to fetch scores with gid ${gid}: ${error.message}`,
+      );
+    }
+  }
+
+  async getLatestStationForGame(gid: number): Promise<number> {
+    try {
+      const scoreObjectStore = await this.db().transaction('scores');
+      const scores: Score[] = await fetchAll(scoreObjectStore);
+      const players = await this.getPlayersForGame(gid);
+
+      let latestStation = 1;
+
+      for (const score of scores) {
+        if (score.gid === gid && score.station > latestStation) {
+          latestStation = score.station;
+        }
+      }
+
+      return latestStation;
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch scores for gid ${gid}: ${error.message}`,
       );
     }
   }
