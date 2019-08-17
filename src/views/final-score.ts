@@ -17,12 +17,14 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import * as Chartist from 'chartist';
+
+import * as c3 from 'c3';
 
 import {
   PlayerScore,
   calculateTotalScore,
   scoreToPoints,
+  averageScore,
 } from '../score-utils';
 import { BaseView } from './base-view';
 import { Player } from '../data-types';
@@ -32,16 +34,24 @@ import { defaultPromiseErrorHandler } from '../utils';
 import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effect
 
 export class FinalScoreView extends BaseView {
+  private chartTabs: M.Tabs;
+
   getTitle(): string {
     return 'Final Score';
   }
 
   onReveal(parameters: Readonly<UrlParameters>): void {
+    this.chartTabs = M.Tabs.init(this.queryElement('.score-chart-tabs'), {
+      duration: 150,
+      swipeable: true,
+    });
+
     this.init(parameters.gid as number).catch(defaultPromiseErrorHandler);
   }
 
   onHide(): void {
-    // nothing to do
+    this.removeEventListeners();
+    this.chartTabs.destroy();
   }
 
   protected getTemplateLocator(): string {
@@ -58,10 +68,10 @@ export class FinalScoreView extends BaseView {
       this.getStorage().finishGame(gid),
       this.getStorage().getCourseForGame(gid),
     ]);
-    // tslint:disable-next-line:prefer-template
-    const courseLabel = `${course.place ? course.place + ' ' : ''}${
-      course.name
-    } (${course.stations} stations)`;
+    const courseLabel =
+      course.place.length > 0
+        ? `${course.place} ${course.name} (${course.stations} stations)`
+        : `${course.name} (${course.stations} stations)`;
     const duration = getDuration(game.starttime, game.endtime);
     const from = new Date(game.starttime).toLocaleDateString('de-AT', {
       year: 'numeric',
@@ -102,30 +112,48 @@ export class FinalScoreView extends BaseView {
       stations,
     );
     const { players, scores } = totalScore.totalScoreForGame;
-    const series = [];
-
-    for (const player of players) {
-      // series.push({
-      //   name: player.name,
-      //   data: scores.get(player.pid)!.map(scoreToPoints), // tslint:disable-line:no-non-null-assertion
-      // });
-      series.push(scores.get(player.pid)!.map(scoreToPoints)); // tslint:disable-line:no-non-null-assertion
-    }
-    console.log(series);
-
-    const labels = new Array(stations);
-
-    for (let i = 0; i < stations; i++) {
-      labels[i] = `${i + 1}`;
-    }
-
-    const chart = new Chartist.Line(
-      `.${this.getViewClassName()} .progress-chart`,
-      { labels, series },
-      {
-        fullWidth: true,
+    const axis: c3.AxesOptions = {
+      x: {
+        type: 'indexed',
+        label: {
+          text: 'Stations',
+          position: 'outer-center',
+        },
       },
-    );
+      y: {
+        min: 0,
+        max: 20,
+        default: [0, 20],
+        label: {
+          text: 'Score',
+          position: 'outer-middle',
+        },
+      },
+    };
+
+    c3.generate({
+      bindto: `.${this.getViewClassName()} .progress-chart`,
+      axis,
+      line: {
+        step: {
+          type: 'step-after',
+        },
+      },
+      data: { x: 'x', columns: createProgressChartData(players, scores) },
+    });
+    c3.generate({
+      bindto: `.${this.getViewClassName()} .avg-progress-chart`,
+      axis,
+      line: {
+        step: {
+          type: 'step-after',
+        },
+      },
+      data: {
+        x: 'x',
+        columns: createAverageProgressChartData(players, scores),
+      },
+    });
   }
 
   private async generateScoreTable(
@@ -366,4 +394,57 @@ function getDuration(starttime: string, endtime: string): string {
   duration += `${diffInMinutes - diffInHours * 60}m`;
 
   return duration;
+}
+
+function createXAxisLabels(stations: number): string[] {
+  const xAxisLabels = new Array<string>(stations + 1);
+
+  xAxisLabels[0] = 'x';
+
+  for (let i = 1; i <= stations; i++) {
+    xAxisLabels[i] = `${i}`;
+  }
+  return xAxisLabels;
+}
+
+function createProgressChartData(
+  players: Player[],
+  scores: Map<number, string[]>,
+): [string, ...c3.PrimitiveArray][] {
+  const columns = [];
+
+  for (const player of players) {
+    const playerScore = scores.get(player.pid)!.map(scoreToPoints); // tslint:disable-line:no-non-null-assertion
+
+    if (columns.length === 0) {
+      columns.push(createXAxisLabels(playerScore.length));
+    }
+    columns.push([player.name, ...playerScore]);
+  }
+  return columns as [string, ...c3.PrimitiveArray][];
+}
+
+function createAverageProgressChartData(
+  players: Player[],
+  scores: Map<number, string[]>,
+): [string, ...c3.PrimitiveArray][] {
+  const columns = [];
+
+  for (const player of players) {
+    const playerScore = scores.get(player.pid)!.map(scoreToPoints); // tslint:disable-line:no-non-null-assertion
+    const avgPlayerScore = new Array<number>(playerScore.length);
+
+    if (columns.length === 0) {
+      columns.push(createXAxisLabels(playerScore.length));
+    }
+
+    let tmpTotalScore = 0;
+
+    for (let i = 0; i < playerScore.length; i++) {
+      tmpTotalScore += playerScore[i];
+      avgPlayerScore[i] = averageScore(tmpTotalScore, i + 1);
+    }
+    columns.push([player.name, ...avgPlayerScore]);
+  }
+  return columns as [string, ...c3.PrimitiveArray][];
 }

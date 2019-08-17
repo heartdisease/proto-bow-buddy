@@ -17,7 +17,7 @@
     "linebreak-style": [true, "LF"],
     "quotemark": [true, "single", "backtick"],
     "comment-type": [true, "doc", "singleline", "multiline"],
-    "array-type": [true, "array-simple"],
+    "array-type": [true, "array"],
     "no-console": [false, "log", "warning", "error"],
     "only-arrow-functions": [true, "allow-named-functions"],
     "max-file-line-count": [true, 1000],
@@ -31,6 +31,7 @@
     "prefer-function-over-method": [true, "allow-public", "allow-protected"],
     "object-literal-sort-keys": false,
     "prefer-conditional-expression": false,
+    "prefer-method-signature": false,
     "no-floating-promises": {
       "options": [true],
       "severity": "warning"

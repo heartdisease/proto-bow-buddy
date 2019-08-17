@@ -21,7 +21,15 @@ import { DbAccess } from '../db';
 import { Application } from '../main';
 import { Router, UrlParameters } from '../router';
 
+interface HandlerRegistration {
+  element: HTMLElement;
+  handler: (e: Event) => void;
+}
+
 export abstract class BaseView {
+  private readonly eventHandlers: {
+    [type: string]: HandlerRegistration[];
+  } = {};
   private viewContainer: HTMLElement;
 
   /**
@@ -149,6 +157,38 @@ export abstract class BaseView {
     // tslint:disable-next-line:no-conditional-assignment
     while ((child = element.firstChild) !== null) {
       element.removeChild(child);
+    }
+  }
+
+  /**
+   * Never override this method!
+   */
+  protected /*final*/ addEventListener(
+    element: HTMLElement,
+    type: string,
+    handler: (e: Event) => void,
+  ): void {
+    element.addEventListener(type, handler);
+
+    if (!this.eventHandlers.hasOwnProperty(type)) {
+      this.eventHandlers[type] = [];
+    }
+    this.eventHandlers[type].push({ element, handler });
+  }
+
+  /**
+   * Never override this method!
+   */
+  protected /*final*/ removeEventListeners(): void {
+    for (const type in this.eventHandlers) {
+      if (this.eventHandlers.hasOwnProperty(type)) {
+        for (const handlerRegistration of this.eventHandlers[type]) {
+          handlerRegistration.element.removeEventListener(
+            type,
+            handlerRegistration.handler,
+          );
+        }
+      }
     }
   }
 
