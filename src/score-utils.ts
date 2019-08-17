@@ -38,9 +38,8 @@ export interface TotalScore {
   playerScores: PlayerScore[];
 }
 
-export function generateScoreTable(
+export function calculateTotalScore(
   totalScoreForGame: TotalScoreForGame,
-  gid: number,
   stations: number,
 ): TotalScore {
   const playerScores = totalScoreForGame.players.map(player => {

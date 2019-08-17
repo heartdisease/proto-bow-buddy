@@ -17,7 +17,13 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
-import { PlayerScore, generateScoreTable, scoreToPoints } from '../score-utils';
+import * as Chartist from 'chartist';
+
+import {
+  PlayerScore,
+  calculateTotalScore,
+  scoreToPoints,
+} from '../score-utils';
 import { BaseView } from './base-view';
 import { Player } from '../data-types';
 import { UrlParameters } from '../router';
@@ -26,26 +32,6 @@ import { defaultPromiseErrorHandler } from '../utils';
 import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effect
 
 export class FinalScoreView extends BaseView {
-  private static getDuration(starttime: string, endtime: string): string {
-    const startDate = new Date(starttime);
-    const endDate = new Date(endtime);
-    const diffInMs = endDate.getTime() - startDate.getTime();
-    let duration = '';
-
-    if (diffInMs < 0) {
-      throw new Error('Start time is after end time!');
-    }
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMinutes / 60);
-
-    if (diffInHours >= 1) {
-      duration += `${diffInHours}h `;
-    }
-    duration += `${diffInMinutes - diffInHours * 60}m`;
-
-    return duration;
-  }
-
   getTitle(): string {
     return 'Final Score';
   }
@@ -76,7 +62,7 @@ export class FinalScoreView extends BaseView {
     const courseLabel = `${course.place ? course.place + ' ' : ''}${
       course.name
     } (${course.stations} stations)`;
-    const duration = FinalScoreView.getDuration(game.starttime, game.endtime);
+    const duration = getDuration(game.starttime, game.endtime);
     const from = new Date(game.starttime).toLocaleDateString('de-AT', {
       year: 'numeric',
       month: '2-digit',
@@ -107,21 +93,47 @@ export class FinalScoreView extends BaseView {
     ]);
   }
 
-  // tslint:disable-next-line:prefer-function-over-method
   private async generateScoreChart(
     gid: number,
     stations: number,
   ): Promise<void> {
-    return Promise.resolve(); // TODO implement score chart with chartist.js
+    const totalScore = calculateTotalScore(
+      await this.getStorage().getTotalScoreForGame(gid),
+      stations,
+    );
+    const { players, scores } = totalScore.totalScoreForGame;
+    const series = [];
+
+    for (const player of players) {
+      // series.push({
+      //   name: player.name,
+      //   data: scores.get(player.pid)!.map(scoreToPoints), // tslint:disable-line:no-non-null-assertion
+      // });
+      series.push(scores.get(player.pid)!.map(scoreToPoints)); // tslint:disable-line:no-non-null-assertion
+    }
+    console.log(series);
+
+    const labels = new Array(stations);
+
+    for (let i = 0; i < stations; i++) {
+      labels[i] = `${i + 1}`;
+    }
+
+    const chart = new Chartist.Line(
+      `.${this.getViewClassName()} .progress-chart`,
+      { labels, series },
+      {
+        fullWidth: true,
+      },
+    );
   }
 
   private async generateScoreTable(
     gid: number,
     stations: number,
   ): Promise<void> {
-    const totalScore = generateScoreTable(
+    const totalScore = calculateTotalScore(
       await this.getStorage().getTotalScoreForGame(gid),
-      gid,
       stations,
     );
     const players = totalScore.totalScoreForGame.players;
@@ -334,4 +346,24 @@ export class FinalScoreView extends BaseView {
         );
     }
   }
+}
+
+function getDuration(starttime: string, endtime: string): string {
+  const startDate = new Date(starttime);
+  const endDate = new Date(endtime);
+  const diffInMs = endDate.getTime() - startDate.getTime();
+  let duration = '';
+
+  if (diffInMs < 0) {
+    throw new Error('Start time is after end time!');
+  }
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMinutes / 60);
+
+  if (diffInHours >= 1) {
+    duration += `${diffInHours}h `;
+  }
+  duration += `${diffInMinutes - diffInHours * 60}m`;
+
+  return duration;
 }
