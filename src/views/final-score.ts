@@ -26,11 +26,11 @@ import {
   scoreToPoints,
   averageScore,
   TotalScore,
-} from '../score-utils';
+  defaultPromiseErrorHandler,
+} from '../utils';
 import { BaseView } from './base-view';
 import { Player } from '../data-types';
 import { UrlParameters } from '../router';
-import { defaultPromiseErrorHandler } from '../score-utils';
 
 import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effect
 

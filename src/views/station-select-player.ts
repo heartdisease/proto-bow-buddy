@@ -22,10 +22,10 @@ import {
   scoreToPoints,
   scoreToDisplayName,
   averageScore,
-} from '../score-utils';
+  defaultPromiseErrorHandler,
+} from '../utils';
 import { BaseView } from './base-view';
 import { UrlParameters } from '../router';
-import { defaultPromiseErrorHandler } from '../score-utils';
 
 import '../styles/station-select-player.scss'; // tslint:disable-line:no-import-side-effect
 
