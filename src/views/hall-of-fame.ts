@@ -19,7 +19,7 @@
  */
 import { BaseView } from './base-view';
 import { Game, Course } from '../data-types';
-import { defaultPromiseErrorHandler } from '../utils';
+import { defaultPromiseErrorHandler } from '../score-utils';
 import { UrlParameters } from '../router';
 
 import '../styles/hall-of-fame.scss'; // tslint:disable-line:no-import-side-effect

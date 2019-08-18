@@ -25,7 +25,7 @@ import {
 } from '../score-utils';
 import { BaseView } from './base-view';
 import { UrlParameters } from '../router';
-import { defaultPromiseErrorHandler } from '../utils';
+import { defaultPromiseErrorHandler } from '../score-utils';
 
 import '../styles/station-select-player.scss'; // tslint:disable-line:no-import-side-effect
 

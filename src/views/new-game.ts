@@ -22,7 +22,7 @@ import * as M from 'materialize-css';
 import { Course, Player } from '../data-types';
 import { BaseView } from './base-view';
 import { UrlParameters } from '../router';
-import { defaultPromiseErrorHandler } from '../utils';
+import { defaultPromiseErrorHandler } from '../score-utils';
 
 import '../styles/new-game.scss'; // tslint:disable-line:no-import-side-effect
 

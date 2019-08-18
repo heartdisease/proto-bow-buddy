@@ -30,7 +30,7 @@ import {
 import { BaseView } from './base-view';
 import { Player } from '../data-types';
 import { UrlParameters } from '../router';
-import { defaultPromiseErrorHandler } from '../utils';
+import { defaultPromiseErrorHandler } from '../score-utils';
 
 import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effect
 

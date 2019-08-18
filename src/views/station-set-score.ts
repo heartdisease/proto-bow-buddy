@@ -20,7 +20,7 @@
 import * as dragula from 'dragula';
 
 import { BaseView } from './base-view';
-import { defaultPromiseErrorHandler } from '../utils';
+import { defaultPromiseErrorHandler } from '../score-utils';
 import { UrlParameters } from '../router';
 
 import '../../node_modules/dragula/dist/dragula.min.css';

@@ -37,6 +37,10 @@ export interface TotalScore {
   playerScores: PlayerScore[];
 }
 
+export function defaultPromiseErrorHandler(error: any): void {
+  console.error(error); // tslint:disable-line:no-console
+}
+
 export function calculateTotalScore(
   totalScoreForGame: TotalScoreForGame,
   stations: number,
