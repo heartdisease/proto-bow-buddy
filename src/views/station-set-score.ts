@@ -18,8 +18,7 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import * as dragula from 'dragula';
-import 'materialize-css'; // tslint:disable-line:no-import-side-effect
-import { Application } from '../main';
+
 import { BaseView } from './base-view';
 import { defaultPromiseErrorHandler } from '../utils';
 import { UrlParameters } from '../router';
@@ -27,16 +26,12 @@ import { UrlParameters } from '../router';
 import '../../node_modules/dragula/dist/dragula.min.css';
 import '../styles/station-set-score.scss'; // tslint:disable-line:no-import-side-effect
 
-export class StationSetScoreView extends BaseView {
-  private static readonly NAVIGATION_DELAY = 350;
+const NAVIGATION_DELAY = 300;
 
+export class StationSetScoreView extends BaseView {
   private scoreModalElement: Element;
 
-  getTitle(): string {
-    return 'Assign Score';
-  }
-
-  onReveal(parameters: Readonly<UrlParameters>): void {
+  protected onReveal(parameters: Readonly<UrlParameters>): void {
     const assignAll = parameters.aa === true;
     const gid = parameters.gid as number;
     const pid = assignAll ? -1 : (parameters.pid as number);
@@ -58,9 +53,13 @@ export class StationSetScoreView extends BaseView {
     }
   }
 
-  onHide(): void {
+  protected onHide(): void {
     M.Modal.getInstance(this.scoreModalElement).close();
     M.Modal.getInstance(this.scoreModalElement).destroy();
+  }
+
+  protected updateTitle(title?: string): void {
+    super.updateTitle('Assign Score');
   }
 
   protected getTemplateLocator(): string {
@@ -151,7 +150,7 @@ export class StationSetScoreView extends BaseView {
         'span.player-name',
       ).innerText = `All players (${remainingPids.length})`;
     } else {
-      const player = await Application.getStorage().getPlayer(pid);
+      const player = await this.getStorage().getPlayer(pid);
       this.queryElement('span.player-name').innerText = player.name;
     }
 
@@ -194,12 +193,12 @@ export class StationSetScoreView extends BaseView {
 
         const timeDiff = Date.now() - before;
 
-        if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
+        if (timeDiff >= NAVIGATION_DELAY) {
           this.navigateToPlayerSelection(gid, station);
         } else {
           window.setTimeout(
             () => this.navigateToPlayerSelection(gid, station),
-            StationSetScoreView.NAVIGATION_DELAY - timeDiff,
+            NAVIGATION_DELAY - timeDiff,
           );
         }
       } else {
@@ -207,12 +206,12 @@ export class StationSetScoreView extends BaseView {
 
         const timeDiff = Date.now() - before;
 
-        if (timeDiff >= StationSetScoreView.NAVIGATION_DELAY) {
+        if (timeDiff >= NAVIGATION_DELAY) {
           this.navigateNext(gid, station, remainingPids);
         } else {
           window.setTimeout(
             () => this.navigateNext(gid, station, remainingPids),
-            StationSetScoreView.NAVIGATION_DELAY - timeDiff,
+            NAVIGATION_DELAY - timeDiff,
           );
         }
       }

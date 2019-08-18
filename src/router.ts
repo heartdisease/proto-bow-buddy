@@ -1,32 +1,22 @@
 import { BaseView } from './views/base-view';
-import { MainMenuView } from './views/main-menu';
-import { NewGameView } from './views/new-game';
-import { StationSelectPlayerView } from './views/station-select-player';
-import { StationSetScoreView } from './views/station-set-score';
-import { FinalScoreView } from './views/final-score';
-import { AppSettingsView } from './views/app-settings';
-import { HallOfFameView } from './views/hall-of-fame';
-import { Application } from './main';
+import { DbAccess } from './db';
+
+export type ViewConstructor = new (
+  router: Router,
+  storage: DbAccess,
+  updateTitle: (title: string) => void,
+) => BaseView;
+
+export type InstanceCreator = (view: ViewConstructor) => BaseView;
 
 export interface Route {
-  path: string;
-  view: new () => BaseView;
+  readonly path: string;
+  readonly view: ViewConstructor;
 }
 
 export interface UrlParameters {
   [key: string]: string | number | boolean;
 }
-
-export const ROUTES: Route[] = [
-  { path: '', view: MainMenuView },
-  { path: '#main-menu', view: MainMenuView },
-  { path: '#new-game', view: NewGameView },
-  { path: '#station-select-player', view: StationSelectPlayerView },
-  { path: '#station-set-score', view: StationSetScoreView },
-  { path: '#final-score', view: FinalScoreView },
-  { path: '#app-settings', view: AppSettingsView },
-  { path: '#hall-of-fame', view: HallOfFameView },
-];
 
 const NUMBER_PATTERN = /^(?:0|-?[1-9][0-9]*)$/;
 const BOOLEAN_PATTERN = /^(?:true|false)$/i;
@@ -34,6 +24,12 @@ const BOOLEAN_PATTERN = /^(?:true|false)$/i;
 export class Router {
   private currentView?: BaseView;
   private handlersRegistered = false;
+
+  constructor(
+    private readonly routes: Route[],
+    private readonly defaultRoute: Route,
+    private readonly instanceCreator: InstanceCreator,
+  ) {}
 
   registerHandlers(): void {
     if (this.handlersRegistered) {
@@ -50,14 +46,18 @@ export class Router {
   }
 
   navigateTo(path: string, params?: UrlParameters, replaceState = false): void {
-    let url = path;
+    let url;
 
-    if (params !== undefined) {
+    if (params !== undefined && path.length > 1 && path[0] === '#') {
+      url = path;
+
       for (const key in params) {
         if (params.hasOwnProperty(key)) {
           url += `;${key}=${params[key]}`;
         }
       }
+    } else {
+      url = path.length === 0 ? '/' : path;
     }
 
     if (replaceState) {
@@ -71,29 +71,33 @@ export class Router {
   private onHashChange(params?: UrlParameters): void {
     const urlParams = window.location.hash.split(';');
     const viewToken = urlParams[0];
-    const view = createViewForToken(viewToken);
+    const view = this.createViewForToken(viewToken);
+
+    if (view === undefined) {
+      this.navigateTo(this.defaultRoute.path, {}, true);
+      return;
+    }
 
     if (this.currentView !== undefined) {
       this.currentView.destroyView();
     }
     this.currentView = view;
 
-    Application.updateWindowTitle(view.getTitle());
     view.initView(
-      Object.freeze(params !== undefined ? params : getUrlParams()),
+      Object.freeze(params !== undefined ? { ...params } : getUrlParams()),
     );
   }
-}
 
-function createViewForToken(viewToken: string): BaseView {
-  const route = ROUTES.find(appRoute => appRoute.path === viewToken);
+  private createViewForToken(viewToken: string): BaseView | undefined {
+    const route = this.routes.find(appRoute => appRoute.path === viewToken);
 
-  if (route !== undefined) {
-    return new route.view();
+    if (route !== undefined) {
+      return this.instanceCreator(route.view);
+    }
+
+    console.warn(`Unknown route: ${viewToken}`);
+    return undefined;
   }
-  console.warn(`Unknown route: ${viewToken}`);
-
-  return new MainMenuView();
 }
 
 function getUrlParams(): Readonly<UrlParameters> {

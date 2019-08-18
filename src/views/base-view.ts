@@ -18,7 +18,6 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { DbAccess } from '../db';
-import { Application } from '../main';
 import { Router, UrlParameters } from '../router';
 
 interface HandlerRegistration {
@@ -32,10 +31,17 @@ export abstract class BaseView {
   } = {};
   private viewContainer: HTMLElement;
 
+  constructor(
+    private readonly router: Router,
+    private readonly storage: DbAccess,
+    private readonly titleUpdater: (title: string) => void,
+  ) {}
+
   /**
    * Never override this method!
    */
   /*final*/ initView(parameters: Readonly<UrlParameters>): void {
+    this.updateTitle();
     this.loadTemplate();
     this.onReveal(parameters);
   }
@@ -48,20 +54,18 @@ export abstract class BaseView {
     this.unloadTemplate();
   }
 
-  abstract getTitle(): string;
-
   /**
    * Never override this method!
    */
   protected /*final*/ getRouter(): Router {
-    return Application.getRouter();
+    return this.router;
   }
 
   /**
    * Never override this method!
    */
   protected /*final*/ getStorage(): DbAccess {
-    return Application.getStorage();
+    return this.storage;
   }
 
   /**
@@ -69,6 +73,10 @@ export abstract class BaseView {
    */
   protected /*final*/ getViewContainer(): HTMLElement {
     return this.viewContainer;
+  }
+
+  protected updateTitle(title?: string): void {
+    this.titleUpdater(title || ''); // tslint:disable-line:strict-boolean-expressions
   }
 
   /**

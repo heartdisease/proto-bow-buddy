@@ -18,41 +18,61 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { DbAccess } from './db';
+import { Router, Route } from './router';
+
+import { MainMenuView } from './views/main-menu';
+import { NewGameView } from './views/new-game';
+import { StationSelectPlayerView } from './views/station-select-player';
+import { StationSetScoreView } from './views/station-set-score';
+import { FinalScoreView } from './views/final-score';
+import { AppSettingsView } from './views/app-settings';
+import { HallOfFameView } from './views/hall-of-fame';
 
 import '../node_modules/materialize-css/dist/css/materialize.min.css';
 import './styles/main.scss'; // tslint:disable-line:no-import-side-effect
-import { Router } from './router';
 
-export class Application {
-  private static readonly VERSION = '2.19.1';
+const VERSION = '2.19.2';
 
-  private static router: Router;
-  private static storage: DbAccess;
+const ROUTES: Route[] = [
+  { path: '', view: MainMenuView },
+  { path: '#main-menu', view: MainMenuView },
+  { path: '#new-game', view: NewGameView },
+  { path: '#station-select-player', view: StationSelectPlayerView },
+  { path: '#station-set-score', view: StationSetScoreView },
+  { path: '#final-score', view: FinalScoreView },
+  { path: '#app-settings', view: AppSettingsView },
+  { path: '#hall-of-fame', view: HallOfFameView },
+];
 
-  static initApplication(): void {
-    Application.updateWindowTitle('');
-    Application.router = new Router();
-    Application.storage = new DbAccess();
+class Application {
+  private readonly router: Router;
+  private readonly storage: DbAccess;
+
+  constructor() {
+    this.storage = new DbAccess();
+    this.router = new Router(
+      ROUTES,
+      ROUTES[0],
+      view => new view(this.router, this.storage, updateWindowTitle),
+    );
+  }
+
+  init(): void {
+    updateWindowTitle('');
 
     console.info('Application starting...');
 
-    Application.router.registerHandlers();
-  }
-
-  static getRouter(): Router {
-    return Application.router;
-  }
-
-  static getStorage(): DbAccess {
-    return Application.storage;
-  }
-
-  static updateWindowTitle(viewTitle: string): void {
-    const version = Application.VERSION;
-    const formattedViewTitle = viewTitle.length > 0 ? ` - ${viewTitle}` : '';
-
-    document.title = `BowBuddy ${version}${formattedViewTitle}`;
+    this.router.registerHandlers();
   }
 }
 
-Application.initApplication();
+function updateWindowTitle(viewTitle: string): void {
+  document.title =
+    viewTitle.length > 0
+      ? `BowBuddy ${VERSION} - ${viewTitle}`
+      : `BowBuddy ${VERSION}`;
+}
+
+// start up the application
+const bowBuddy = new Application();
+bowBuddy.init();

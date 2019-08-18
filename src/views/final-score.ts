@@ -25,6 +25,7 @@ import {
   calculateTotalScore,
   scoreToPoints,
   averageScore,
+  TotalScore,
 } from '../score-utils';
 import { BaseView } from './base-view';
 import { Player } from '../data-types';
@@ -36,11 +37,7 @@ import '../styles/final-score.scss'; // tslint:disable-line:no-import-side-effec
 export class FinalScoreView extends BaseView {
   private chartTabs: M.Tabs;
 
-  getTitle(): string {
-    return 'Final Score';
-  }
-
-  onReveal(parameters: Readonly<UrlParameters>): void {
+  protected onReveal(parameters: Readonly<UrlParameters>): void {
     this.chartTabs = M.Tabs.init(this.queryElement('.score-chart-tabs'), {
       duration: 150,
       swipeable: true,
@@ -49,9 +46,13 @@ export class FinalScoreView extends BaseView {
     this.init(parameters.gid as number).catch(defaultPromiseErrorHandler);
   }
 
-  onHide(): void {
+  protected onHide(): void {
     this.removeEventListeners();
     this.chartTabs.destroy();
+  }
+
+  protected updateTitle(title?: string): void {
+    super.updateTitle('Final Score');
   }
 
   protected getTemplateLocator(): string {
@@ -97,20 +98,16 @@ export class FinalScoreView extends BaseView {
       this.getRouter().navigateTo('#main-menu');
     });
 
-    await Promise.all([
-      this.generateScoreChart(gid, course.stations),
-      this.generateScoreTable(gid, course.stations),
-    ]);
-  }
-
-  private async generateScoreChart(
-    gid: number,
-    stations: number,
-  ): Promise<void> {
     const totalScore = calculateTotalScore(
       await this.getStorage().getTotalScoreForGame(gid),
-      stations,
+      course.stations,
     );
+
+    this.generateScoreChart(totalScore);
+    this.generateScoreTable(totalScore, course.stations);
+  }
+
+  private generateScoreChart(totalScore: TotalScore): void {
     const { players, scores } = totalScore.totalScoreForGame;
     const axis: c3.AxesOptions = {
       x: {
@@ -156,14 +153,7 @@ export class FinalScoreView extends BaseView {
     });
   }
 
-  private async generateScoreTable(
-    gid: number,
-    stations: number,
-  ): Promise<void> {
-    const totalScore = calculateTotalScore(
-      await this.getStorage().getTotalScoreForGame(gid),
-      stations,
-    );
+  private generateScoreTable(totalScore: TotalScore, stations: number): void {
     const players = totalScore.totalScoreForGame.players;
     const scores = totalScore.totalScoreForGame.scores;
     const playerScores = totalScore.playerScores;

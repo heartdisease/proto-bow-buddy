@@ -23,16 +23,16 @@ import { UrlParameters } from '../router';
 import '../styles/main-menu.scss'; // tslint:disable-line:no-import-side-effect
 
 export class MainMenuView extends BaseView {
-  getTitle(): string {
-    return '';
-  }
-
-  onReveal(parameters: Readonly<UrlParameters>): void {
+  protected onReveal(parameters: Readonly<UrlParameters>): void {
     this.queryElement('.app-logo > h1').innerText = document.title;
   }
 
-  onHide(): void {
+  protected onHide(): void {
     // nothing to do
+  }
+
+  protected updateTitle(title?: string): void {
+    super.updateTitle('');
   }
 
   protected getTemplateLocator(): string {

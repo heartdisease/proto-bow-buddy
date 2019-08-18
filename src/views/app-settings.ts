@@ -26,11 +26,7 @@ export class AppSettingsView extends BaseView {
   private appSettingsCollapsibleElement: Element;
   private textarea: HTMLTextAreaElement;
 
-  getTitle(): string {
-    return 'App Settings';
-  }
-
-  onReveal(parameters: Readonly<UrlParameters>): void {
+  protected onReveal(parameters: Readonly<UrlParameters>): void {
     this.appSettingsCollapsibleElement = this.queryElement(
       '.app-settings-collapsible',
     );
@@ -40,8 +36,12 @@ export class AppSettingsView extends BaseView {
     this.initControls();
   }
 
-  onHide(): void {
+  protected onHide(): void {
     M.Collapsible.getInstance(this.appSettingsCollapsibleElement).destroy();
+  }
+
+  protected updateTitle(title?: string): void {
+    super.updateTitle('App Settings');
   }
 
   protected getTemplateLocator(): string {

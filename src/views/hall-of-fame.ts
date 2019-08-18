@@ -25,11 +25,7 @@ import { UrlParameters } from '../router';
 import '../styles/hall-of-fame.scss'; // tslint:disable-line:no-import-side-effect
 
 export class HallOfFameView extends BaseView {
-  getTitle(): string {
-    return 'Hall of Fame';
-  }
-
-  onReveal(parameters: Readonly<UrlParameters>): void {
+  protected onReveal(parameters: Readonly<UrlParameters>): void {
     this.init().catch(defaultPromiseErrorHandler);
     this.queryElement('.main-menu-btn').addEventListener('click', e => {
       e.preventDefault();
@@ -37,8 +33,12 @@ export class HallOfFameView extends BaseView {
     });
   }
 
-  onHide(): void {
+  protected onHide(): void {
     // nothing to do
+  }
+
+  protected updateTitle(title?: string): void {
+    super.updateTitle('Hall of Fame');
   }
 
   protected getTemplateLocator(): string {

@@ -30,18 +30,18 @@ import { defaultPromiseErrorHandler } from '../utils';
 import '../styles/station-select-player.scss'; // tslint:disable-line:no-import-side-effect
 
 export class StationSelectPlayerView extends BaseView {
-  getTitle(): string {
-    return 'Choose Player';
-  }
-
-  onReveal(parameters: Readonly<UrlParameters>): void {
+  protected onReveal(parameters: Readonly<UrlParameters>): void {
     this.init(parameters.gid as number, parameters.station as number).catch(
       defaultPromiseErrorHandler,
     );
   }
 
-  onHide(): void {
+  protected onHide(): void {
     // nothing to do
+  }
+
+  protected updateTitle(title?: string): void {
+    super.updateTitle('Choose Player');
   }
 
   protected getTemplateLocator(): string {

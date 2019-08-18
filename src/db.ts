@@ -261,6 +261,9 @@ export class DbAccess {
           const scores2 = totalScore.scores.get(scoreForGame.pid);
 
           !scores2 || scores2.push(scoreForGame.score || 'undefined-score');
+          // if (scores2 !== undefined) {
+          //   scores2.push(scoreForGame.score || 'undefined-score');
+          // }
         });
 
       return totalScore;

@@ -18,7 +18,6 @@
  * Copyright 2017-2019 Christoph Matscheko
  */
 import { Player, TotalScoreForGame } from './data-types';
-import { Application } from './main';
 
 export interface PlayerScore {
   playerName: string;
@@ -150,5 +149,5 @@ export function scoreToDisplayName(score: string): string {
 }
 
 export function averageScore(totalScore: number, stations: number): number {
-  return Math.round((totalScore / stations) * 10) / 10; // TODO make configurable whether to round to 1 or 2 decimals;
+  return Math.round((totalScore / stations) * 10) / 10; // TODO make configurable whether to round to 1 or 2 decimals
 }

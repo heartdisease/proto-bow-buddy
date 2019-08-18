@@ -17,6 +17,8 @@
  *
  * Copyright 2017-2019 Christoph Matscheko
  */
+import * as M from 'materialize-css';
+
 import { Course, Player } from '../data-types';
 import { BaseView } from './base-view';
 import { UrlParameters } from '../router';
@@ -46,11 +48,7 @@ export class NewGameView extends BaseView {
   private readonly playerInputListener = () => this.verifyPlayerInput();
   private readonly courseInputListener = () => this.verifyCourseInput();
 
-  getTitle(): string {
-    return 'New Game';
-  }
-
-  onReveal(parameters: Readonly<UrlParameters>): void {
+  protected onReveal(parameters: Readonly<UrlParameters>): void {
     const newPlayerName = this.queryElement('.new-player-name');
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');
@@ -72,7 +70,7 @@ export class NewGameView extends BaseView {
     this.initControls();
   }
 
-  onHide(): void {
+  protected onHide(): void {
     const newPlayerName = this.queryElement('.new-player-name');
     const addPlayerBtn = this.queryElement('.add-player-btn');
     const newCourseName = this.queryElement('.new-course-name');
@@ -93,6 +91,10 @@ export class NewGameView extends BaseView {
     M.Collapsible.getInstance(this.collapsibleElement).destroy();
     M.FormSelect.getInstance(this.playerSelectElement).destroy();
     M.FormSelect.getInstance(this.courseSelectElement).destroy();
+  }
+
+  protected updateTitle(title?: string): void {
+    super.updateTitle('New Game');
   }
 
   protected getTemplateLocator(): string {
